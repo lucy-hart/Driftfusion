@@ -6,13 +6,12 @@
 % PC: Nice code! Well done for figuring this all out!
 %% Read in data and create devices with HTLs of different thicknesses
 par_10 = pc('Input_files/ptaa_mapi_pcbm.csv');
-par_10.vsr_mode=0;
+%par_10.vsr_mode=0;
 
 par_10 = refresh_device(par_10);
 
 par_50 = par_10;
 par_50.d(1) = 5*10^-6;
-
 par_50 = refresh_device(par_50);
 
 par_90 = par_10;
@@ -27,18 +26,18 @@ devices = {par_10, par_50, par_90};
 % bias it is not at equilibrium. Instead we use the term 'steady-state' to
 % indicate that dndt = dpdt = dcdt = 0;
 eqm_solutions_dark = cell(1,3);
-eqm_solutions_light = cell(1,3);
+%eqm_solutions_light = cell(1,3);
 for i = 1:3
     eqm = equilibrate(devices{i});
     eqm_solutions_dark{i} = eqm;
-    eqm_solutions_light{i} = changeLight(eqm.ion,1,0);
+    %eqm_solutions_light{i} = changeLight(eqm.ion,1,0);
 end
 
 %% Perform CV scans
 CV_solutions = cell(1,3);
 for j = 1:3
     sol = eqm_solutions_dark{j}.ion;
-    CV_solutions{j} = doCV(sol, 1, 0, 1.3, 0, 10e-3, 1, 241);
+    CV_solutions{j} = doCV(sol, 1, 0, 1.1, 0, 10e-3, 1, 241);
     dfplot.JtotVapp(CV_solutions{j},0)
     hold on
 end
@@ -55,8 +54,8 @@ ylim([-0.03, 0.01])
 % What would also be nice is to write this as a method in DFANA so that
 % it can be easily called. That way, when you write a function like this it
 % can become part of the code development.
-J_values = zeros(241,3);
-e = -1.60*10^-19;
+
+e = par_10.e;
 for k = 1:3
 %     w = eqm_solutions_dark{k}.el.par.d;
 %     num_points = eqm_solutions_dark{k}.el.par.layer_points;
@@ -87,7 +86,7 @@ for k = 1:3
     % you get a positive current.
     
     gxt = dfana.calcg(CV_solutions{k});
-    J.gen(:,k) = e*trapz(x_sub, gxt,2);
+    J.gen(:,k) = e*trapz(x_sub, gxt, 2);
     J.rad(:,k) = -e*trapz(x_sub, r.btb, 2);
     % PC Also needed to add VSR to the non-rad component which is the interfacial surface recombination component
     J.nonrad(:,k) = -e*trapz(x_sub, r.srh + r.vsr, 2);   
