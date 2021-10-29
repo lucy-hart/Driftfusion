@@ -114,7 +114,7 @@ legend({'J_{gen}', '', 'J_{rad}', '', 'J_{nonrad}', '', 'J_{ext}', '', 'J = 0'},
 %% Plot 'PL' results
 figure(11)
 for i = 1:3
-    semilogy(dfana.calcVapp(CV_solutions{i}), -J.rad(:,i)) 
+    semilogy(dfana.calcVapp(CV_solutions{i}), J.rad(:,i)) 
     hold on
 end
 xlim([0, 1.3])
