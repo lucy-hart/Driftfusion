@@ -6,7 +6,7 @@
 % PC: Nice code! Well done for figuring this all out!
 %% Read in data and create devices with HTLs of different thicknesses
 par_10 = pc('Input_files/ptaa_mapi_pcbm.csv');
-%par_10.vsr_mode=0;
+par_10.vsr_mode = 1;
 
 par_10 = refresh_device(par_10);
 
@@ -30,14 +30,14 @@ eqm_solutions_dark = cell(1,3);
 for i = 1:3
     eqm = equilibrate(devices{i});
     eqm_solutions_dark{i} = eqm;
-    %eqm_solutions_light{i} = changeLight(eqm.ion,1,0);
+    eqm_solutions_light{i} = changeLight(eqm.ion,1,0);
 end
 
 %% Perform CV scans
 CV_solutions = cell(1,3);
 for j = 1:3
     sol = eqm_solutions_dark{j}.ion;
-    CV_solutions{j} = doCV(sol, 1, 0, 1.1, 0, 10e-3, 1, 241);
+    CV_solutions{j} = doCV(sol, 1, 0, 1.3, 0, 10e-3, 1, 241);
     dfplot.JtotVapp(CV_solutions{j},0)
     hold on
 end
@@ -86,10 +86,10 @@ for k = 1:3
     % you get a positive current.
     
     gxt = dfana.calcg(CV_solutions{k});
-    J.gen(:,k) = e*trapz(x_sub, gxt, 2);
-    J.rad(:,k) = -e*trapz(x_sub, r.btb, 2);
+    J.gen(:,k) = -e*trapz(x_sub, gxt, 2);
+    J.rad(:,k) = e*trapz(x_sub, r.btb, 2);
     % PC Also needed to add VSR to the non-rad component which is the interfacial surface recombination component
-    J.nonrad(:,k) = -e*trapz(x_sub, r.srh + r.vsr, 2);   
+    J.nonrad(:,k) = e*trapz(x_sub, r.srh + r.vsr, 2);   
     J.ext(:,k) = dfana.calcJ(CV_solutions{k}).tot(:,1);
 end
 
@@ -114,12 +114,13 @@ plot(V_10(1:121), J.ext(1:121,3), 'color', line_colour{4})
 plot(V_90(1:121), J.ext(1:121,1), 'color', line_colour{4}, 'linestyle', '--')
 
 plot(V_10(1:121), zeros(1,121), 'black', 'LineWidth', 1)
-hold off
+
 xlim([0, 1.3])
 xlabel('Voltage (V)')
 ylim([-0.03, 0.03])
 ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', '', 'J_{rad}', '', 'J_{nonrad}', '', 'J_{ext}', '', 'J = 0'}, 'Location', 'bestoutside')
+hold off
 
 %% Plot 'PL' results
 figure(11)
