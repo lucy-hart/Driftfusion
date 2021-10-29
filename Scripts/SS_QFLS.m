@@ -58,23 +58,34 @@ ylim([-0.03, 0.01])
 J_values = zeros(241,3);
 e = -1.60*10^-19;
 for k = 1:3
-    w = eqm_solutions_dark{k}.el.par.d;
-    num_points = eqm_solutions_dark{k}.el.par.layer_points;
-    volume_matrix = zeros(241,sum(num_points));
-    volume_matrix(:,1:num_points(1))= w(1)/num_points(1);
-    start = num_points(1);
-    for m = 2:5
-        volume_matrix(:,(start+1):start+num_points(m)) = w(m)/num_points(m);
-        start = start+num_points(m);
-    end
+%     w = eqm_solutions_dark{k}.el.par.d;
+%     num_points = eqm_solutions_dark{k}.el.par.layer_points;
+%     volume_matrix = zeros(241,sum(num_points));
+%     volume_matrix(:,1:num_points(1))= w(1)/num_points(1);
+%     start = num_points(1);
+%     for m = 2:5
+%         volume_matrix(:,(start+1):start+num_points(m)) = w(m)/num_points(m);
+%         start = start+num_points(m);
+%     end
+    
+    % PC: I think these should be integrals with respect to x below otherwise it
+    % doesn't take into account the variable mesh spacing.
+    
+    % Get active layer positions:
+    par = CV_solutions{k}.par;
+    % PC: If you wanted just the active layer PL you could add these limits
+    % although most of the PL will be from the active layer as minority
+    % carrier densities are so low in the other layers.
+%     active_start = par.dcum0(par.active_layer);
+%     active_end = par.dcum0(par.active_layer + 1);
+    x_sub = par.x_sub;
+    
     r = dfana.calcr(CV_solutions{k},'sub');
-    % PC: I think these should be integrals with respect to x otherwise it
-    % doesn't take into account the variable mesh spacing and the units
-    % will not be correct. Also I have set the recombination currents to be
+    % PC: I have set the recombination currents to be
     % positive- this is simply a convention we have chosen. It makes sense
-    % from the perspective that when you apply a positive bias to a diode
+    % from the perspective that when you apply a positive bias to a diode 
     % you get a positive current.
-    x_sub = CV_solutions{k}.par.x_sub;
+    
     gxt = dfana.calcg(CV_solutions{k});
     J.gen(:,k) = e*trapz(x_sub, gxt,2);
     J.rad(:,k) = -e*trapz(x_sub, r.btb, 2);
@@ -86,7 +97,7 @@ end
 %% Plot contributons to the current
 
 figure(2)
-%line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250], [0 0.4470 0.7410], [0.4660 0.6740 0.1880]};
+line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250], [0 0.4470 0.7410], [0.4660 0.6740 0.1880]};
 V_10 = dfana.calcVapp(CV_solutions{1});
 V_90 = dfana.calcVapp(CV_solutions{3});
 hold on
