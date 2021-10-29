@@ -70,19 +70,23 @@ for k = 1:3
     r = dfana.calcr(CV_solutions{k},'sub');
     % PC: I think these should be integrals with respect to x otherwise it
     % doesn't take into account the variable mesh spacing and the units
-    % will not be correct
+    % will not be correct. Also I have set the recombination currents to be
+    % positive- this is simply a convention we have chosen. It makes sense
+    % from the perspective that when you apply a positive bias to a diode
+    % you get a positive current.
     x_sub = CV_solutions{k}.par.x_sub;
-    g = dfana.calcg(CV_solutions{k});
-    J.gen(:,k) = e*trapz(x_sub, dfana.calcg(CV_solutions{k}),2);
-    J.rad(:,k) = e*trapz(x_sub, r.btb, 2);
+    gxt = dfana.calcg(CV_solutions{k});
+    J.gen(:,k) = e*trapz(x_sub, gxt,2);
+    J.rad(:,k) = -e*trapz(x_sub, r.btb, 2);
     % PC Also needed to add VSR to the non-rad component which is the interfacial surface recombination component
-    J.nonrad(:,k) = e*trapz(x_sub, r.srh + r.vsr, 2);   
+    J.nonrad(:,k) = -e*trapz(x_sub, r.srh + r.vsr, 2);   
     J.ext(:,k) = dfana.calcJ(CV_solutions{k}).tot(:,1);
 end
 
 %% Plot contributons to the current
+
 figure(2)
-line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250], [0 0.4470 0.7410], [0.4660 0.6740 0.1880]};
+%line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250], [0 0.4470 0.7410], [0.4660 0.6740 0.1880]};
 V_10 = dfana.calcVapp(CV_solutions{1});
 V_90 = dfana.calcVapp(CV_solutions{3});
 hold on
@@ -103,7 +107,7 @@ plot(V_10(1:121), zeros(1,121), 'black', 'LineWidth', 1)
 hold off
 xlim([0, 1.3])
 xlabel('Voltage (V)')
-ylim([-0.05, 0.01])
+ylim([-0.03, 0.03])
 ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', '', 'J_{rad}', '', 'J_{nonrad}', '', 'J_{ext}', '', 'J = 0'}, 'Location', 'bestoutside')
 
