@@ -11,13 +11,13 @@ eqm = equilibrate(par_10);
 
 %% Measure JV curves with and wihtout ion motion
 
-CV_el = doCV(eqm.el, 1, 0, 1.3, 0, 10e-3, 1, 241);
-CV_ion = doCV(eqm.ion, 1, 0, 1.3, 0, 10e-3, 1, 241);
+CV_el = doCV(eqm.el, 0, 0, 1.0, 0, 10e-3, 1, 241);
+CV_ion = doCV(eqm.ion, 0, 0, 1.0, 0, 10e-3, 1, 241);
 
 %% Do the plotting 
 figure('WindowState', 'fullscreen')
 
-filename = 'C:\Users\User\Documents\Work\PhD\Figures\Populations.gif';
+filename = 'C:\Users\User\Documents\Work\PhD\Figures\Populations_dark.gif';
 for n = 1:241
     % Define figure and axes
     plot(CV_el.x, log10(CV_el.u(n,:,2)), 'b--')
@@ -44,9 +44,9 @@ for n = 1:241
     xlim([0, sum(CV_el.par.d)])
     xticks([0 100e-7 200e-7 300e-7 400e-7 500e-7])
     xticklabels({'0', '100', '200', '300', '400', '500'})
-    ylim([8,18])
-    yticks([8 10 12 14 16 18])
-    yticklabels({'10^{8}', '10^{10}', '10^{12}', '10^{14}', '10^{16}', '10^{18}'})
+    ylim([4,18])
+    yticks([2 4 6 8 10 12 14 16 18])
+    yticklabels({'10^{2}', '10^{4}', '10^{6}', '10^{8}', '10^{10}', '10^{12}', '10^{14}', '10^{16}', '10^{18}'})
     xlabel('distance (nm)')
     ylabel('carrier concentration (cm^{-3})')
     legend({'','','','','',' n, No Ions', ' p, No Ions',' n, Ions', ' p, Ions' }, 'Position', [0.75 0.8 0.1 0.1])
