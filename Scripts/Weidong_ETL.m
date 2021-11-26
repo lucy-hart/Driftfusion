@@ -25,19 +25,29 @@ CV_solutions_ion = cell(1,3);
 for j = 1:3
     sol_el = eqm_solutions_dark{j}.el;
     sol_ion = eqm_solutions_dark{j}.ion;
-    CV_solutions_el{j} = doCV(sol_el, 1, 0, 1.3, 0, 10e-3, 1, 241);
-    CV_solutions_ion{j} = doCV(sol_ion, 1, 0, 1.3, 0, 10e-3, 1, 241);
-    dfplot.JtotVapp(CV_solutions_ion{j},0)
+    CV_solutions_el{j} = doCV(sol_el, 1, -0.3, 1.3, -0.3, 10e-3, 1, 321);
+    CV_solutions_ion{j} = doCV(sol_ion, 1, -0.3, 1.3, -0.3, 10e-3, 1, 321);
+end
+
+%% Plot JVs
+figure(1)
+for m=1:3
+    v = dfana.calcVapp(CV_solutions_ion{m});
+    j = dfana.calcJ(CV_solutions_ion{m}).tot(:,1);
+    plot(v(:), j(:))
     hold on
 end
+plot(v(:), zeros(1,length(v)), 'black', 'LineWidth', 1)
 hold off
-legend({'Kloc-6', 'PCBM', 'ICBA'}, 'Location', 'northwest')
+legend({'Kloc-6', 'PCBM', 'ICBA',''}, 'Location', 'northwest')
 xlim([0, 1.3])
 ylim([-0.03, 0.01])
+xlabel('Voltage(V)')
+ylabel('Current Density (Acm^{-2})')
 
 %% Break down contributions to the current
 %Columns in J_values are J_gen, J_rad, J_srh, J_vsr and J_ext
-J_values = zeros(241,5,3);
+J_values = zeros(321,5,3);
 e = 1.60e-19;
 
 %choose to plot for electron vs ion solutions - see what difference this
@@ -71,13 +81,25 @@ ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', 'J_{rad}', 'J_{SRH}', 'J_{VSR}', 'J_{ext}', ''}, 'Location', 'bestoutside')
 
 %% Plot 'PL' results
-figure(11)
+figure(3)
 for i = 1:3
-    plot(dfana.calcVapp(CV_solutions{i}), J_values(:,2,i)) 
+    plot(dfana.calcVapp(CV_solutions{i}), -J_values(:,2,i)) 
     hold on
 end
 xlim([0, 1.3])
 xlabel('Voltage (V)')
 ylabel('e\phi_{PL}(Acm^{-2})')
-%ylim([0, 2.5e-3])
+ylim([0, 0.5e-3])
 legend({'Kloc-6', 'PCBM', 'ICBA'}, 'Location', 'northwest')
+
+%% Plot rad/non-rad ratio
+figure(4)
+for n = 1:3
+    semilogy(dfana.calcVapp(CV_solutions{n}), J_values(:,2,n)./(J_values(:,3,n)+J_values(:,4,n)))
+    hold on
+end
+xlim([0, 1.3])
+xlabel('Voltage (V)')
+ylabel('J_{rad}/J_{non-rad}')
+%ylim([0, 2.5e-3])
+legend({'Kloc-6', 'PCBM', 'ICBA'}, 'Location', 'southwest')
