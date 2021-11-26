@@ -262,10 +262,56 @@ classdef dfana
             ps = p.*exp(-beta_xp.*xprime_p);  % Projected hole surface density
             r.vsr = vsr_zone.*(ns.*ps - dev.ni.^2)...
                 ./(dev.taun_vsr.*(ps + dev.pt) + dev.taup_vsr.*(ns + dev.nt));
+            % System boundary surface recombination i.e. minority carrier
+            % currents
+            
             % Total
             r.tot = r.btb + r.srh + r.vsr;
+            
         end
 
+        function j_surf_rec = calcj_surf_rec(sol)
+            % Calculates the absolute surface recombination flux for system
+            % boundaries.
+            [u,t,x_input,par,~,n,p,a,c,V] = dfana.splitsol(sol);
+            
+            %% Absolute fluxes at the boundaries
+            [~, j, ~] = dfana.calcJ(sol);
+            jn_l = abs(j.n(:,1));
+            jn_r = abs(j.n(:,end));
+
+            jp_l = abs(j.p(:,1));
+            jp_r = abs(j.p(:,end));
+            
+            j_surf_rec.n_l = zeros(1, length(t));
+            j_surf_rec.p_l = zeros(1, length(t));
+            j_surf_rec.n_r = zeros(1, length(t));
+            j_surf_rec.p_r = zeros(1, length(t));
+            
+            if par.p0_l == par.n0_l && par.n0_r == par.p0_r
+                % Intrinsic both sides then can be either?
+                j_surf_rec.l = jn_l;
+                j_surf_rec.r = jn_r;
+            elseif par.p0_l >= par.n0_l && par.n0_r >= par.p0_r
+                % p-type left boundary, n-type right boundary
+                j_surf_rec.l = jn_l;
+                j_surf_rec.r = jp_r;
+            elseif par.n0_l >= par.n0_r && par.p0_r >= par.n0_r
+                % n-type left boundary, p-type right boundary
+                j_surf_rec.l = jp_l;
+                j_surf_rec.r = jn_r;
+            elseif par.p0_l >= par.n0_l && par.p0_r >= par.n0_r
+                j_surf_rec.l = jn_l;
+                j_surf_rec.r = jn_r;   
+            elseif par.n0_l >= par.p0_l && par.n0_r >= par.p0_r
+                % p-type both boundaries or n-type both boundaries
+                j_surf_rec.l = jp_l;
+                j_surf_rec.r = jp_r;  
+            end
+            
+            j_surf_rec.tot = j_surf_rec.l + j_surf_rec.r;
+        end
+        
         function [Jdd, jdd, xout] = calcJdd(sol)
             % Calculates drift and diffusion currents at every point and all times -
             % NOTE: UNRELIABLE FOR TOTAL CURRENT as errors in the calculation of the
