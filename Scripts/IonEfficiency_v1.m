@@ -24,15 +24,33 @@ for i=1:7
     for j=1:12
         par.Phi_left = par.EF0-params{i,j}(2);
         par.Phi_right = par.EF0+params{i,j}(2);
-        par.sn_l = params{i,j}(2);
-        par.sp_r = params{i,j}(2);
+        par.sn_l = params{i,j}(1);
+        par.sp_r = params{i,j}(1);
         par = refresh_device(par);
         soleq = equilibrate(par);
-        solCV_ion = doCV(soleq.ion, 1, -0.1, 2*params{i,j}(2) + 0.4, -0.1, 10e-3, 1, 241);
-        solCV_el = doCV(soleq.el, 1, -0.1, 2*params{i,j}(2) + 0.4, -0.1, 10e-3, 1, 241);
+        if params{i,j}(2)<=0.4
+            solCV_ion = doCV(soleq.ion, 1, -0.3, 1, -0.3, 10e-3, 1, 241);
+            solCV_el = doCV(soleq.el, 1, -0.3, 1, -0.3, 10e-3, 1, 241);
+        elseif params{i,j}(2)>0.4
+            solCV_ion = doCV(soleq.ion, 1, -0.3, 1.3, -0.3, 10e-3, 1, 241);
+            solCV_el = doCV(soleq.el, 1, -0.3, 1.3, -0.3, 10e-3, 1, 241);
+        end
         ion_results{i,j} = CVstats(solCV_ion);
         el_results{i,j} = CVstats(solCV_el);
     end
 end
 
 %% Plot results
+PCE_ratio = zeros(7,12);
+for i=1:7
+    for j=1:12
+        try
+            PCE_ratio(i,j) = (ion_results{i,j}.efficiency_f-el_results{i,j}.efficiency_f)/ion_results{i,j}.efficiency_f;
+        catch
+            warning('CVstats unsucessful. Assigning a PCE value of 0.');
+            PCE_ratio(i,j) = 0;
+        end
+    end
+end
+figure(1)
+contour(Ebi_values, sigma_values, PCE_ratio)
