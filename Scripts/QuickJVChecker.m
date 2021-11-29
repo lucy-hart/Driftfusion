@@ -1,7 +1,7 @@
 
 
-par = pc('Input_files/pedotpss_mapi_kloc6.csv');
-%par = pc('Input_files/pedotpss_mapi_icba.csv');
+%par = pc('Input_files/pedotpss_mapi_kloc6.csv');
+par = pc('Input_files/pedotpss_mapi_icba.csv');
 %par = pc('Input_files/pedotpss_mapi_pcbm.csv');
 
 eqm = equilibrate(par);

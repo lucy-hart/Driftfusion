@@ -36,7 +36,7 @@ semilogy(x_values, CV_solutions_ion{num}.u(31,:,2), 'b',...
     x_values, CV_solutions_el{num}.u(31,:,2), 'b--',...
     x_values, CV_solutions_el{num}.u(31,:,3), 'r--')
 xlim([0, max(x_values)])
-ylim([10e8,10e17])
+ylim([1e8,1e17])
 ylabel('Carrier concentrations (cm^{-3})')
 xlabel('Device depth (nm)')
 legend('n, ions', 'p, ions', 'n, no ions', 'p, no ions', 'Location', 'bestoutside')
