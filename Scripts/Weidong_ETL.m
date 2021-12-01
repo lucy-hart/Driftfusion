@@ -1,6 +1,5 @@
 %Code to model the results of Weidong's experiment varying the choice of
-%ETL material used in his FaCs devices. Just without the FaCs and the worng
-%HTL...
+%ETL material used in his FaCs devices. Just without the FaCs..
 
 %% Read in data files 
 
@@ -32,16 +31,16 @@ end
 %% Plot JVs
 figure(1)
 for m=1:3
-    v = dfana.calcVapp(CV_solutions_ion{m});
-    j = dfana.calcJ(CV_solutions_ion{m}).tot(:,1);
+    v = dfana.calcVapp(CV_solutions_el{m});
+    j = -dfana.calcJ(CV_solutions_el{m}).tot(:,1);
     plot(v(:), j(:))
     hold on
 end
 plot(v(:), zeros(1,length(v)), 'black', 'LineWidth', 1)
 hold off
-legend({'Kloc-6', 'PCBM', 'ICBA',''}, 'Location', 'northwest')
+legend({'Kloc-6', 'PCBM', 'ICBA',''}, 'Location', 'southwest')
 xlim([0, 1.3])
-ylim([-0.03, 0.01])
+ylim([0, 0.025])
 xlabel('Voltage(V)')
 ylabel('Current Density (Acm^{-2})')
 
@@ -65,16 +64,17 @@ for k=1:3
     J_values(:,2,k) = e*trapz(x, loss_currents.btb, 2)';
     J_values(:,3,k) = e*trapz(x, loss_currents.srh, 2)';
     J_values(:,4,k) = e*trapz(x, loss_currents.vsr, 2)';
-    J_values(:,5,k) = e*(j_surf_rec.tot);
-    J_values(:,6,k) = J.tot(:,1);
+    J_values(:,5,k) = J.tot(:,1);
+    J_values(:,6,k) = e*(j_surf_rec.tot);
 end    
 %% Plot contributons to the current
+%J_rad not corrected for EL - see EL_Measurements
 figure(2)
-line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250], [0.4940 0.1840 0.5560],...
+line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250],...
                 [0 0.4470 0.7410], [0.3010 0.7450 0.9330], [0.4660 0.6740 0.1880]};
 V = dfana.calcVapp(CV_solutions{1});
-for n = 1:6
-    plot(V(:), J_values(:,n,1), 'color', line_colour{n})
+for n = 1:5
+    plot(V(:), J_values(:,n,2), 'color', line_colour{n})
     hold on
 end
 plot(V(1:num_values), zeros(1,num_values), 'black', 'LineWidth', 1)
@@ -83,7 +83,7 @@ xlim([0, max(V)])
 xlabel('Voltage (V)')
 ylim([-0.025, 0.01])
 ylabel('Current Density (Acm^{-2})')
-legend({'J_{gen}', 'J_{rad}', 'J_{SRH}', 'J_{VSR}', 'J_{surf}', 'J_{ext}'}, 'Location', 'bestoutside')
+legend({'J_{gen}', 'J_{rad}', 'J_{SRH}', 'J_{VSR}', 'J_{ext}'}, 'Location', 'bestoutside')
 
 %% Plot 'PL' results
 figure(3)
@@ -94,17 +94,6 @@ end
 xlim([0, 1.3])
 xlabel('Voltage (V)')
 ylabel('e\phi_{PL}(Acm^{-2})')
-ylim([0, 0.5e-3])
+ylim([0, 2.5e-4])
 legend({'Kloc-6', 'PCBM', 'ICBA'}, 'Location', 'northwest')
 
-%% Plot rad/non-rad ratio
-figure(4)
-for n = 1:3
-    semilogy(dfana.calcVapp(CV_solutions{n}), J_values(:,2,n)./(J_values(:,3,n)+J_values(:,4,n)+J_values(:,5,n)))
-    hold on
-end
-xlim([0, 1.3])
-xlabel('Voltage (V)')
-ylabel('J_{rad}/J_{non-rad}')
-%ylim([0, 2.5e-3])
-legend({'Kloc-6', 'PCBM', 'ICBA'}, 'Location', 'southwest')
