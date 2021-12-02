@@ -3,9 +3,9 @@
 
 %% Read in data files 
 
-par_kloc6 = pc('Input_files/pedotpss_mapi_kloc6.csv');
-par_icba = pc('Input_files/pedotpss_mapi_icba.csv');
-par_pcbm = pc('Input_files/pedotpss_mapi_pcbm.csv');
+par_kloc6 = pc('Input_files/PTAA_MAPI_Kloc6.csv');
+par_icba = pc('Input_files/PTAA_MAPI_PCBM.csv');
+par_pcbm = pc('Input_files/PTAA_MAPI_ICBA.csv');
 
 devices = {par_kloc6, par_pcbm, par_icba};
 
