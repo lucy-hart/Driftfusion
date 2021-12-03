@@ -6,7 +6,7 @@ dark_CV_solutions = cell(1,3);
 for i = 1:3
     dark_CV_solutions{i} = doCV(eqm_solutions_dark{i}.ion, 0, -0.3, 1.3, -0.3, 1e-3, 1, 321);
 end
-%% Plot  dark JVs
+%% Plot dark JVs
 figure(11)
 for m=1:3
     v_dark = dfana.calcVapp(dark_CV_solutions{m});
@@ -40,17 +40,18 @@ for k=1:3
     J_values_dark(:,3,k) = e*trapz(x, loss_currents.vsr, 2)';
     J_values_dark(:,4,k) = J.tot(:,1);
     J_values_dark(:,5,k) = e*(j_surf_rec.tot);
-end    
+end  
+
 %% Plot contributons to the current corrected for EL
 figure(12)
-num = 1;
+num = 3;
 
 V = dfana.calcVapp(dark_CV_solutions{1});
 plot(V(:), J_values(:,1,num), 'color', [0.8500 0.3250 0.0980])
 hold on
-plot(V(:), (J_values(:,2,num)+J_values_dark(:,1,num))*100, 'color', [0.9290 0.6940 0.1250])
+plot(V(:), (J_values(:,2,num)+J_values_dark(:,1,num))*10, 'color', [0.9290 0.6940 0.1250])
 hold on
-plot(V(:), -J_values_dark(:,1,num)*100, 'r:')
+plot(V(:), -J_values_dark(:,1,num)*10, 'r:')
 hold on
 plot(V(:), J_values(:,3,num), 'color', [0 0.4470 0.7410])
 hold on
@@ -65,7 +66,7 @@ xlim([0, max(V)])
 xlabel('Voltage (V)')
 ylim([-0.025, 0.005])
 ylabel('Current Density (Acm^{-2})')
-legend({'J_{gen}', 'J_{rad}x10^{2}', 'J_{EL}x10^{2}', 'J_{SRH}', 'J_{VSR}', 'J_{ext}'}, 'Location', 'bestoutside')
+legend({'J_{gen}', 'J_{rad}x10', 'J_{EL}x10', 'J_{SRH}', 'J_{VSR}', 'J_{ext}'}, 'Location', 'bestoutside')
 
 %% Plot PLQY results
 figure(13)
