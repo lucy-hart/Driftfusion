@@ -74,7 +74,7 @@ line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250],...
                 [0 0.4470 0.7410], [0.3010 0.7450 0.9330], [0.4660 0.6740 0.1880]};
 V = dfana.calcVapp(CV_solutions{1});
 for n = 1:5
-    plot(V(:), J_values(:,n,2), 'color', line_colour{n})
+    plot(V(:), J_values(:,n,3), 'color', line_colour{n})
     hold on
 end
 plot(V(1:num_values), zeros(1,num_values), 'black', 'LineWidth', 1)
@@ -85,15 +85,6 @@ ylim([-0.025, 0.01])
 ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', 'J_{rad}', 'J_{SRH}', 'J_{VSR}', 'J_{ext}'}, 'Location', 'bestoutside')
 
-%% Plot 'PL' results
-figure(3)
-for i = 1:3
-    plot(dfana.calcVapp(CV_solutions{i}), -J_values(:,2,i)) 
-    hold on
-end
-xlim([0, 1.3])
-xlabel('Voltage (V)')
-ylabel('e\phi_{PL}(Acm^{-2})')
-ylim([0, 2.5e-4])
-legend({'Kloc-6', 'PCBM', 'ICBA'}, 'Location', 'northwest')
+
+
 

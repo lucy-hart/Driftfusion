@@ -3,8 +3,8 @@
 % SC conditions for forward scan are at 31st timepoint, and 291st for reverse 
 % OC at 127, 145 and 146 for Kloc-6, PCBM and ICBA respectively
 
-num = 1;
-T = 127;
+num = 3;
+T = 31;
 
 [Ecb_ion, Evb_ion, Efn_ion, Efp_ion] = dfana.calcEnergies(CV_solutions_ion{num});
 [Ecb_el, Evb_el, Efn_el, Efp_el] = dfana.calcEnergies(CV_solutions_el{num});
@@ -38,7 +38,7 @@ semilogy(x_values, CV_solutions_ion{num}.u(T,:,2), 'b',...
     x_values, CV_solutions_el{num}.u(T,:,2), 'b--',...
     x_values, CV_solutions_el{num}.u(T,:,3), 'r--')
 xlim([0, max(x_values)])
-ylim([1e8,1e17])
+ylim([1e8,5e17])
 ylabel('Carrier concentrations (cm^{-3})')
 xlabel('Device depth (nm)')
 legend('n, ions', 'p, ions', 'n, no ions', 'p, no ions', 'Location', 'bestoutside')

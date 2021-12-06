@@ -44,14 +44,14 @@ end
 
 %% Plot contributons to the current corrected for EL
 figure(12)
-num = 3;
+num = 2;
 
 V = dfana.calcVapp(dark_CV_solutions{1});
 plot(V(:), J_values(:,1,num), 'color', [0.8500 0.3250 0.0980])
 hold on
-plot(V(:), (J_values(:,2,num)+J_values_dark(:,1,num))*10, 'color', [0.9290 0.6940 0.1250])
+plot(V(:), (J_values(:,2,num)+J_values_dark(:,1,num))*100, 'color', [0.9290 0.6940 0.1250])
 hold on
-plot(V(:), -J_values_dark(:,1,num)*10, 'r:')
+plot(V(:), -J_values_dark(:,1,num)*100, 'r:')
 hold on
 plot(V(:), J_values(:,3,num), 'color', [0 0.4470 0.7410])
 hold on
@@ -77,7 +77,7 @@ end
 xlim([0, 1.3])
 xlabel('Voltage (V)')
 ylabel('PLQY (%)')
-ylim([5e-4, 0.6])
+%ylim([5e-4, 0.6])
 legend({'Kloc-6', 'PCBM', 'ICBA'}, 'Location', 'northwest')
 
 %% Plot rad/non-rad ratio. Rad defined as the component NOT due to EL 
@@ -93,5 +93,5 @@ end
 xlim([0, 1.3])
 xlabel('Voltage (V)')
 ylabel('J_{rad}/J_{non-rad} (%)')
-ylim([1e-3, 0.3])
+%ylim([1e-3, 0.3])
 legend({'Kloc-6', 'PCBM', 'ICBA'}, 'Location', 'northwest')
