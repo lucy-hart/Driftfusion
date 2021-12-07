@@ -1,6 +1,6 @@
-%par = pc('Input_files/PTAA_MAPI_Kloc6.csv');
+par = pc('Input_files/PTAA_MAPI_Kloc6.csv');
 %par = pc('Input_files/PTAA_MAPI_PCBM.csv');
-par = pc('Input_files/PTAA_MAPI_ICBA.csv');
+%par = pc('Input_files/PTAA_MAPI_ICBA.csv');
 
 eqm = equilibrate(par);
 CV_sol_ion = doCV(eqm.ion, 1, -0.3, 1.3, -0.3, 1e-3, 1, 241);
