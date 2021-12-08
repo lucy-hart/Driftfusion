@@ -1,7 +1,7 @@
 % Plot energy levels and carrier popultions at short circuit 
 % with and without ion motion.
 % SC conditions for forward scan are at 31st timepoint, and 291st for reverse 
-% OC at 127, 145 and 146 for Kloc-6, PCBM and ICBA respectively
+% OC at 127, 140 and 141 for Kloc-6, PCBM and ICBA respectively
 
 num = 3;
 T = 31;
