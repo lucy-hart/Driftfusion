@@ -17,12 +17,14 @@ end
 %Need to find time point solutuion is evaluated at closest to Voc first
 OC_time = zeros(1,3);
 Voc = zeros(1,3);
+Voc_v2 = zeros(1,3);
 QFLS_OC_ion = zeros(1,3);
 
 for z=1:3
-    Voc(z) = CVstats(CV_solutions_ion{z}).Voc_f;
+    Voc(z) = CVstats(CV_solutions_ion{z}).Voc_r;
     V = dfana.calcVapp(CV_solutions_ion{z});
     OC_time(z) = find(abs(V-Voc(z))== min(abs(V-Voc(z))), 1);
+    Voc_v2(z) = V(OC_time(z));
 end
 
 for w=1:3
@@ -33,4 +35,4 @@ end
 %% Find (and print)'Figure of Merit'
 
 Delta_mu = (QFLS_OC_ion-QFLS_SC_ion)*1000
-QFLS_Loss = (QFLS_OC_ion-Voc)*1000
+QFLS_Loss = (QFLS_OC_ion-Voc_v2)*1000

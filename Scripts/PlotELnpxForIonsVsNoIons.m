@@ -3,8 +3,8 @@
 % SC conditions for forward scan are at 31st timepoint, and 291st for reverse 
 % OC at 127, 140 and 141 for Kloc-6, PCBM and ICBA respectively
 
-num = 3;
-T = 31;
+num = 1;
+T = 128;
 
 [Ecb_ion, Evb_ion, Efn_ion, Efp_ion] = dfana.calcEnergies(CV_solutions_ion{num});
 [Ecb_el, Evb_el, Efn_el, Efp_el] = dfana.calcEnergies(CV_solutions_el{num});
@@ -17,7 +17,7 @@ plot(x_values, Ecb_ion(T,:), 'b',...
     x_values, Efn_ion(T,:), 'b--', ...
     x_values, Efp_ion(T,:), 'r--')
 xlim([0, max(x_values)])
-ylim([-7.5, -2.5])
+ylim([-6.5, -1.5])
 ylabel('Energy, eV')
 xlabel('Device depth (nm)')
 title('Energy Levels with Ions')
@@ -27,7 +27,7 @@ plot(x_values, Ecb_el(T,:), 'b',...
     x_values, Efn_el(T,:), 'b--', ...
     x_values, Efp_el(T,:), 'r--')
 xlim([0, max(x_values)])
-ylim([-7.5, -2.5])
+ylim([-6.5, -1.5])
 ylabel('Energy, eV')
 xlabel('Device depth (nm)')
 legend('E_{C}', 'E_{V}', 'E_{f,n}', 'E_{f,p}', 'NumColumns', 2, 'Location', 'northeast')

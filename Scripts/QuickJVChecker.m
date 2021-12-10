@@ -6,3 +6,4 @@ eqm = equilibrate(par);
 CV_sol_ion = doCV(eqm.ion, 1, -0.3, 1.4, -0.3, 1e-3, 1, 241);
 dfplot.JtotVapp(CV_sol_ion,0)
 legend('data', 'Location', 'northwest')
+CVstats(CV_sol_ion)
