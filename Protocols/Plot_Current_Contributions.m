@@ -35,7 +35,7 @@ plot(V(1:num_values), zeros(1,num_values), 'black', 'LineWidth', 1)
 hold off
 xlim([0, CVsol.par.V_fun_arg(2)])
 xlabel('Voltage (V)')
-ylim([-0.025, 0.01])
+ylim([J_values(1,1)*1.1, 0.01])
 ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', 'J_{rad}', 'J_{SRH}', 'J_{VSR}', 'J_{surf}', 'J_{ext}'}, 'Location', 'bestoutside')
 

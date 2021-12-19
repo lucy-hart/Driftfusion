@@ -3,9 +3,9 @@
 
 %% Read in data files 
 
-par_kloc6 = pc('Input_files/PTAA_MAPI_Kloc6.csv');
-par_pcbm = pc('Input_files/PTAA_MAPI_PCBM.csv');
-par_icba = pc('Input_files/PTAA_MAPI_ICBA.csv');
+par_kloc6 = pc('Input_files/PTAA_MAPI_Kloc6_v2.csv');
+par_pcbm = pc('Input_files/PTAA_MAPI_PCBM_v2.csv');
+par_icba = pc('Input_files/PTAA_MAPI_ICBA_v2.csv');
 
 devices = {par_kloc6, par_pcbm, par_icba};
 
@@ -74,7 +74,7 @@ line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250],...
                 [0 0.4470 0.7410], [0.3010 0.7450 0.9330], [0.4660 0.6740 0.1880]};
 V = dfana.calcVapp(CV_solutions{1});
 for n = 1:5
-    plot(V(:), J_values(:,n,1), 'color', line_colour{n})
+    plot(V(:), J_values(:,n,2), 'color', line_colour{n})
     hold on
 end
 plot(V(1:num_values), zeros(1,num_values), 'black', 'LineWidth', 1)

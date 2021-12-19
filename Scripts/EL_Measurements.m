@@ -66,7 +66,7 @@ xlim([0, max(V)])
 xlabel('Voltage (V)')
 ylim([-0.025, 0.005])
 ylabel('Current Density (Acm^{-2})')
-legend({'J_{gen}', 'J_{rad}x10', 'J_{EL}x10', 'J_{SRH}', 'J_{VSR}', 'J_{ext}'}, 'Location', 'bestoutside')
+legend({'J_{gen}', 'J_{rad}x100', 'J_{EL}x100', 'J_{SRH}', 'J_{VSR}', 'J_{ext}'}, 'Location', 'bestoutside')
 
 %% Plot PLQY results
 figure(13)
