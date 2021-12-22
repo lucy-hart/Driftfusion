@@ -2,7 +2,7 @@ function stats = CVstats(sol)
 % A function to pull statistics from a CV sweep using doCV
 % If multiple cycles have been performed, stats are taken from the first
 % cycle
-% sol - a solution from doCV
+% sol - a solution from doCV 
 
 % At present CVSTATS only works for P-I-N devices. Some adaption still
 % required for N-I-P devices

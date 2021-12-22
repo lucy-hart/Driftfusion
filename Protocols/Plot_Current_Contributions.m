@@ -4,7 +4,7 @@ function Plot_Current_Contributions(CVsol)
 %generation current. 
 
 %% Break down contributions to the current
-%Columns in J_values are J_gen, J_rad, J_srh, J_vsr and J_ext
+%Columns in J_values are J_gen, J_rad, J_srh, J_vsr, J_shunt and J_ext
 num_values = length(CVsol.t);
 J_values = zeros(num_values, 6);
 e = -CVsol.par.e;
