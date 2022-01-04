@@ -16,5 +16,5 @@ plot(Kloc6{:,1}, Kloc6{:,3}, 'r', PCBM{:,1}, PCBM{:,3}, 'g', ICBA{:,1}, ICBA{:,3
 legend('Kloc-6', 'PCBM', 'ICBA', 'Location', 'northwest')
 xlabel('Voltage (V)')
 ylabel('Current Density (mAcm^{-2}')
-xlim([-0, 1.3])
-ylim([-30, 0])
+xlim([-0.3, 1.3])
+ylim([-30, 10])

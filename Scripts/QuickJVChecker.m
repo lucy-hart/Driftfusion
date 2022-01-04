@@ -23,9 +23,9 @@ rho_series_el = ((e*CV_sol_ion.par.dev.mu_n.*CV_sol_ion.u(:,:,2))'.^-1)/100; %Co
 r_series_el = trapz(CV_sol_ion.x, rho_series_el, 1)'/1e6; %x given in um
 
 %% Add a shunt resistance (lab book 21/12/21)
-%Kloc6 = 3e3 Ohms, PCBM = 6e4 Ohms, ICBA = 4e3 Ohms
+%Kloc6 = 3e3 Ohms, PCBM = 6e4 Ohms, ICBA = 5e3 Ohms
 Area = 0.045e-4;
-R_shunt = 4e3;
+R_shunt = 5e3;
 r_shunt = Area*R_shunt;
 J_PV = dfana.calcJ(CV_sol_ion).tot;
 Vapp = dfana.calcVapp(CV_sol_ion)';
