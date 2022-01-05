@@ -2,11 +2,13 @@ par=pc('Input_files/1_layer_test.csv');
 
 par.Phi_left = par.EF0-0.6;
 par.Phi_right = par.EF0+0.6;
+par.sn_l = 1e1;
+par.sp_r = 1e1;
 par = refresh_device(par);
 soleq = equilibrate(par);
 
-solCV_ion = doCV(soleq.ion, 1, -0.2, 1.1, -0.2, 1e-4, 1, 241);
-solCV_el = doCV(soleq.el, 1, -0.2, 1.1, -0.2, 1e-4, 1, 241);
+solCV_ion = doCV(soleq.ion, 1, -0.2, 1.2, -0.2, 1e-4, 1, 241);
+solCV_el = doCV(soleq.el, 1, -0.2, 1.2, -0.2, 1e-4, 1, 241);
 
 J_ion = dfana.calcJ(solCV_ion);
 J_el = dfana.calcJ(solCV_el);
