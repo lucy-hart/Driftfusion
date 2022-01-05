@@ -4,8 +4,8 @@
 tic
 %% Define parameter space
 % Rows are recombination velocities, columns are Ebi values
-params = cell(7,13);
-sigma_values = logspace(1,7,7);
+params = cell(7,14);
+sigma_values = logspace(-1,5,7);
 Ebi_values = zeros(1,14);
 Ebi_values(2:end) = linspace(0,0.6,13);
 Ebi_values(2) = 0.01;
