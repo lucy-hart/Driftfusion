@@ -15,3 +15,5 @@ J_el = dfana.calcJ(solCV_el);
 
 figure(008)
 plot(dfana.calcVapp(solCV_el), J_el.tot(:,1), 'blue', dfana.calcVapp(solCV_ion), J_ion.tot(:,1), 'red')
+
+
