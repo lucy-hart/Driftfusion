@@ -31,6 +31,7 @@ for n = 1:6
     plot(V(:), J_values(:,n), 'color', line_colour{n})
     hold on
 end
+plot(V, J_values(:,1) - sum(J_values(:,2:5),2), ':k')
 plot(V(1:num_values), zeros(1,num_values), 'black', 'LineWidth', 1)
 hold off
 xlim([0, CVsol.par.V_fun_arg(2)])

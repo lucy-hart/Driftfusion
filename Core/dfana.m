@@ -304,41 +304,23 @@ classdef dfana
                 j_surf_rec.l = jp_l;
                 j_surf_rec.r = jp_r;  
             end
-            j_surf_rec.tot = -(j_surf_rec.l + j_surf_rec.r);
+            j_surf_rec.tot = j_surf_rec.l + j_surf_rec.r;
         end
         
         function j_surf_rec = calcj_surf_rec_lucy(sol)
             [u,t,x_input,par,~,n,p,a,c,V] = dfana.splitsol(sol);
             [~, j, ~] = dfana.calcJ(sol);
+            
             jn_l = j.n(:,1);
             jn_r = j.n(:,end);
 
             jp_l = j.p(:,1);
             jp_r = j.p(:,end);
             
-        %Find point where current becomes positive i.e. V>Voc
-        %There will be two values for the forward and reverse scans
-        %For V<Voc +ve current at boundaries is recombination current
-        %For V>Voc +ve current at boundaries is injection current
-        %Little j is flux so negative means carriers moving left and
-        %postive means carriers moving right
-        %Assume for now majority carriers on left are holes and right are
-        %electrons
-            J = dfana.calcJ(sol);
-            x = sol.par.x_sub;
-            gxt = dfana.calcg(sol);
-            J_gen = trapz(x, gxt(1,:))';
-            index = find(diff(sign(J.tot(:,1))));
             for i = 1:length(t)
-                if (index(1)+1<i) && (i<index(2))
-                    j_surf_rec.l(i) = jp_l(i);
-                    j_surf_rec.r(i) = jn_r(i);
-                    j_surf_rec.tot(i) = -(abs(j_surf_rec.l(i))+abs(j_surf_rec.r(i)))+2*J_gen(1);
-                else
-                    j_surf_rec.l(i) = jn_l(i);
-                    j_surf_rec.r(i) = jp_r(i);
-                    j_surf_rec.tot(i) = abs(j_surf_rec.l(i))+abs(j_surf_rec.r(i));
-                end 
+            j_surf_rec.l(i) = jn_l(i);
+            j_surf_rec.r(i) = jp_r(i);
+            j_surf_rec.tot(i) = abs(j_surf_rec.l(i))+abs(j_surf_rec.r(i));%+2*j_gen(1);               
             end
             
         end
