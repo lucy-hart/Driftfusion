@@ -73,12 +73,12 @@ end
 
 %% Plot results 
 figure(1)
-contourf(2*Ebi_values, log10(sigma_values(1:end-1)), PCE_ratio(1:end-1,:), 15, 'LineWidth', 0.1)
+contourf(2*Ebi_values, log10(sigma_values(1:end)), log10(PCE_ratio(1:end,:)), 25, 'LineWidth', 0.1)
 xlabel('V_{BI} (V)')
 ylabel('log_{10}(\tau_{SRH} / s)')
 %ylabel('log_{10}(s_{surf} /cms^{-1})')
 c = colorbar;
-c.Label.String = 'PCE_{el} / PCE_{ion}';
+c.Label.String = 'log_{10}(PCE_{el} / PCE_{ion})';
 
 %% Voc vs V_bi plot
 V_ratio = zeros(Nsigma,NEbi-1);
