@@ -22,9 +22,9 @@ el_results = cell(7,14);
 par=pc('Input_files/1_layer_test.csv');
 for i=1:7
     for j=1:14
-        if j==1 && i ==7
-            par.Phi_left = par.EF0-0.01;
-            par.Phi_right = par.EF0+0.01;
+        if j==1 && i==7
+            par.Phi_left = par.EF0-0.0;
+            par.Phi_right = par.EF0+0.0;
         else
             par.Phi_left = par.EF0-params{i,j}(2);
             par.Phi_right = par.EF0+params{i,j}(2);  
@@ -60,13 +60,13 @@ for i=1:7
 end
 
 %% Plot results 
-PCE_ratio(6:7,1) = 0;
 figure(1)
-contourf(2*Ebi_values, log10(sigma_values), log10(PCE_ratio), 12, 'LineWidth', 0.1)
+contourf(2*Ebi_values, log10(sigma_values), log10(PCE_ratio), 18, 'LineWidth', 0.1)
 xlabel('V_{BI} (V)')
 ylabel('log_{10}(s_{surf} /cms^{-1})')
 c = colorbar;
 c.Label.String = 'log_{10}(PCE_{el} / PCE_{ion})';
+caxis([-0.3,0.31])
 
 %% Voc vs V_bi plot
 

@@ -2,8 +2,8 @@ par=pc('Input_files/1_layer_test.csv');
 
 par.Phi_left = par.EF0-0.1;
 par.Phi_right = par.EF0+0.1;
-par.sn_l = 1e6;
-par.sp_r = 1e6;
+par.sn_l = 1e1;
+par.sp_r = 1e1;
 par = refresh_device(par);
 soleq = equilibrate(par);
 

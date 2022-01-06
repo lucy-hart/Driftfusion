@@ -12,7 +12,7 @@ loss_currents = dfana.calcr(CVsol,'sub');
 x = CVsol.par.x_sub;
 gxt = dfana.calcg(CVsol);
 J = dfana.calcJ(CVsol);
-j_surf_rec = dfana.calcj_surf_rec(CVsol);
+j_surf_rec = dfana.calcj_surf_rec_lucy(CVsol);
 
 %forward sweep
 J_values(:,1) = e*trapz(x, gxt(1,:))';
