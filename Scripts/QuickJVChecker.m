@@ -1,10 +1,10 @@
-%par = pc('Input_files/PTAA_MAPI_Kloc6_v2.csv');
+par = pc('Input_files/PTAA_MAPI_Kloc6_v2.csv');
 %par = pc('Input_files/PTAA_MAPI_PCBM_v2.csv');
-par = pc('Input_files/PTAA_MAPI_ICBA_v2.csv');
+%par = pc('Input_files/PTAA_MAPI_ICBA_v2.csv');
 
 eqm = equilibrate(par);
-CV_sol_ion = doCV(eqm.ion, 1.2, -0.3, 1.3, -0.3, 1e-3, 1, 341);
-CV_sol_dark = doCV(eqm.ion, 0, -0.3, 1.3, -0.3, 1e-3, 1, 341);
+CV_sol_ion = doCV(eqm.ion, 1.2, -0.2, 1.2, -0.2, 1e-3, 1, 281);
+CV_sol_dark = doCV(eqm.ion, 0, -0.2, 1.2, -0.2, 1e-3, 1, 281);
 Plot_Current_Contributions(CV_sol_ion)
 stats = CVstats(CV_sol_ion)
 
@@ -23,9 +23,9 @@ rho_series_el = ((e*CV_sol_ion.par.dev.mu_n.*CV_sol_ion.u(:,:,2))'.^-1)/100; %Co
 r_series_el = trapz(CV_sol_ion.x, rho_series_el, 1)'/1e6; %x given in um
 
 %% Add a shunt resistance (lab book 21/12/21)
-%Kloc6 = 3e3 Ohms, PCBM = 6e4 Ohms, ICBA = 5e3 Ohms
+%Kloc6 = 2600 Ohms, PCBM = 35000 Ohms, ICBA = 4700 Ohms
 Area = 0.045e-4;
-R_shunt = 5e3;
+R_shunt = 2600;
 r_shunt = Area*R_shunt;
 J_PV = dfana.calcJ(CV_sol_ion).tot;
 Vapp = dfana.calcVapp(CV_sol_ion)';
@@ -33,10 +33,10 @@ Vapp = dfana.calcVapp(CV_sol_ion)';
 J_out = ((Vapp./(r_shunt))*1e-4) + J_PV(:,1); %convert to A/cm^-2
 
 %Calculate JV stats (use forwards scan)
-Jsc_f = interp1(Vapp(1:171), J_out(1:171), 0, 'linear');
-Voc_f = interp1(J_out(1:171), Vapp(1:171), 0, 'linear');
+Jsc_f = interp1(Vapp(1:141), J_out(1:141), 0, 'linear');
+Voc_f = interp1(J_out(1:141), Vapp(1:141), 0, 'linear');
 Pin = dfana.calcPin(CV_sol_ion);
-pow_f = J_out(1:171).*Vapp(1:171);
+pow_f = J_out(1:141).*Vapp(1:141);
 mpp_f = abs(min(pow_f));
 efficiency_f = 100*(mpp_f/Pin);
 mppV_f = Vapp(-pow_f == mpp_f);
