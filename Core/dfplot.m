@@ -558,6 +558,17 @@ classdef dfplot
             dfplot.x2d(sol, x, {rho},{'\rho'},{'-'},'Charge density [cm-3]', tarr, xrange, 0, 0);
         end
 
+        function rhox_el(varargin)
+            % Volumetric charge density (rho) as a funciton of position
+            % A time array can be used as a second input argument
+            [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
+            [u,t,x,par,dev,n,p,a,c,V] = dfana.splitsol(sol);
+            rho = dfana.calcrho_el(sol, "whole");
+
+            figure(19)
+            dfplot.x2d(sol, x, {rho},{'\rho'},{'-'},'Charge density [cm-3]', tarr, xrange, 0, 0);
+        end
+        
         function deltarhox(varargin)
             % The change in volumetric charge density (rho) as a funciton of position
             % A time array can be used as a second input argument
