@@ -8,7 +8,6 @@ par_pcbm = pc('Input_files/PTAA_MAPI_PCBM_v2.csv');
 par_icba = pc('Input_files/PTAA_MAPI_ICBA_v2.csv');
 
 devices = {par_kloc6, par_pcbm, par_icba};
-shunt_res = [3e3, 6e4, 5e3]*0.045;
 
 %% Find eqm solutions 
 eqm_solutions_dark = cell(1,3);
@@ -23,16 +22,15 @@ CV_solutions_ion = cell(1,3);
 for j = 1:3
     sol_el = eqm_solutions_dark{j}.el;
     sol_ion = eqm_solutions_dark{j}.ion;
-    CV_solutions_el{j} = doCV(sol_el, 1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
-    CV_solutions_ion{j} = doCV(sol_ion, 1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+    CV_solutions_el{j} = doCV(sol_el, 1.15, -0.3, 1.3, -0.3, 1e-4, 1, 321);
+    CV_solutions_ion{j} = doCV(sol_ion, 1.15, -0.3, 1.3, -0.3, 1e-4, 1, 321);
 end
 
 %% Plot JVs
 figure(1)
 for m=1:3
     v = dfana.calcVapp(CV_solutions_ion{m});
-    j_pv = -dfana.calcJ(CV_solutions_ion{m}).tot(:,1);
-    j = j_pv - v/shunt_res(m);
+    j = -dfana.calcJ(CV_solutions_ion{m}).tot(:,1);
     plot(v(:), j(:))
     hold on
 end
@@ -64,9 +62,9 @@ for k=1:3
     J_values(:,2,k) = e*trapz(x, loss_currents.btb, 2)';
     J_values(:,3,k) = e*trapz(x, loss_currents.srh, 2)';
     J_values(:,4,k) = e*trapz(x, loss_currents.vsr, 2)';
-    J_values(:,5,k) = v/shunt_res(k);
-    J_values(:,6,k) = J.tot(:,1)-J_values(:,5,k);
-    J_values(:,7,k) = e*(j_surf_rec.tot);
+    J_values(:,5,k) = e*(j_surf_rec.tot);
+    J_values(:,6,k) = J.tot(:,1);
+    
 end    
 %% Plot contributons to the current
 %J_rad not corrected for EL - see EL_Measurements
@@ -84,7 +82,7 @@ xlim([0, 1.3])
 xlabel('Voltage (V)')
 ylim([-0.025, 0.01])
 ylabel('Current Density (Acm^{-2})')
-legend({'J_{gen}', 'J_{rad}', 'J_{SRH}', 'J_{VSR}', 'J_{shunt}','J_{ext}'}, 'Location', 'bestoutside')
+legend({'J_{gen}', 'J_{rad}', 'J_{SRH}', 'J_{VSR}', 'J_{surf}','J_{ext}'}, 'Location', 'bestoutside')
 
 
 
