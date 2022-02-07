@@ -71,7 +71,7 @@ legend({'J_{gen}', 'J_{rad}x100', 'J_{EL}x100', 'J_{SRH}', 'J_{VSR}', 'J_{ext}'}
 %% Plot PLQY results
 figure(13)
 for i = 1:3
-    semilogy(dfana.calcVapp(dark_CV_solutions{i}), 100*(J_values(:,2,i)+J_values_dark(:,1,i))./J_values(:,1,i))                                                       
+    semilogy(dfana.calcVapp(CV_solutions{i}), 100*(J_values(:,2,i))./J_values(:,1,i))                                                       
     hold on
 end
 xlim([0, 1.3])
