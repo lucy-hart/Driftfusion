@@ -59,7 +59,7 @@ par.g2_fun_type = 'constant';
 
 % Time mesh
 par.tmesh_type = 2;
-par.tpoints = 10;
+par.tpoints = 200;
 
 % Series resistance
 par.Rs = 0;
