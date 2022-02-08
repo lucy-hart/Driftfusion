@@ -4,7 +4,7 @@
 %% Do dark JV
 dark_CV_solutions = cell(1,3);
 for i = 1:3
-    dark_CV_solutions{i} = doCV(eqm_solutions_dark{i}.ion, 0, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+    dark_CV_solutions{i} = doCV(eqm_solutions_dark{i}.ion, 0, -0.25, 1.25, -0.25, 1e-3, 1, 321);
 end
 %% Plot dark JVs
 figure(11)
@@ -71,13 +71,13 @@ legend({'J_{gen}', 'J_{rad}x100', 'J_{EL}x100', 'J_{SRH}', 'J_{VSR}', 'J_{ext}'}
 %% Plot PLQY results
 figure(13)
 for i = 1:3
-    semilogy(dfana.calcVapp(CV_solutions{i}), 100*(J_values(:,2,i))./J_values(:,1,i))                                                       
+    semilogy(V(1:161), 100*(J_values(1:161,2,i))./J_values(1:161,1,i))                                                       
     hold on
 end
-xlim([0, 1.3])
+xlim([0, 1.25])
 xlabel('Voltage (V)')
 ylabel('PLQY (%)')
-%ylim([5e-4, 0.6])
+ylim([1e-3, 0.3])
 legend({'Kloc-6', 'PCBM', 'ICBA'}, 'Location', 'northwest')
 
 %% Plot rad/non-rad ratio. Rad defined as the component NOT due to EL 

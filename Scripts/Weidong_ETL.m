@@ -22,8 +22,8 @@ CV_solutions_ion = cell(1,3);
 for j = 1:3
     sol_el = eqm_solutions_dark{j}.el;
     sol_ion = eqm_solutions_dark{j}.ion;
-    CV_solutions_el{j} = doCV(sol_el, 1.15, -0.3, 1.3, -0.3, 1e-4, 1, 321);
-    CV_solutions_ion{j} = doCV(sol_ion, 1.15, -0.3, 1.3, -0.3, 1e-4, 1, 321);
+    CV_solutions_el{j} = doCV(sol_el, 1.15, -0.25, 1.25, -0.25, 1e-3, 1, 321);
+    CV_solutions_ion{j} = doCV(sol_ion, 1.15, -0.25, 1.25, -0.25, 1e-3, 1, 321);
 end
 
 %% Plot JVs
@@ -42,7 +42,7 @@ end
 plot(v(:), zeros(1,length(v)), 'black', 'LineWidth', 1)
 hold off
 legend({'Kloc-6','', 'PCBM','', 'ICBA','',''}, 'Location', 'southwest')
-xlim([0, 1.3])
+xlim([0, 1.25])
 ylim([0, 0.025])
 xlabel('Voltage(V)')
 ylabel('Current Density (Acm^{-2})')
@@ -83,11 +83,13 @@ for n = 1:6
 end
 plot(V(1:num_values), zeros(1,num_values), 'black', 'LineWidth', 1)
 hold off
-xlim([0, 1.3])
+xlim([0, 1.25])
 xlabel('Voltage (V)')
 ylim([-0.03, 0.01])
 ylabel('Current Density (Acm^{-2})')
-legend({'J_{gen}', 'J_{rad}', 'J_{SRH}', 'J_{VSR}', 'J_{surf}','J_{ext}'}, 'Location', 'bestoutside')
+legend({'J_{gen}', 'J_{rad}', 'J_{SRH}', 'J_{interface}', 'J_{contact}','J_{ext}'}, 'Location', 'bestoutside')
+
+
 
 
 

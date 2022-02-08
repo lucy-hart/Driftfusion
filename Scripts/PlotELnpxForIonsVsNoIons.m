@@ -3,8 +3,8 @@
 % SC conditions for forward scan are at 31st timepoint, and 291st for reverse 
 % OC at 127, 140 and 182 for Kloc-6, PCBM and ICBA respectively
 
-num = 2;
-T = 138;
+num = 1;
+T = 133;
 
 [Ecb_ion, Evb_ion, Efn_ion, Efp_ion] = dfana.calcEnergies(CV_solutions_ion{num});
 [Ecb_el, Evb_el, Efn_el, Efp_el] = dfana.calcEnergies(CV_solutions_el{num});
