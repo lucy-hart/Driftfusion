@@ -4,7 +4,7 @@
 % OC at 127, 140 and 182 for Kloc-6, PCBM and ICBA respectively
 
 num = 2;
-T = 140;
+T = 138;
 
 [Ecb_ion, Evb_ion, Efn_ion, Efp_ion] = dfana.calcEnergies(CV_solutions_ion{num});
 [Ecb_el, Evb_el, Efn_el, Efp_el] = dfana.calcEnergies(CV_solutions_el{num});

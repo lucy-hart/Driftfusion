@@ -15,21 +15,18 @@ for y=1:3
 end
 %% Calculate QFLS at OC
 %Need to find time point solutuion is evaluated at closest to Voc first
-OC_time = zeros(1,3);
 Voc = zeros(1,3);
-Voc_v2 = zeros(1,3);
+OC_solutions = cell(1,3);
 QFLS_OC_ion = zeros(1,3);
 
 for z=1:3
     Voc(z) = CVstats(CV_solutions_ion{z}).Voc_r;
-    V = dfana.calcVapp(CV_solutions_ion{z});
-    OC_time(z) = find(abs(V-Voc(z))== min(abs(V-Voc(z))), 1);
-    Voc_v2(z) = V(OC_time(z));
+    OC_solutions{z} = jumptoV(CV_solutions_ion{z}, Voc(z), 1000, 1, 1.15, 1, 0);
 end
 
 for w=1:3
-    [Ecb_ion, Evb_ion, Efn_ion, Efp_ion] = dfana.calcEnergies(CV_solutions_ion{w});
-    QFLS_OC_ion(w) = trapz(x(num_start:num_stop), Efn_ion(OC_time(w), num_start:num_stop)-Efp_ion(OC_time(w),num_start:num_stop))/d;
+    [Ecb_ion, Evb_ion, Efn_ion, Efp_ion] = dfana.calcEnergies(OC_solutions{w});
+    QFLS_OC_ion(w) = trapz(x(num_start:num_stop), Efn_ion(end, num_start:num_stop)-Efp_ion(end,num_start:num_stop))/d;
 end
 
 %% Find (and print)'Figure of Merit'
