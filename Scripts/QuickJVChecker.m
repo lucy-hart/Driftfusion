@@ -7,3 +7,4 @@ CV_sol_ion = doCV(eqm_QJV.ion, 1.15, -0.3, 1.3, -0.3, 1e-3, 1, 321);
 CV_sol_el = doCV(eqm_QJV.el, 1.15, -0.3, 1.3, -0.3, 1e-3, 1, 321);
 Plot_Current_Contributions(CV_sol_ion)
 stats = CVstats(CV_sol_ion)
+

@@ -15,22 +15,30 @@ for y=1:3
 end
 %% Calculate QFLS at OC
 %Need to find time point solutuion is evaluated at closest to Voc first
-Voc = zeros(1,3);
-OC_time = zeros(1,3);
+Voc_ion = zeros(1,3);
+Voc_el = zeros(1,3);
+OC_time_ion = zeros(1,3);
+OC_time_el = zeros(1,3);
 QFLS_OC_ion = zeros(1,3);
+QFLS_OC_el = zeros(1,3);
 
 for z=1:3
     V_temp = dfana.calcVapp(CV_solutions_ion{z});
-    Voc(z) = CVstats(CV_solutions_ion{z}).Voc_r;
-    OC_time(z) = find(abs(Voc(z)-V_temp) == min(abs(Voc(z)-V_temp)),1);
+    Voc_ion(z) = CVstats(CV_solutions_ion{z}).Voc_f;
+    OC_time_ion(z) = find(abs(Voc(z)-V_temp) == min(abs(Voc(z)-V_temp)),1);
+    Voc_el(z) = CVstats(CV_solutions_el{z}).Voc_f;
+    OC_time_el(z) = find(abs(Voc(z)-V_temp) == min(abs(Voc(z)-V_temp)),1);
 end
 
 for w=1:3
     [Ecb_ion, Evb_ion, Efn_ion, Efp_ion] = dfana.calcEnergies(CV_solutions_ion{w});
-    QFLS_OC_ion(w) = trapz(x(num_start:num_stop), Efn_ion(OC_time(w), num_start:num_stop)-Efp_ion(OC_time(w),num_start:num_stop))/d;
+    [Ecb_el, Evb_el, Efn_el, Efp_el] = dfana.calcEnergies(CV_solutions_el{w});
+    QFLS_OC_ion(w) = trapz(x(num_start:num_stop), Efn_ion(OC_time_ion(w), num_start:num_stop)-Efp_ion(OC_time_ion(w),num_start:num_stop))/d;
+    QFLS_OC_el(w) = trapz(x(num_start:num_stop), Efn_el(OC_time_el(w), num_start:num_stop)-Efp_el(OC_time_el(w),num_start:num_stop))/d;
 end
 
 %% Find (and print)'Figure of Merit'
 
-Delta_mu = (QFLS_OC_ion-QFLS_SC_ion)*1000
-QFLS_Loss = (QFLS_OC_ion-Voc)*1000
+Delta_mu_ion = (QFLS_OC_ion-QFLS_SC_ion)*1000
+Delta_mu_el = (QFLS_OC_el-QFLS_SC_el)*1000
+QFLS_Loss = (QFLS_OC_ion-Voc_ion)*1000
