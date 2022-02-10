@@ -71,7 +71,7 @@ legend({'J_{gen}', 'J_{rad}x100', 'J_{EL}x100', 'J_{SRH}', 'J_{VSR}', 'J_{ext}'}
 %% Plot PLQY results
 figure(13)
 for i = 1:3
-    semilogy(V(1:161), 100*(J_values(1:161,2,i))./J_values(1:161,1,i))                                                       
+    semilogy(V(1:161), 100*(J_values(1:161,2,i))./J_values(1:161,1,i), 'color', colors_JV{i})                                                       
     hold on
 end
 xlim([0, 1.25])

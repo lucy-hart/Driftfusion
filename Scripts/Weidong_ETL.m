@@ -22,8 +22,8 @@ CV_solutions_ion = cell(1,3);
 for j = 1:3
     sol_el = eqm_solutions_dark{j}.el;
     sol_ion = eqm_solutions_dark{j}.ion;
-    CV_solutions_el{j} = doCV(sol_el, 1.15, -0.25, 1.25, -0.25, 1e-3, 1, 321);
-    CV_solutions_ion{j} = doCV(sol_ion, 1.15, -0.25, 1.25, -0.25, 1e-3, 1, 321);
+    CV_solutions_el{j} = doCV(sol_el, 1.15, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+    CV_solutions_ion{j} = doCV(sol_ion, 1.15, -0.3, 1.3, -0.3, 1e-3, 1, 321);
 end
 
 %% Plot JVs
