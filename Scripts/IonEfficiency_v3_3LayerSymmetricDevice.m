@@ -69,17 +69,3 @@ xlabel('log_{10}(Mobile Cation Concentration /cm^{-3})')
 ylabel('log_{10}(s_{surf} /cms^{-1})')
 c = colorbar;
 c.Label.String = 'log_{10}(PCE_{el} / PCE_{ion})';
-
-%% Voc vs V_bi plot
-V_ratio = zeros(Nsigma,NIonConc-1);
-for i = 1:Nsigma
-    for j = 2:NIonConc
-        V_ratio(i,j) = ion_results{i,j}.Voc_f/(2*Ebi_values(j));
-    end
-end
-figure(2)
-contourf(2*Ebi_values(1:end), log10(sigma_values), log10(V_ratio), 12, 'LineWidth', 1)
-xlabel('log_{10}(Mobile Cation Concentration /cm^{-3})')
-ylabel('log_{10}(s_{surf} /cms^{-1})')
-c = colorbar;
-c.Label.String = 'log_{10}(V_{OC,ion} / V_{BI})';
