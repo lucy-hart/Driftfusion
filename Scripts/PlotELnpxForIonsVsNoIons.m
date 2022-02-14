@@ -3,7 +3,7 @@
 % SC conditions for forward scan are at 31st timepoint, and 291st for reverse 
 % OC at 106, 137 and 183 for Kloc-6, PCBM and ICBA respectively
 
-num = 3;
+num = 1;
 T = 31;
 %T = OC_time_ion(num);
 lower_lim=[-6.5, -7, -7.5];
@@ -78,6 +78,7 @@ legend('','','','','E_{C}', 'E_{V}', 'E_{f,n}', 'E_{f,p}', 'NumColumns', 2, 'Loc
 figure(6)
 
 num = 3;
+T=31;
 
 hold on
 

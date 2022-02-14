@@ -25,9 +25,9 @@ QFLS_OC_el = zeros(1,3);
 for z=1:3
     V_temp = dfana.calcVapp(CV_solutions_ion{z});
     Voc_ion(z) = CVstats(CV_solutions_ion{z}).Voc_f;
-    OC_time_ion(z) = find(abs(Voc(z)-V_temp) == min(abs(Voc(z)-V_temp)),1);
+    OC_time_ion(z) = find(abs(Voc_ion(z)-V_temp) == min(abs(Voc_ion(z)-V_temp)),1);
     Voc_el(z) = CVstats(CV_solutions_el{z}).Voc_f;
-    OC_time_el(z) = find(abs(Voc(z)-V_temp) == min(abs(Voc(z)-V_temp)),1);
+    OC_time_el(z) = find(abs(Voc_el(z)-V_temp) == min(abs(Voc_el(z)-V_temp)),1);
 end
 
 for w=1:3
