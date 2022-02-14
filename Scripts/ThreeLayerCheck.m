@@ -12,7 +12,7 @@ v = dfana.calcVapp(solCV_ion);
 figure(1)
 plot(v, dfana.calcJ(solCV_ion).tot(:,1), 'r',  v, dfana.calcJ(solCV_el).tot(:,1), 'b')
 xlim([-0.1, 1.7])
-ylim([-0.025, 0.01])
+%ylim([-0.025, 0.01])
 
 %% Get Stats
 stats_ion = CVstats(solCV_ion);
