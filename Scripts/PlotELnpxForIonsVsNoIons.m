@@ -111,5 +111,75 @@ ylabel('Charge carrier concentration (cm^{-3})')
 xlabel('Device depth (nm)')
 legend('','','','','electrons', 'holes', '', '', 'cations','','', 'Location', 'bestoutside')
 
-%
-%x_values, log10(CV_solutions_ion{num}.u(T,:,4)), 'color', colors_JV{2}, 'LineStyle', '--', ...
+%% Plot el vs ion populations at OC vs SC
+
+num = 1;
+T = 31;
+
+figure(7)
+
+subplot(2,1,1)
+hold on
+
+% Do background colours
+% Arguments of patch give the coordinates of the corners of the polygon to
+% be shaded
+patch('XData',[0 x_values(500) x_values(500) 0], 'YData',[-2 -2 lower_lim(num) lower_lim(num)], 'FaceColor', colors_JV{1},...
+    'FaceAlpha', 0.3, 'EdgeColor', 'none')
+patch('XData',[x_values(500) x_values(600) x_values(600) x_values(500)], 'YData',[-2 -2 lower_lim(num) lower_lim(num)], 'FaceColor', colors_JV{2},...
+    'FaceAlpha', 0.5, 'EdgeColor', 'none')
+patch('XData',[x_values(1100) x_values(1200) x_values(1200) x_values(1100)], 'YData',[-2 -2 lower_lim(num) lower_lim(num)], 'FaceColor', colors_JV{2},...
+    'FaceAlpha', 0.5, 'EdgeColor', 'none')
+patch('XData',[x_values(1200) x_values(end) x_values(end) x_values(1200)], 'YData',[-2 -2 lower_lim(num) lower_lim(num)],  'FaceColor', colors_JV{3},...
+    'FaceAlpha', 0.3, 'EdgeColor', 'none')
+
+semilogy(x_values, log10(CV_solutions_ion{num}.u(T,:,2)), 'b-',...
+    x_values, log10(CV_solutions_ion{num}.u(T,:,3)), 'r-',...    
+    x_values, log10(CV_solutions_el{num}.u(T,:,2)), 'b--',...
+    x_values, log10(CV_solutions_el{num}.u(T,:,3)), 'r--')
+
+ semilogy(x_values, log10(CV_solutions_ion{num}.u(T,:,4)), 'color', colors_JV{2})
+ semilogy(x_values, 17*ones(1,length(x_values)), 'black','LineStyle', '--')
+
+hold off
+
+xlim([0, max(x_values)])
+ylim([9,19])
+ylabel('Carrier Population (cm^{-3})')
+xlabel('Device depth (nm)')
+
+subplot(2,1,2)
+T = OC_time_ion(num);
+
+hold on
+
+% Do background colours
+% Arguments of patch give the coordinates of the corners of the polygon to
+% be shaded
+patch('XData',[0 x_values(500) x_values(500) 0], 'YData',[-2 -2 lower_lim(num) lower_lim(num)], 'FaceColor', colors_JV{1},...
+    'FaceAlpha', 0.3, 'EdgeColor', 'none')
+patch('XData',[x_values(500) x_values(600) x_values(600) x_values(500)], 'YData',[-2 -2 lower_lim(num) lower_lim(num)], 'FaceColor', colors_JV{2},...
+    'FaceAlpha', 0.5, 'EdgeColor', 'none')
+patch('XData',[x_values(1100) x_values(1200) x_values(1200) x_values(1100)], 'YData',[-2 -2 lower_lim(num) lower_lim(num)], 'FaceColor', colors_JV{2},...
+    'FaceAlpha', 0.5, 'EdgeColor', 'none')
+patch('XData',[x_values(1200) x_values(end) x_values(end) x_values(1200)], 'YData',[-2 -2 lower_lim(num) lower_lim(num)],  'FaceColor', colors_JV{3},...
+    'FaceAlpha', 0.3, 'EdgeColor', 'none')
+
+semilogy(x_values, log10(CV_solutions_ion{num}.u(T,:,2)), 'b-',...
+         x_values, log10(CV_solutions_ion{num}.u(T,:,3)), 'r-')
+
+ semilogy(x_values, log10(CV_solutions_ion{num}.u(T,:,4)), 'color', colors_JV{2})
+ semilogy(x_values, 17*ones(1,length(x_values)), 'black','LineStyle', '--')
+
+T = OC_time_el(num);
+
+semilogy(x_values, log10(CV_solutions_el{num}.u(T,:,2)), 'b--',...
+         x_values, log10(CV_solutions_el{num}.u(T,:,3)), 'r--')
+
+hold off 
+
+xlim([0, max(x_values)])
+ylim([9,19])
+ylabel('Carrier Population (cm^{-3})')
+xlabel('Device depth (nm)')
+legend('electrons','holes','cations','','', 'NumColumns', 2, 'Location', 'northeast')

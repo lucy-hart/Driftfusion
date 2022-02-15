@@ -80,14 +80,11 @@ ylabel('PLQY (%)')
 ylim([1e-3, 0.3])
 legend({'Kloc-6', 'PCBM', 'ICBA'}, 'Location', 'northwest')
 
-%% Plot rad/non-rad ratio. Rad defined as the component NOT due to EL 
-%(wouldn't have this in a working solar cell - scanning JV by applying a votage, meaning some
-%charge injection???)
-%Plus sign for EL current as all the other currents are neagtive
+%% Plot rad/non-rad ratio. 
 figure(14)
 for n = 1:3
     semilogy(dfana.calcVapp(CV_solutions{n}), 100*(J_values(:,2,n))...
-               ./(J_values(:,3,n)+J_values(:,4,n)+J_values(:,6,n)))
+               ./(J_values(:,1,n)-J_values(:,6,n)+J_values(:,2,n)))
     hold on
 end
 xlim([0, 1.3])
