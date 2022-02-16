@@ -2,9 +2,9 @@ tic
 %% Define parameter space
 %Rows are variable parameter, columns are the ion concentrations
 
+IonConc_values = [1e15, 1e16, 1e17, 1e18, 1e19];
 %Use these vaues for surface recombination 
 sigma_values= logspace(-1,5,7);
-IonConc_values = [1e15, 1e16, 1e17, 1e19];
 Nsigma = length(sigma_values); 
 NIonConc = length(IonConc_values);
 params = cell(Nsigma, NIonConc);
