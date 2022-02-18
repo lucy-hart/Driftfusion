@@ -27,6 +27,7 @@ el_results = cell(N_y, NIonConc);
 
 %% Do (many) JV sweeps
 par=pc('Input_files/3_layer_test_symmetric.csv');
+%For SRH reset tau values in transport layers too
 for i=1:N_y
     for j=1:NIonConc
         disp(["tau_SRH = ", num2str(y_values(i)), " s"])
@@ -35,8 +36,8 @@ for i=1:N_y
         par.Ncat(:) = params{i,j}(2);
         par.Nani(:) = params{i,j}(2);
         %Remember to change these when you change y variable
-        par.taun(3) = params{i,j}(1);
-        par.taup(3) = params{i,j}(1);
+        par.taun([1,3,5]) = params{i,j}(1);
+        par.taup([1,3,5]) = params{i,j}(1);
         par = refresh_device(par);
 
         soleq{i,j} = equilibrate(par);
@@ -78,5 +79,5 @@ c.Label.String = 'log_{10}(PCE_{el} / PCE_{ion})';
 
 %% Save results and solutions
 
-filename = 'tld_symmetric_tSRH_vs_Ncat.mat';
+filename = 'tld_symmetric_tSRH_vs_Ncat_Vbi_0p2.mat';
 save(filename, 'el_results', 'ion_results', 'solCV_el', 'solCV_ion')
