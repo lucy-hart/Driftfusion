@@ -74,6 +74,7 @@ contourf(log10(IonConc_values), log10(y_values(1:end)), log10(PCE_ratio(1:end,:)
 xlabel('log_{10}(Mobile Cation Concentration /cm^{-3})')
 %ylabel('log_{10}(s_{surf} /cms^{-1})')
 ylabel('log_{10}(\tau_{SRH} /s)')
+ylim([-7,-4])
 c = colorbar;
 c.Label.String = 'log_{10}(PCE_{el} / PCE_{ion})';
 
