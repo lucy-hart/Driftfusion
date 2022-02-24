@@ -77,7 +77,7 @@ end
 xlim([0, 1.25])
 xlabel('Voltage (V)')
 ylabel('PLQY (%)')
-ylim([1e-3, 0.3])
+ylim([1e-4, 0.3])
 legend({'Kloc-6', 'PCBM', 'ICBA'}, 'Location', 'northwest')
 
 %% Plot rad/non-rad ratio. 

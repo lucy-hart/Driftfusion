@@ -19,7 +19,7 @@ end
 CV_solutions_el = cell(1,3);
 CV_solutions_ion = cell(1,3);
 for j = 1:3
-    CV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, 1.15, -0.3, 1.25, -0.3, 1e-3, 1, 311);
+    CV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, 1.15, -0.3, 1.3, -0.3, 1e-3, 1, 321);
     CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, 1.15, -0.3, 1.3, -0.3, 1e-3, 1, 321);
 end
 
@@ -39,7 +39,7 @@ end
 plot(v(:), zeros(1,length(v)), 'black', 'LineWidth', 1)
 hold off
 legend({'Kloc-6','', 'PCBM','', 'ICBA','',''}, 'Location', 'southwest')
-xlim([0, 1.25])
+xlim([0, 1.3])
 ylim([0, 0.025])
 xlabel('Voltage(V)')
 ylabel('Current Density (Acm^{-2})')
@@ -88,7 +88,7 @@ for n = 1:6
 end
 plot(V(1:num_values), zeros(1,num_values), 'black', 'LineWidth', 1)
 hold off
-xlim([0, 1.25])
+xlim([0, 1.3])
 xlabel('Voltage (V)')
 ylim([-0.03, 0.01])
 ylabel('Current Density (Acm^{-2})')
