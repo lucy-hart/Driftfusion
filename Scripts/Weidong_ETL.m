@@ -19,8 +19,8 @@ end
 CV_solutions_el = cell(1,3);
 CV_solutions_ion = cell(1,3);
 for j = 1:3
-    CV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, 1.15, -0.3, 1.3, -0.3, 1e-3, 1, 321);
-    CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, 1.15, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+    CV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, 1.2, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+    CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, 1.2, -0.3, 1.3, -0.3, 1e-3, 1, 321);
 end
 
 %% Plot JVs
@@ -48,15 +48,15 @@ ylabel('Current Density (Acm^{-2})')
 %Columns in J_values are J_gen, J_rad, J_srh, J_vsr and J_ext
 %Don't take btb from back layer as unlikely to escape the device, parasitic
 %absorption of metal back contact
-CV_solutions = CV_solutions_ion;
 
-num_values = length(CV_solutions{1}.t);
+num_values = length(CV_solutions_ion{1}.t);
 num_stop = sum(CV_solutions_ion{1}.par.layer_points(1:3));
-J_values = zeros(num_values, 7,3);
-e = -CV_solutions{1}.par.e;
+J_values = zeros(num_values,7,3);
+J_values_el = zeros(num_values,2,3);
+e = -CV_solutions_ion{1}.par.e;
 
 for k=1:3
-    CVsol = CV_solutions{k};
+    CVsol = CV_solutions_ion{k};
     loss_currents = dfana.calcr(CVsol,'sub');
     x = CVsol.par.x_sub;
     gxt = dfana.calcg(CVsol);
@@ -71,6 +71,17 @@ for k=1:3
     J_values(:,6,k) = J.tot(:,1);
     
 end    
+
+for k=1:3
+    CVsol = CV_solutions_el{k};
+    loss_currents = dfana.calcr(CVsol,'sub');
+    x = CVsol.par.x_sub;
+    gxt = dfana.calcg(CVsol);
+
+    J_values(:,1,k) = e*trapz(x, gxt(1,:))';
+    J_values(:,2,k) = e*trapz(x(1:num_stop), loss_currents.btb(:,1:num_stop), 2)';
+    
+end   
 %% Plot contributons to the current
 %J_rad not corrected for EL - see EL_Measurements
 figure(3)
@@ -94,6 +105,18 @@ ylim([-0.03, 0.01])
 ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{interface}', 'J_{contact}','J_{ext}'}, 'Location', 'bestoutside')
 
+%% Plot PLQY results
+figure(4)
+for i = 1:3
+    semilogy(V(1:161), 100*(J_values(1:161,2,i))./J_values(1:161,1,i), 'color', colors_JV{i})   
+    semilogy(V(1:161), 100*(J_values_el(1:161,2,i))./J_values_el(1:161,1,i), '-.', 'color', colors_JV{i})     
+    hold on
+end
+xlim([0, 1.25])
+xlabel('Voltage (V)')
+ylabel('PLQY (%)')
+ylim([1e-4, 0.3])
+legend({'Kloc-6','', 'PCBM','', 'ICBA',''}, 'Location', 'northwest')
 
 
 

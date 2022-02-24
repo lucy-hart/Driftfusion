@@ -25,7 +25,7 @@ OC_time = find(abs(Voc-Vapp) == min(abs(Voc-Vapp)),1);
 [~, ~, Efn, Efp] = dfana.calcEnergies(CV_sol_ion);
 QFLS_OC = trapz(x(num_start:num_stop), Efn(OC_time, num_start:num_stop)-Efp(OC_time,num_start:num_stop))/d;
   
-%% Find (and print)'Figure of Merit'
+%% Find 'Figure of Merit'
 
 Delta_mu = (QFLS_OC-QFLS_SC)*1000;
 QFLS_Loss = (QFLS_OC-Voc)*1000;
