@@ -84,7 +84,7 @@ c.Label.String = 'log_{10}(PCE_{el} / PCE_{ion})';
 V_ratio = zeros(Nsigma,NEbi-1);
 for i = 1:Nsigma
     for j = 2:NEbi
-        V_ratio(i,j) = ion_results{i,j}.Voc_f/(2*Ebi_values(j));
+        V_ratio(i,j-1) = ion_results{i,j}.Voc_f/(2*Ebi_values(j));
     end
 end
 figure(2)

@@ -68,14 +68,9 @@ end
 
 stats.Voc_f = interp1(J_f, V_f, 0, 'linear');
 if isnan(stats.Voc_f)
-    try 
-        zero_index = find(J_f <1e-6 , 1);
-        stats.Voc_f = V_f(zero_index);
-    catch
-        warning('No Voc available- try increasing applied voltage range')
-        stats.Voc_f = 0;
-    end
-end
+            warning('No Voc available- try increasing applied voltage range')
+            stats.Voc_f = 0;
+end 
 
 % Incident optical power
 Pin = dfana.calcPin(sol);
@@ -110,14 +105,9 @@ end
 
 stats.Voc_r = interp1(J_r, V_r, 0, 'linear');
 if isnan(stats.Voc_r)
-    try 
-        zero_index = find(J_r < 1e-6, 1);
-        stats.Voc_r = V_r(zero_index);
-    catch
-        warning('No Voc available- try increasing applied voltage range')
-        stats.Voc_r = 0;
-    end
-end
+            warning('No Voc available- try increasing applied voltage range')
+            stats.Voc_r = 0;
+end 
 
 A_r = 0; %Hysteresis Factor
 if stats.Jsc_r ~= 0 && stats.Voc_r ~= 0

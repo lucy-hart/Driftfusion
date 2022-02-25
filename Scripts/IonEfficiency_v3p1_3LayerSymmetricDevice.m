@@ -30,11 +30,11 @@ el_results = cell(N_y, NIonConc);
 
 %% Do (many) JV sweeps
 par=pc('Input_files/3_layer_test_symmetric.csv');
-%For SRH reset tau values in transport layers too
-for i=1:N_y
+
+for i=4:4
     for j=1:NIonConc
-        disp(["Ion Concentration = ", num2str(IonConc_values(i)), " cm-3"])
-        disp(["Built in potential, Vbi = ", num2str(2*y_values(j)), " V"])
+        disp(["Ion Concentration = ", num2str(IonConc_values(j)), " cm-3"])
+        disp(["Built in potential, Vbi = ", num2str(2*y_values(i)), " V"])
         par.Ncat(:) = params{i,j}(2);
         par.Nani(:) = params{i,j}(2);
         %Remember to change these when you change y variable
@@ -44,12 +44,12 @@ for i=1:N_y
 
         soleq{i,j} = equilibrate(par);
         try
-            if params{i,j}(1) <= 0.35
-                solCV_ion{i, j} = doCV(soleq{i, j}.ion, 1, -0.1, 1, -0.1, 1e-4, 1, 241);
-                solCV_el{i, j} = doCV(soleq{i, j}.el, 1, -0.1, 1, -0.1, 1e-4, 1, 241);
-            elseif params{i,j}(1) > 0.35
-                solCV_ion{i, j} = doCV(soleq{i, j}.ion, 1, -0.2, 1.3, -0.2, 1e-4, 1, 241);
-                solCV_el{i, j} = doCV(soleq{i, j}.el, 1, -0.2, 1.3, -0.2, 1e-4, 1, 241);
+            if params{i,j}(1) < 0.1
+                solCV_ion{i, j} = doCV(soleq{i, j}.ion, 1, -0.1, 1.2, -0.1, 1e-4, 1, 241);
+                solCV_el{i, j} = doCV(soleq{i, j}.el, 1, -0.1, 1.2, -0.1, 1e-4, 1, 241);
+            elseif params{i,j}(1) >= 0.1
+                solCV_ion{i, j} = doCV(soleq{i, j}.ion, 1, -0.2, 1.5, -0.2, 1e-4, 1, 241);
+                solCV_el{i, j} = doCV(soleq{i, j}.el, 1, -0.2, 1.5, -0.2, 1e-4, 1, 241);
             end
             error_log(i,j) = 0;
             ion_results{i,j} = CVstats(solCV_ion{i, j});
@@ -77,14 +77,27 @@ end
 
 %% Plot results 
 figure(1)
-contourf(log10(IonConc_values), 2*y_values, log10(PCE_ratio(1:end,:)), 25, 'LineWidth', 0.1)
+contourf(log10(IonConc_values), 2*y_values, (PCE_ratio(1:end,:)), 25, 'LineWidth', 0.1)
 xlabel('log_{10}(Mobile Cation Concentration /cm^{-3})')
-%ylabel('log_{10}(s_{surf} /cms^{-1})')
-ylabel('log_{10}(V_{BI} /V)')
-ylim([-7,-4])
+ylabel('V_{BI}(V)')
+ylim([0,1.2])
 c = colorbar;
-c.Label.String = 'log_{10}(PCE_{el} / PCE_{ion})';
+c.Label.String = 'PCE_{el} / PCE_{ion}';
 
+%% Voc vs V_bi plot
+V_ratio = zeros(N_y-1,NIonConc);
+for i = 1:NIonConc
+    for j = 1:N_y-1
+        V_ratio(j,i) = ion_results{j+1,i}.Voc_f/(2*y_values(j+1));
+    end
+end
+figure(2)
+contourf(log10(IonConc_values), 2*y_values(2:end), log10(V_ratio), 12, 'LineWidth', 1)
+ylabel('V_{BI} (V)')
+%ylim([0, 1.2])
+xlabel('log_{10}(Mobile Cation Concentration /cm^{-3})')
+c = colorbar;
+c.Label.String = 'log_{10}(V_{OC,ion} / V_{BI})';
 %% Save results and solutions
 
 filename = 'tld_symmetric_Vbi_vs_Ncat_DopedTLs.mat';
