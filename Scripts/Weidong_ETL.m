@@ -40,7 +40,7 @@ plot(v(:), zeros(1,length(v)), 'black', 'LineWidth', 1)
 hold off
 legend({'Kloc-6','', 'PCBM','', 'ICBA','',''}, 'Location', 'southwest')
 xlim([0, 1.3])
-ylim([0, 0.025])
+ylim([0, 0.03])
 xlabel('Voltage(V)')
 ylabel('Current Density (Acm^{-2})')
 
@@ -78,8 +78,8 @@ for k=1:3
     x = CVsol.par.x_sub;
     gxt = dfana.calcg(CVsol);
 
-    J_values(:,1,k) = e*trapz(x, gxt(1,:))';
-    J_values(:,2,k) = e*trapz(x(1:num_stop), loss_currents.btb(:,1:num_stop), 2)';
+    J_values_el(:,1,k) = e*trapz(x, gxt(1,:))';
+    J_values_el(:,2,k) = e*trapz(x(1:num_stop), loss_currents.btb(:,1:num_stop), 2)';
     
 end   
 %% Plot contributons to the current
@@ -88,7 +88,7 @@ figure(3)
 num=3;
 line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560]...
                 [0 0.4470 0.7410], [0.3010 0.7450 0.9330], [0.4660 0.6740 0.1880]};
-V = dfana.calcVapp(CV_solutions{1});
+V = dfana.calcVapp(CV_solutions_ion{1});
 for n = 1:6
     if n ==2 
     plot(V(:), J_values(:,n,num)*100, 'color', line_colour{n})
@@ -108,11 +108,13 @@ legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{interface}', 'J_{contact}','J_{
 %% Plot PLQY results
 figure(4)
 for i = 1:3
-    semilogy(V(1:161), 100*(J_values(1:161,2,i))./J_values(1:161,1,i), 'color', colors_JV{i})   
+    semilogy(V(1:161), 100*(J_values(1:161,2,i))./J_values(1:161,1,i), 'color', colors_JV{i}) 
+    hold on 
     semilogy(V(1:161), 100*(J_values_el(1:161,2,i))./J_values_el(1:161,1,i), '-.', 'color', colors_JV{i})     
     hold on
 end
-xlim([0, 1.25])
+hold off
+xlim([0, 1.3])
 xlabel('Voltage (V)')
 ylabel('PLQY (%)')
 ylim([1e-4, 0.3])
