@@ -31,7 +31,7 @@ el_results = cell(N_y, NIonConc);
 %% Do (many) JV sweeps
 par=pc('Input_files/3_layer_test_symmetric.csv');
 
-for i=4:4
+for i=1:N_y
     for j=1:NIonConc
         disp(["Ion Concentration = ", num2str(IonConc_values(j)), " cm-3"])
         disp(["Built in potential, Vbi = ", num2str(2*y_values(i)), " V"])
@@ -100,5 +100,5 @@ c = colorbar;
 c.Label.String = 'log_{10}(V_{OC,ion} / V_{BI})';
 %% Save results and solutions
 
-filename = 'tld_symmetric_Vbi_vs_Ncat_DopedTLs.mat';
+filename = 'tld_symmetric_Vbi_vs_Ncat_DopedTLs_vsr.mat';
 save(filename, 'el_results', 'ion_results', 'solCV_el', 'solCV_ion')
