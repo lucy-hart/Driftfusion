@@ -83,7 +83,7 @@ legend({'Kloc-6', 'PCBM', 'ICBA'}, 'Location', 'northwest')
 %% Plot rad/non-rad ratio. 
 figure(14)
 for n = 1:3
-    semilogy(dfana.calcVapp(CV_solutions{n}), 100*(J_values(:,2,n))...
+    semilogy(dfana.calcVapp(CV_solutions_ion{n}), 100*(J_values(:,2,n))...
                ./(J_values(:,1,n)-J_values(:,6,n)+J_values(:,2,n)))
     hold on
 end

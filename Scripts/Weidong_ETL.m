@@ -6,27 +6,28 @@
 par_kloc6 = pc('Input_files/PTAA_MAPI_Kloc6_v2.csv');
 par_pcbm = pc('Input_files/PTAA_MAPI_PCBM_v2.csv');
 par_icba = pc('Input_files/PTAA_MAPI_ICBA_v2.csv');
+par_iph = pc('Input_files/PTAA_MAPI_IPH_v2.csv');
 
-devices = {par_kloc6, par_pcbm, par_icba};
+devices = {par_kloc6, par_pcbm, par_icba, par_iph};
 
 %% Find eqm solutions 
-eqm_solutions_dark = cell(1,3);
-for i = 1:3
+eqm_solutions_dark = cell(1,4);
+for i = 1:4
     eqm_solutions_dark{i} = equilibrate(devices{i});
 end
 
 %% Perform CV scans
-CV_solutions_el = cell(1,3);
-CV_solutions_ion = cell(1,3);
-for j = 1:3
-    CV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, 1.2, -0.3, 1.3, -0.3, 1e-3, 1, 321);
-    CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, 1.2, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+CV_solutions_el = cell(1,4);
+CV_solutions_ion = cell(1,4);
+for j = 1:4
+    CV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, 1.15, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+    CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, 1.15, -0.3, 1.3, -0.3, 1e-3, 1, 321);
 end
 
 %% Plot JVs
 figure(1)
-colors_JV = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880],[0 0.4470 0.7410]};
-for m=1:3
+colors_JV = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880],[0 0.4470 0.7410],[0.9290 0.6940 0.1250]};
+for m=1:4
     v = dfana.calcVapp(CV_solutions_ion{m});
     v_el = dfana.calcVapp(CV_solutions_el{m});
     j = -dfana.calcJ(CV_solutions_ion{m}).tot(:,1);
@@ -38,9 +39,9 @@ for m=1:3
 end
 plot(v(:), zeros(1,length(v)), 'black', 'LineWidth', 1)
 hold off
-legend({'Kloc-6','', 'PCBM','', 'ICBA','',''}, 'Location', 'southwest')
-xlim([0, 1.3])
-ylim([0, 0.03])
+legend({'Kloc-6','', 'PCBM','', 'ICBA','','IPH','',''}, 'Location', 'southwest')
+xlim([0, 1.2])
+ylim([0, 0.027])
 xlabel('Voltage(V)')
 ylabel('Current Density (Acm^{-2})')
 
@@ -51,11 +52,11 @@ ylabel('Current Density (Acm^{-2})')
 
 num_values = length(CV_solutions_ion{1}.t);
 num_stop = sum(CV_solutions_ion{1}.par.layer_points(1:3));
-J_values = zeros(num_values,7,3);
-J_values_el = zeros(num_values,2,3);
+J_values = zeros(num_values,7,4);
+J_values_el = zeros(num_values,2,4);
 e = -CV_solutions_ion{1}.par.e;
 
-for k=1:3
+for k=1:4
     CVsol = CV_solutions_ion{k};
     loss_currents = dfana.calcr(CVsol,'sub');
     x = CVsol.par.x_sub;
@@ -72,7 +73,7 @@ for k=1:3
     
 end    
 
-for k=1:3
+for k=1:4
     CVsol = CV_solutions_el{k};
     loss_currents = dfana.calcr(CVsol,'sub');
     x = CVsol.par.x_sub;
@@ -107,7 +108,7 @@ legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{interface}', 'J_{contact}','J_{
 
 %% Plot PLQY results
 figure(4)
-for i = 1:3
+for i = 1:4
     semilogy(V(1:161), 100*(J_values(1:161,2,i))./J_values(1:161,1,i), 'color', colors_JV{i}) 
     hold on 
     semilogy(V(1:161), 100*(J_values_el(1:161,2,i))./J_values_el(1:161,1,i), '-.', 'color', colors_JV{i})     
@@ -117,8 +118,8 @@ hold off
 xlim([0, 1.3])
 xlabel('Voltage (V)')
 ylabel('PLQY (%)')
-ylim([1e-4, 0.3])
-legend({'Kloc-6','', 'PCBM','', 'ICBA',''}, 'Location', 'northwest')
+ylim([1e-5, 0.3])
+legend({'Kloc-6','', 'PCBM','', 'ICBA','','IPH',''}, 'Location', 'northwest')
 
 
 
