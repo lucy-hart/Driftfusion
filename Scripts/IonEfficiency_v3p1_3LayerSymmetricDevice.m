@@ -31,7 +31,9 @@ el_results = cell(N_y, NIonConc);
 %% Do (many) JV sweeps
 par=pc('Input_files/3_layer_test_symmetric.csv');
 
-for i=1:N_y
+%Reduce voltage limits for undoped TLs (cases with V_BI <= 0.1 only need to
+%go up to 0.4 V)
+for i=1:4
     for j=1:NIonConc
         disp(["Ion Concentration = ", num2str(IonConc_values(j)), " cm-3"])
         disp(["Built in potential, Vbi = ", num2str(2*y_values(i)), " V"])
@@ -44,12 +46,12 @@ for i=1:N_y
 
         soleq{i,j} = equilibrate(par);
         try
-            if params{i,j}(1) < 0.1
-                solCV_ion{i, j} = doCV(soleq{i, j}.ion, 1, -0.1, 1.2, -0.1, 1e-4, 1, 241);
-                solCV_el{i, j} = doCV(soleq{i, j}.el, 1, -0.1, 1.2, -0.1, 1e-4, 1, 241);
-            elseif params{i,j}(1) >= 0.1
-                solCV_ion{i, j} = doCV(soleq{i, j}.ion, 1, -0.2, 1.5, -0.2, 1e-4, 1, 241);
-                solCV_el{i, j} = doCV(soleq{i, j}.el, 1, -0.2, 1.5, -0.2, 1e-4, 1, 241);
+            if params{i,j}(1) <= 0.1
+                solCV_ion{i, j} = doCV(soleq{i, j}.ion, 1, -0.2, 0.4, -0.2, 1e-4, 1, 263);
+                solCV_el{i, j} = doCV(soleq{i, j}.el, 1, -0.2, 0.4, -0.2, 1e-4, 1, 263);
+            elseif params{i,j}(1) > 0.1
+                solCV_ion{i, j} = doCV(soleq{i, j}.ion, 1, -0.2, 1.2, -0.2, 1e-4, 1, 241);
+                solCV_el{i, j} = doCV(soleq{i, j}.el, 1, -0.2, 1.2, -0.2, 1e-4, 1, 241);
             end
             error_log(i,j) = 0;
             ion_results{i,j} = CVstats(solCV_ion{i, j});
@@ -77,7 +79,7 @@ end
 
 %% Plot results 
 figure(1)
-contourf(log10(IonConc_values), 2*y_values, (PCE_ratio(1:end,:)), 25, 'LineWidth', 0.1)
+contourf(log10(IonConc_values), 2*y_values, (PCE_ratio), 25, 'LineWidth', 0.1)
 xlabel('log_{10}(Mobile Cation Concentration /cm^{-3})')
 ylabel('V_{BI}(V)')
 ylim([0,1.2])
@@ -98,7 +100,42 @@ ylabel('V_{BI} (V)')
 xlabel('log_{10}(Mobile Cation Concentration /cm^{-3})')
 c = colorbar;
 c.Label.String = 'log_{10}(V_{OC,ion} / V_{BI})';
+
+%% Vapp vs VBI VS Jsc
+Vapp = dfana.calcVapp(solCV_ion{5,1});
+Vapp_lowVBI = dfana.calcVapp(solCV_ion{1,1});
+
+voltage_matrix = ones(10,1)*Vapp(18:104);
+voltage_matrix_lowVBI = ones(4,1)*Vapp_lowVBI(44:130);
+voltage_matrix_plot = [voltage_matrix_lowVBI; voltage_matrix];
+
+result_matrix = zeros(N_y, length(voltage_matrix(1,:)));
+for i = 1:N_y
+    if i <= 4
+        result_matrix(i,:) = dfana.calcJ(solCV_ion{i,4}).tot(44:130,1);
+    elseif i > 4
+        result_matrix(i,:) = dfana.calcJ(solCV_ion{i,4}).tot(18:104,1);
+    end
+end
+%%
+figure(4)
+[M,h] = contourf(2*y_values(2:end)'*ones(1,87), ...
+    voltage_matrix_plot(2:end,:), ...
+    result_matrix(2:end,:)*1000, ...
+    50);
+hold on
+plot(2*y_values(1:end), 2*y_values(1:end), 'k--')
+patch([0.02,0.3,0.3,0.02],[0.39,0.39,1.1,1.1],'white', 'EdgeColor', 'none')
+hold off
+h.LineStyle = 'none';
+xlabel('V_{BI} (V)')
+ylabel('Applied Volage (V)')
+ylim([0,1])
+xlim([0.02,1.2])
+c = colorbar;
+c.Label.String = 'Current Density (mAcm^{-3})';
+
 %% Save results and solutions
 
-filename = 'tld_symmetric_Vbi_vs_Ncat_DopedTLs_vsr.mat';
+filename = 'tld_symmetric_Vbi_vs_Ncat_UndopedTLs_vsr.mat';
 save(filename, 'el_results', 'ion_results', 'solCV_el', 'solCV_ion')
