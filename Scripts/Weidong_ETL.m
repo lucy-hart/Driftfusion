@@ -7,7 +7,7 @@ num_devices = 3;
 par_kloc6 = pc('Input_files/PTAA_MAPI_Kloc6_v2.csv');
 par_pcbm = pc('Input_files/PTAA_MAPI_PCBM_v2.csv');
 par_icba = pc('Input_files/PTAA_MAPI_ICBA_v2.csv');
-par_iph = pc('Input_files/PTAA_MAPI_IPH_v2.csv');
+par_iph = pc('Input_files/PTAA_MAPI_IPH_v3.csv');
 
 if num_devices == 4
     devices = {par_kloc6, par_pcbm, par_icba, par_iph};
@@ -30,7 +30,7 @@ for j = 1:num_devices
 end
 
 %% Plot JVs
-figure(1)
+figure('Name', 'JVPlot', 'Position', [100 100 1250 1750])
 colors_JV = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880],[0 0.4470 0.7410],[0.9290 0.6940 0.1250]};
 for m=1:num_devices
     v = dfana.calcVapp(CV_solutions_ion{m});
@@ -53,7 +53,7 @@ xlim([0, 1.2])
 ylim([0, 0.027])
 xlabel('Voltage(V)')
 ylabel('Current Density (Acm^{-2})')
-
+ax1 = gca;
 %% Break down contributions to the current
 %Columns in J_values are J_gen, J_rad, J_srh, J_vsr and J_ext
 %Don't take btb from back layer as unlikely to escape the device, parasitic
@@ -92,10 +92,11 @@ for k=1:num_devices
     J_values_el(:,2,k) = e*trapz(x(1:num_stop), loss_currents.btb(:,1:num_stop), 2)';
     
 end   
+
 %% Plot contributons to the current
 %J_rad not corrected for EL - see EL_Measurements
 figure(3)
-num=2;
+num=3;
 line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560]...
                 [0 0.4470 0.7410], [0.3010 0.7450 0.9330], [0.4660 0.6740 0.1880]};
 V = dfana.calcVapp(CV_solutions_ion{1});
@@ -116,7 +117,7 @@ ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{interface}', 'J_{contact}','J_{ext}'}, 'Location', 'bestoutside')
 
 %% Plot PLQY results
-figure(4)
+figure('Name', 'PLQYPlot', 'Position', [100 100 1250 1750])
 for i = 1:num_devices
     semilogy(V(1:161), 100*(J_values(1:161,2,i))./J_values(1:161,1,i), 'color', colors_JV{i}) 
     hold on 
@@ -133,8 +134,18 @@ if num_devices == 4
 elseif num_devices == 3
     legend({'Kloc-6','', 'PCBM','', 'ICBA',''}, 'Location', 'northwest')
 end
+ax2=gca;
 
+%% Save Plots at 300 dpi
 
+exportgraphics(ax1, ...
+    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Simulations\v2\JV_curves_el_and_ion_300dpi.png', ...
+    'Resolution', 300)
+
+%%
+exportgraphics(ax2, ...
+    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Simulations\v2\PLQY_el_and_ion_300dpi.png', ...
+    'Resolution', 300)
 
 
 

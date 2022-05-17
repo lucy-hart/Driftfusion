@@ -1,8 +1,7 @@
-%Kloc-6 FF & QFLS
-par = pc('Input_files/PTAA_MAPI_Kloc6_v2.csv');
-%par = pc('Input_files/PTAA_MAPI_PCBM_v2.csv');
-%par = pc('Input_files/PTAA_MAPI_IPH_v2.csv');
-%par = pc('Input_files/PTAA_MAPI_ICBA_v2.csv');
+%par = pc('Input_files/PTAA_MAPI_Kloc6_v3.csv');
+%par = pc('Input_files/PTAA_MAPI_PCBM_v3.csv');
+%par = pc('Input_files/PTAA_MAPI_IPH_v3.csv');
+par = pc('Input_files/PTAA_MAPI_ICBA_v3.csv');
 
 eqm_QJV = equilibrate(par);
 CV_sol_ion = doCV(eqm_QJV.ion, 1.1, -0.3, 1.3, -0.3, 1e-3, 1, 321);

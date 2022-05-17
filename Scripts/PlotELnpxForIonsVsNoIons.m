@@ -113,10 +113,10 @@ legend('','','','','electrons', 'holes', '', '', 'cations','','', 'Location', 'b
 
 %% Plot el vs ion populations at OC vs SC
 
-num = 1;
+num = 3;
 T = 31;
 
-figure(7)
+figure('Name', 'Carrier Densities', 'Position', [100 100 1000 2000])
 
 subplot(3,1,1)
 hold on
@@ -210,3 +210,8 @@ ylabel('Cation Population (cm^{-3})')
 xlabel('Device depth (nm)')
 legend('','','','','Short Circuit','Open Circuit', 'NumColumns', 1, 'Location', 'northeast')
 
+fig = gcf;
+
+exportgraphics(fig, ...
+    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Simulations\v2\Carrier_Distributions_ICBA_el_and_ion_300dpi.png', ...
+    'Resolution', 300)
