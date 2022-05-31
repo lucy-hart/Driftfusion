@@ -3,7 +3,7 @@
 % SC conditions for forward scan are at 31st timepoint, and 291st for reverse 
 % OC at 106, 137 and 183 for Kloc-6, PCBM and ICBA respectively
 
-num = 3;
+num = 1;
 %T = 31;
 T = OC_time_ion(num);
 lower_lim=[-7.5, -7.5, -7.5];
@@ -113,7 +113,7 @@ legend('','','','','electrons', 'holes', '', '', 'cations','','', 'Location', 'b
 
 %% Plot el vs ion populations at OC vs SC
 
-num = 3;
+num = 1;
 T = 31;
 
 figure('Name', 'Carrier Densities', 'Position', [100 100 1000 2000])
@@ -138,11 +138,11 @@ semilogy(x_values, log10(CV_solutions_ion{num}.u(T,:,2)), 'b-',...
     x_values, log10(CV_solutions_el{num}.u(T,:,2)), 'b--',...
     x_values, log10(CV_solutions_el{num}.u(T,:,3)), 'r--')
 
-ylim([9,19])
+ylim([9,20])
 ylabel('Carrier Density (cm^{-3})')
 xlim([0, max(x_values)])
 xlabel('Device depth (nm)')
-legend('','','','','electrons','holes', 'NumColumns', 1, 'Location', 'northeast')
+legend('','','','','electrons','holes', 'NumColumns', 1, 'Position', [0.7,0.85,0.05,0.03])
 
 hold off 
 
@@ -154,13 +154,13 @@ hold on
 % Do background colours
 % Arguments of patch give the coordinates of the corners of the polygon to
 % be shaded
-patch('XData',[0 x_values(500) x_values(500) 0], 'YData',[19 19 9 9], 'FaceColor', colors_JV{1},...
+patch('XData',[0 x_values(500) x_values(500) 0], 'YData',[30 30 2 2], 'FaceColor', colors_JV{1},...
     'FaceAlpha', 0.3, 'EdgeColor', 'none')
-patch('XData',[x_values(500) x_values(600) x_values(600) x_values(500)], 'YData',[19 19 9 9], 'FaceColor', colors_JV{2},...
+patch('XData',[x_values(500) x_values(600) x_values(600) x_values(500)], 'YData',[30 30 2 2], 'FaceColor', colors_JV{2},...
     'FaceAlpha', 0.5, 'EdgeColor', 'none')
-patch('XData',[x_values(1100) x_values(1200) x_values(1200) x_values(1100)], 'YData',[19 19 9 9], 'FaceColor', colors_JV{2},...
+patch('XData',[x_values(1100) x_values(1200) x_values(1200) x_values(1100)], 'YData',[30 30 2 2], 'FaceColor', colors_JV{2},...
     'FaceAlpha', 0.5, 'EdgeColor', 'none')
-patch('XData',[x_values(1200) x_values(end) x_values(end) x_values(1200)], 'YData',[19 19 9 9],  'FaceColor', colors_JV{3},...
+patch('XData',[x_values(1200) x_values(end) x_values(end) x_values(1200)], 'YData',[30 30 2 2],  'FaceColor', colors_JV{3},...
     'FaceAlpha', 0.3, 'EdgeColor', 'none')
 
 semilogy(x_values, log10(CV_solutions_ion{num}.u(T,:,2)), 'b-',...
@@ -174,13 +174,13 @@ semilogy(x_values, log10(CV_solutions_el{num}.u(T,:,2)), 'b--',...
 hold off 
 
 xlim([0, max(x_values)])
-ylim([9,19])
+ylim([9,20])
 ylabel('Carrier Density (cm^{-3})')
 xlabel('Device depth (nm)')
 
 subplot(3,1,3)
 T = 31;
-upper_lim_ion = [2e18, 2.5e18, 2.5e18];
+upper_lim_ion = [1.5e18, 1e18, 1.5e18];
 
 hold on
 
@@ -205,13 +205,14 @@ T = OC_time_ion(num);
 hold off 
 
 xlim([0, max(x_values)])
-ylim([upper_lim_ion(num)/10, upper_lim_ion(num)])
+ylim([1e10, upper_lim_ion(num)])
 ylabel('Cation Population (cm^{-3})')
 xlabel('Device depth (nm)')
-legend('','','','','Short Circuit','Open Circuit', 'NumColumns', 1, 'Location', 'northeast')
+legend('','','','','Short Circuit','Open Circuit', 'NumColumns', 1, 'Position', [0.7,0.25,0.05,0.03])
 
 fig = gcf;
 
-exportgraphics(fig, ...
-    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Simulations\v2\Carrier_Distributions_ICBA_el_and_ion_300dpi.png', ...
-    'Resolution', 300)
+%%
+%exportgraphics(fig, ...
+ %   'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Simulations\v2\Carrier_Distributions_PCBM_el_and_ion_BIG.png', ...
+  %  'Resolution', 300)

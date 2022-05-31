@@ -4,15 +4,18 @@
 num_start = sum(CV_solutions_ion{1}.par.layer_points(1:2))+1;
 num_stop = num_start + CV_solutions_ion{1}.par.layer_points(3)-1;
 num_points = length(CV_solutions_ion{1}.t);
-x = CV_solutions_ion{1}.par.x_sub;
+x = cell(1, num_devices);
+for i = 1:num_devices
+    x{i} = CV_solutions_ion{i}.par.x_sub;
+end
 d = CV_solutions_ion{1}.par.d(3);
 QFLS_ion = zeros(num_points,num_devices);
 QFLS_el = zeros(num_points,num_devices);
 for y=1:num_devices
     [Ecb_ion, Evb_ion, Efn_ion, Efp_ion] = dfana.calcEnergies(CV_solutions_ion{y});
     [Ecb_el, Evb_el, Efn_el, Efp_el] = dfana.calcEnergies(CV_solutions_el{y});
-    QFLS_ion(:,y) = trapz(x(num_start:num_stop), Efn_ion(:, num_start:num_stop)-Efp_ion(:,num_start:num_stop),2)/d;
-    QFLS_el(:,y) = trapz(x(num_start:num_stop), Efn_el(:,num_start:num_stop)-Efp_el(:,num_start:num_stop),2)/d;
+    QFLS_ion(:,y) = trapz(x{y}(num_start:num_stop), Efn_ion(:, num_start:num_stop)-Efp_ion(:,num_start:num_stop),2)/d;
+    QFLS_el(:,y) = trapz(x{y}(num_start:num_stop), Efn_el(:,num_start:num_stop)-Efp_el(:,num_start:num_stop),2)/d;
 end
 
 QFLS_SC_ion = QFLS_ion(31,:);

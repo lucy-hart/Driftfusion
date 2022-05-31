@@ -4,9 +4,9 @@
 %% Read in data files 
 num_devices = 3;
 
-par_kloc6 = pc('Input_files/PTAA_MAPI_Kloc6_v2.csv');
-par_pcbm = pc('Input_files/PTAA_MAPI_PCBM_v2.csv');
-par_icba = pc('Input_files/PTAA_MAPI_ICBA_v2.csv');
+par_kloc6 = pc('Input_files/PTAA_MAPI_Kloc6_v3.csv');
+par_pcbm = pc('Input_files/PTAA_MAPI_PCBM_v3.csv');
+par_icba = pc('Input_files/PTAA_MAPI_ICBA_v3.csv');
 par_iph = pc('Input_files/PTAA_MAPI_IPH_v3.csv');
 
 if num_devices == 4
@@ -25,8 +25,17 @@ end
 CV_solutions_el = cell(1,num_devices);
 CV_solutions_ion = cell(1,num_devices);
 for j = 1:num_devices
-    CV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, 1.15, -0.3, 1.3, -0.3, 1e-3, 1, 321);
-    CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, 1.15, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+    if j == 3
+        CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, 1.1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+        dodgy_ICBA_fudge = devices{j};
+        dodgy_ICBA_fudge.Phi_right = -3.9;
+        dodgy_ICBA_fudge = refresh_device(dodgy_ICBA_fudge);
+        fudge_eqm = equilibrate(dodgy_ICBA_fudge);
+        CV_solutions_el{j} = doCV(fudge_eqm.el, 1.1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+    else
+        CV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, 1.1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+        CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, 1.1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+    end
 end
 
 %% Plot JVs
@@ -95,7 +104,7 @@ end
 
 %% Plot contributons to the current
 %J_rad not corrected for EL - see EL_Measurements
-figure(3)
+figure(333)
 num=3;
 line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560]...
                 [0 0.4470 0.7410], [0.3010 0.7450 0.9330], [0.4660 0.6740 0.1880]};
@@ -128,7 +137,7 @@ hold off
 xlim([0, 1.3])
 xlabel('Voltage (V)')
 ylabel('PLQY (%)')
-ylim([1e-5, 0.3])
+ylim([4e-5, 0.3])
 if num_devices == 4
     legend({'Kloc-6','', 'PCBM','', 'ICBA','','IPH',''}, 'Location', 'northwest')
 elseif num_devices == 3
@@ -137,15 +146,11 @@ end
 ax2=gca;
 
 %% Save Plots at 300 dpi
+%exportgraphics(ax2, ...
+%    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Simulations\v3\PLQY_curves_el_and_ion_300dpi.png', ...
+%    'Resolution', 300)
 
-exportgraphics(ax1, ...
-    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Simulations\v2\JV_curves_el_and_ion_300dpi.png', ...
-    'Resolution', 300)
 
-%%
-exportgraphics(ax2, ...
-    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Simulations\v2\PLQY_el_and_ion_300dpi.png', ...
-    'Resolution', 300)
 
 
 
