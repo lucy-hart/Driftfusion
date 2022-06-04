@@ -1,6 +1,6 @@
-par = pc('Input_files/PTAA_MAPI_Kloc6_v3.csv');
+%par = pc('Input_files/PTAA_MAPI_Kloc6_v3.csv');
 %par = pc('Input_files/PTAA_MAPI_PCBM_v3.csv');
-%par = pc('Input_files/PTAA_MAPI_IPH_v3.csv');
+par = pc('Input_files/PTAA_MAPI_IPH_v3.csv');
 %par = pc('Input_files/PTAA_MAPI_ICBA_v3.csv');
 par.RelTol_vsr = 0.1;
 par = refresh_device(par);

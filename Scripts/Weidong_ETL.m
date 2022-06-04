@@ -2,7 +2,7 @@
 %ETL material used in his FaCs devices. Just without the FaCs..
 
 %% Read in data files 
-num_devices = 3;
+num_devices = 4;
 
 par_kloc6 = pc('Input_files/PTAA_MAPI_Kloc6_v3.csv');
 par_pcbm = pc('Input_files/PTAA_MAPI_PCBM_v3.csv');
@@ -25,17 +25,8 @@ end
 CV_solutions_el = cell(1,num_devices);
 CV_solutions_ion = cell(1,num_devices);
 for j = 1:num_devices
-    if j == 3
-        CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, 1.1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
-        dodgy_ICBA_fudge = devices{j};
-        dodgy_ICBA_fudge.Phi_right = -3.9;
-        dodgy_ICBA_fudge = refresh_device(dodgy_ICBA_fudge);
-        fudge_eqm = equilibrate(dodgy_ICBA_fudge);
-        CV_solutions_el{j} = doCV(fudge_eqm.el, 1.1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
-    else
         CV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, 1.1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
         CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, 1.1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
-    end
 end
 
 %% Plot JVs
