@@ -1,12 +1,15 @@
-%par = pc('Input_files/PTAA_MAPI_Kloc6_v3.csv');
-%par = pc('Input_files/PTAA_MAPI_PCBM_v3.csv');
-par = pc('Input_files/PTAA_MAPI_IPH_v3.csv');
-%par = pc('Input_files/PTAA_MAPI_ICBA_v3.csv');
+%par = pc('Input_files/PTAA_MAPI_Kloc6_v4.csv');
+par = pc('Input_files/PTAA_MAPI_PCBM_v4.csv');
+%par = pc('Input_files/PTAA_MAPI_IPH_v4.csv');
+%par = pc('Input_files/PTAA_MAPI_ICBA_v4.csv');
+
 par.RelTol_vsr = 0.1;
 par = refresh_device(par);
 
 eqm_QJV = equilibrate(par);
-CV_sol_ion = doCV(eqm_QJV.ion, 1.1, -0.3, 1.2, -0.3, 1e-3, 1, 321);
+
+%%
+CV_sol_ion = doCV(eqm_QJV.ion, 1.1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
 %CV_sol_el = doCV(eqm_QJV.el, 1.1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
 Plot_Current_Contributions(CV_sol_ion)
 stats = CVstats(CV_sol_ion)

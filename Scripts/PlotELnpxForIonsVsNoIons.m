@@ -3,7 +3,7 @@
 % SC conditions for forward scan are at 31st timepoint, and 291st for reverse 
 % OC at 106, 137 and 183 for Kloc-6, PCBM and ICBA respectively
 
-num = 1;
+num = 2;
 %T = 31;
 T = OC_time_ion(num);
 lower_lim=[-7.5, -7.5, -7.5];
@@ -113,8 +113,9 @@ legend('','','','','electrons', 'holes', '', '', 'cations','','', 'Location', 'b
 
 %% Plot el vs ion populations at OC vs SC
 
-num = 1;
+num = 4;
 T = 31;
+x_values = CV_solutions_ion{num}.x * 1e7;
 
 figure('Name', 'Carrier Densities', 'Position', [100 100 1000 2000])
 
@@ -180,7 +181,7 @@ xlabel('Device depth (nm)')
 
 subplot(3,1,3)
 T = 31;
-upper_lim_ion = [1.5e18, 1e18, 1.5e18];
+upper_lim_ion = [4e18, 4e18, 3.5e18, 3e18];
 
 hold on
 

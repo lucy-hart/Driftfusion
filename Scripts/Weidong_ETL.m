@@ -25,8 +25,8 @@ end
 CV_solutions_el = cell(1,num_devices);
 CV_solutions_ion = cell(1,num_devices);
 for j = 1:num_devices
-        CV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, 1.1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
-        CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, 1.1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+        CV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, 1.15, -0.3, 1.3, -0.3, 1e-2, 1, 321);
+        CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, 1.15, -0.3, 1.3, -0.3, 1e-3, 1, 321);
 end
 
 %% Plot JVs
@@ -137,7 +137,7 @@ end
 ax2=gca;
 
 %% Save Plots at 300 dpi
-%exportgraphics(ax2, ...
+%exportgraphics(ax1, ...
 %    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Simulations\v3\PLQY_curves_el_and_ion_300dpi.png', ...
 %    'Resolution', 300)
 
