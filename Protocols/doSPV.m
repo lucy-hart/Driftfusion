@@ -29,7 +29,7 @@ par = sol_ini.par;
 
 %% Set parameters for initial dark solution with Rs on
 par.mobseti = 0;
-par.int1 = 0;
+par.Int = 0;
 par.tmesh_type = 1;
 par.tpoints = 100;
 par.tmax = 1e-3;
@@ -86,6 +86,7 @@ sol_ill = sol;
 %% Clear parameters
 spvsol.ill = sol_ill;
 spvsol.ill.par.mobseti = 1;
+spvsol.ill.par.figson = 1;
 
 %% Dark step
 par.int1 = 0;
@@ -95,7 +96,8 @@ sol_dk = df(sol_ill, par);
 
 spvsol.dk = sol_dk;
 spvsol.dk.par.mobseti = 1;
-spvsol.int1 = Int;
+spvsol.dk.par.figson = 1;
+spvsol.Int = Int;
 
 %spvsol.dat = spvana5(spvsol);
 

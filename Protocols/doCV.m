@@ -21,11 +21,12 @@ function sol_CV = doCV(sol_ini, light_intensity, V0, Vmax, Vmin, scan_rate, cycl
 %
 %% Start code
 disp('Starting DOCV')
-
+tic
 par = sol_ini.par;
 
 %% Set light intensity
 if light_intensity > 0
+    % sol_ill = lightonRs(sol_ini, int1, stable_time, mobseti, Rs, pnts)
     sol = lightonRs(sol_ini, light_intensity, -1, 0, 0, 10);
 else
     sol = sol_ini;
@@ -34,7 +35,7 @@ end
 %% Switch to V0 if different from initial conditions
 % Trying to do this within the triangular wave function resulted in
 % convergence issues so safer to do this here.
-if V0 ~= par.V_fun_arg(1)
+if V0 ~= par.Vapp
     sol = genVappStructs(sol, V0, 0);
 end
 
@@ -47,4 +48,5 @@ sol_CV = VappFunction(sol, 'tri', [V0, Vmax, Vmin, cycles, tmax/cycles], tmax, t
 disp('Complete')
 
 disp('DOCV complete')
+toc
 end

@@ -14,11 +14,11 @@ function gx = generation(par, source_type, laserlambda)
 %
 %% Start code
 xsolver = par.x_sub;
-switch par.optical_model
-    case 'uniform'
+switch par.OM
+    case 0
         % This currently results in the generation profile being stored twice and could be optimised
         gx = build_property(par.g0, xsolver, par, 'zeroed', 0);    
-    case 'Beer-Lambert'
+    case 1
         % beerlambert(par, x, source_type, laserlambda, figson)
         gx = beerlambert(par, par.xx, source_type, laserlambda, 0);
         % interpolate for i+0.5 mesh

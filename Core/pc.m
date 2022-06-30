@@ -51,7 +51,7 @@ classdef pc
         % The names here do not influence the electrical properties of the
         % device. See INDEX OF REFRACTION LIBRARY for choices- names must be entered
         % exactly as given in the column headings with the '_n', '_k' omitted
-        material = {'MAPICl'}
+        stack = {'MAPICl'}
         layer_colour = [1,1,1;1,1,1;1,1,1;1,1,1;1,1,1;1,1,1];
         % Define spatial cordinate system- typically this will be kept at
         % 0 for most applications
@@ -62,7 +62,7 @@ classdef pc
 
         %% Spatial mesh
         % xmesh_type specification - see MESHGEN_X.
-        xmesh_type = 'erf-linear';
+        xmesh_type = 5;
         xmesh_coeff = [0.7];        % Coefficient array for defining point spacing
         
         %% Time mesh
@@ -71,12 +71,20 @@ classdef pc
         % are read out and so does not influence convergence. Defining an
         % unecessarily high number of points however can be expensive owing
         % to interpolation of the solution.
-        tmesh_type = 'log10';             % Mesh type- for use with meshgen_t
+        tmesh_type = 2;             % Mesh type- for use with meshgen_t
         t0 = 1e-16;                 % Initial log mesh time value
         tmax = 1e-12;               % Max time value
         tpoints = 100;              % Number of time points
 
         %% GENERAL CONTROL PARAMETERS
+        OC = 0;                             % Closed circuit = 0, Open Circuit = 1
+        Vapp = 0;                           % Applied bias
+        BC = 3;                             % Boundary Conditions. Must be set to one for first solution
+        figson = 1;                         % Toggle figures on/off
+        meshx_figon = 0;                    % Toggles x-mesh figures on/off
+        mesht_figon = 0;                    % Toggles t-mesh figures on/off
+        side = 1;                           % illumination side 1 = left, 2 = right
+        calcJ = 0;                          % Calculates Currents- slows down solving calcJ = 1, calculates DD currents at every position
         mobset = 1;                         % Switch on/off electron hole mobility- MUST BE SET TO ZERO FOR INITIAL SOLUTION
         mobseti = 1;                        % Switch on/off ionic carrier mobility- MUST BE SET TO ZERO FOR INITIAL SOLUTION
         SRHset = 1;                         % Switch on/off SRH recombination - recommend setting to zero for initial solution
@@ -89,12 +97,13 @@ classdef pc
         intgradfun = 'linear'               % Interface gradient function 'linear' = linear, 'erf' = 'error function'
 
         %% Generation
-        % optical_model = Optical Model
+        % OM = Optical Model
         % 0 = Uniform Generation
         % 1 = Beer Lambert
-        optical_model = 'Beer-Lambert';
-        int1 = 0;               % Light intensity source 1 (multiples of g0 or 1 sun for Beer-Lambert)
-        int2 = 0;               % Light intensity source 2 (multiples of g0 or 1 sun for Beer-Lambert)
+        OM = 1;
+        Int = 0;                % Bias Light intensity (multiples of g0 or 1 sun for Beer-Lambert)
+        int1 = 0;
+        int2 = 0;
         g0 = [2.6409e+21];      % Uniform generation rate [cm-3s-1]
         light_source1 = 'AM15';
         light_source2 = 'laser';
@@ -104,7 +113,6 @@ classdef pc
         g2_fun_type = 'constant'
         g1_fun_arg = 0;
         g2_fun_arg = 0;
-        side = 'left';                           % illumination side 1 = left, 2 = right
         % default: Approximate Uniform generation rate @ 1 Sun for 510 nm active layer thickness
 
         %% Pulse settings
@@ -115,19 +123,28 @@ classdef pc
         % entries equal to the number of layers specified in STACK
 
         %% Energy levels [eV]
-        Phi_EA = [0];           % Electron affinity
-        Phi_IP = [-1];           % Ionisation potential
+        EA = [0];           % Electron affinity
+        IP = [-1];           % Ionisation potential
 
         %% Equilibrium Fermi energies [eV]
         % These define the doping density in each layer- see NA and ND calculations in methods
-        EF0 = [-0.5];
+        E0 = [-0.5];
 
         %% SRH trap energies [eV]
         % These must exist within the energy gap of the appropriate layers
         % and define the variables PT and NT in the expression:
-        % U = (np-ni^2)/(taun(p+pt) +taup(n+nt))
-        Et =[-0.5];
+        % r = (np-ni^2)/((1/Cn)*(p+pt) + (1/Cp)*(n+nt))
+        % Single state
+        Et_CB = -0.5;
+        Et_VB = -0.5;
         ni_eff = 0;     % Effective intrinsic carrier density used for surface recombination equivalence
+        
+        % Exponential tail state
+        E_UCB = 80e-3;      % Urbach energy conduction band
+        E_UVB = 80e-3;      % Urbach energy valence band
+        N_trap_levels = 20;     % Discrete number of trap levels
+        deltaEtrap = 0.05;      % trap spacing
+        introduce_traps = 0;
         
         %% Electrode Fermi energies [eV]
         % Fermi energies of the metal electrode. These define the built-in voltage, Vbi
@@ -168,14 +185,21 @@ classdef pc
         %% Relative dielectric constants
         epp = [10];
         epp_factor = 1e6;    % a factor required to a prevent singular matrix- still under investigation
-        %% Recombination
+        
+        %% Recombination and trapping
         % Radiative recombination, r_rad = k(np - ni^2)
         % [cm3 s-1] Radiative Recombination coefficient
         B = [3.6e-12];
-
-        %% SRH time constants for each layer [s]
-        taun = [1e6];           % [s] SRH time constant for electrons
-        taup = [1e6];           % [s] SRH time constant for holes  
+        
+        %% Density of trap states
+        Nt_CB = 1e14;              % [cm-3]
+        Nt_VB = 1e14;              % [cm-3]
+        
+        % Tail state capture coefficients
+        Cn_CB = 1e-100;
+        Cp_CB = 1e-100;
+        Cn_VB = 1e-100;
+        Cp_VB = 1e-100;
         
         %% Surface recombination and extraction coefficients [cm s-1]
         % Descriptions given in the comments considering that holes are
@@ -249,6 +273,9 @@ classdef pc
         gamma
         int_switch
         Dn
+        E_CBtrap
+        E_VBtrap
+        %E_trap_levels
         Eg
         Efi
         NA
@@ -258,15 +285,17 @@ classdef pc
         n0_l
         n0_r
         ni
-        nt              % Density of CB electrons when Fermi level at trap state energy
-        nt_inter
+        nt_CB
+        nt_VB
+        nt_vsr
         p0
         pcum
         pcum0           % Includes first entry as zero
         p0_l
         p0_r
-        pt              % Density of VB holes when Fermi level at trap state energy
-        pt_inter
+        pt_CB              
+        pt_VB
+        pt_vsr
         wn
         wp
         wscr            % Space charge region width
@@ -288,9 +317,14 @@ classdef pc
                 warning('pc should have 0 or 1 input arguments- only the first argument will be used for the filepath')
             end
 
+            % Warn if tmesh_type is not correct
+            if ~ any([1 2 3 4] == par.tmesh_type)
+                warning('PARAMS.tmesh_type should be an integer from 1 to 4 inclusive. MESHGEN_T cannot generate a mesh if this is not the case.')
+            end
+
             % Warn if xmesh_type is not correct
-            if ~ any(strcmp(par.xmesh_type, {'linear', 'erf-linear'}))
-                error('PAR.xmesh_type should either be ''linear'' or ''erf-linear''. MESHGEN_X cannot generate a mesh if this is not the case.')
+            if ~ any(1:1:5 == par.xmesh_type)
+                warning('PARAMS.xmesh_type should be an integer from 1 to 5 inclusive. MESHGEN_X cannot generate a mesh if this is not the case.')
             end
 
             % Warn if doping density exceeds eDOS
@@ -301,14 +335,21 @@ classdef pc
                 end
             end
 
-            % Warn if trap energies are outside of band gap energies
-            for i = 1:length(par.Et)
-                if par.Et(i) >= par.Phi_EA(i) || par.Et(i) <= par.Phi_IP(i)
+            % Error if trap energies are outside of band gap energies
+            for i = 1:length(par.Et_CB)
+                if par.Et_CB(i) >= par.EA(i) || par.Et_CB(i) <= par.IP(i)
                     msg = 'Trap energies must exist within layer band gap.';
                     error(msg);
                 end
             end
-
+            
+            for i = 1:length(par.Et_VB)
+                if par.Et_VB(i) >= par.EA(i) || par.Et_VB(i) <= par.IP(i)
+                    msg = 'Trap energies must exist within layer band gap.';
+                    error(msg);
+                end
+            end
+            
             % Warn if a_max is set to zero in any layers - leads to
             % infinite diffusion rate
             for i = 1:length(par.a_max)
@@ -329,12 +370,12 @@ classdef pc
             
             % Warn if electrode workfunctions are outside of boundary layer
             % bandgap
-            if par.Phi_left < par.Phi_IP(1) || par.Phi_left > par.Phi_EA(1)
+            if par.Phi_left < par.IP(1) || par.Phi_left > par.EA(1)
                 msg = 'Left-hand workfunction (Phi_left) out of range: value must exist within left-hand layer band gap';
                 error(msg)
             end
 
-            if par.Phi_right < par.Phi_IP(end) || par.Phi_right > par.Phi_EA(end)
+            if par.Phi_right < par.IP(end) || par.Phi_right > par.EA(end)
                 msg = 'Right-hand workfunction (Phi_right) out of range: value must exist within right-hand layer band gap';
                 error(msg)
             end
@@ -345,11 +386,11 @@ classdef pc
             if length(par.parr) ~= length(par.d)
                 msg = 'Points array (parr) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
-            elseif length(par.Phi_EA) ~= length(par.d)
-                msg = 'Electron Affinity array (Phi_EA) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+            elseif length(par.EA) ~= length(par.d)
+                msg = 'Electron Affinity array (EA) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
-            elseif length(par.Phi_IP) ~= length(par.d)
-                msg = 'Ionisation Potential array (Phi_IP) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+            elseif length(par.IP) ~= length(par.d)
+                msg = 'Ionisation Potential array (IP) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
             elseif length(par.mu_n) ~= length(par.d)
                 msg = 'Electron mobility array (mu_n) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
@@ -384,20 +425,29 @@ classdef pc
             elseif length(par.B) ~= length(par.d)
                 msg = 'Radiative recombination coefficient array (B) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
-            elseif length(par.EF0) ~= length(par.d)
-                msg = 'Equilibrium Fermi level array (EF0) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+            elseif length(par.E0) ~= length(par.d)
+                msg = 'Equilibrium Fermi level array (E0) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
             elseif length(par.g0) ~= length(par.d)
                 msg = 'Uniform generation array (g0) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
-            elseif length(par.taun) ~= length(par.d)
-                msg = 'Bulk SRH electron time constants array (taun_bulk) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+            elseif length(par.Cn_CB) ~= length(par.d)
+                msg = 'Bulk SRH electron time constants array (Cn_bulk) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
-            elseif length(par.taup) ~= length(par.d)
-                msg = 'Bulk SRH hole time constants array (taup_bulk) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+            elseif length(par.Cp_CB) ~= length(par.d)
+                msg = 'Bulk SRH hole time constants array (Cp_bulk) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
-            elseif length(par.Et) ~= length(par.d)
-                msg = 'Bulk SRH trap energy array (Et) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+            elseif length(par.Cn_VB) ~= length(par.d)
+                msg = 'Bulk SRH electron time constants array (Cn_bulk) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+                error(msg);
+            elseif length(par.Cp_VB) ~= length(par.d)
+                msg = 'Bulk SRH hole time constants array (Cp_bulk) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+                error(msg);
+            elseif length(par.Et_CB) ~= length(par.d)
+                msg = 'Electron trap energy array (Et_CB) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+                error(msg);
+            elseif length(par.Et_VB) ~= length(par.d)
+                msg = 'Electron trap energy array (Et_VB) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
             end
 
@@ -409,119 +459,40 @@ classdef pc
             % continuously called.
             par = refresh_device(par);
         end
-                
+
         function par = set.xmesh_type(par, value)
-            if isa(value, 'double')
-                % Backwards compat values
-                switch value
-                    case 4
-                        par.xmesh_type = 'linear';
-                    case 5
-                        par.xmesh_type = 'erf-linear';
-                end
-            elseif isa(value, 'cell')
-                if any(strcmp(par.xmesh_type, {'linear', 'erf-linear'}))
-                    par.xmesh_type = value{1};
-                end
-            elseif isa(value, 'char')
-                if any(strcmp(par.xmesh_type, {'linear', 'erf-linear'}))
-                    par.xmesh_type = value;
-                end
+            %   SET.xmesh_type(PARAMS, VALUE) checks if VALUE is an integer
+            %   from 1 to 3, and if so, changes PARAMS.xmesh_type to VALUE.
+            %   Otherwise, a warning is shown. Runs automatically whenever
+            %   xmesh_type is changed.
+            if any(1:1:5 == value)
+                par.xmesh_type = value;
             else
-                par.xmesh_type = 'erf-linear';
-                warning('xmesh_type not recognised- defaulting to ''erf-linear'' spatial mesh');
+                error('PARAMS.xmesh_type should be an integer from 1 to 3 inclusive. MESHGEN_X cannot generate a mesh if this is not the case.')
             end
         end
 
         function par = set.tmesh_type(par, value)
-            % Backwards compat values
-            if isa(value, 'double')
-                switch value
-                    case 1
-                        par.tmesh_type = 'linear';
-                    case 2
-                        par.tmesh_type = 'log10';
-                end
-            elseif isa(value, 'cell')
-                if any(strcmp(value, {'linear', 'log10', 'log10-double'}))
-                    par.tmesh_type = value{1};
-                end
-            elseif isa(value, 'char')
-                if any(strcmp(value, {'linear', 'log10', 'log10-double'}))
-                    par.tmesh_type = value;
-                end
+            %   SET.tmesh_type(PARAMS, VALUE) checks if VALUE is an integer
+            %   from 1 to 2, and if so, changes PARAMS.tmesh_type to VALUE.
+            %   Otherwise, a warning is shown. Runs automatically whenever
+            %   tmesh_type is changed.
+            if any(1:1:4 == value)
+                par.tmesh_type = value;
             else
-                par.tmesh_type = 'linear';
-                warning('tmesh_type not recognised- defaulting to ''linear'' mesh');
+                error('PARAMS.tmesh_type should be an integer from 1 to 4 inclusive. MESHGEN_T cannot generate a mesh if this is not the case.')
             end
         end
         
-        function par = set.optical_model(par, value)
-            % Backwards compat values
-            if isa(value, 'double')
-                switch value
-                    case 0
-                        par.optical_model = 'uniform';
-                    case 1
-                        par.optical_model = 'Beer-Lambert';
-                end
-            elseif isa(value, 'cell')
-                if any(strcmp(value, {'uniform', 'Beer-Lambert'}))
-                    par.optical_model = value{1};
-                end
-            elseif isa(value, 'char')
-                if any(strcmp(value, {'uniform', 'Beer-Lambert'}))
-                    par.optical_model = value;
-                end
-            else
-                par.optical_model = 'Beer-Lambert';
-                warning('optical_model not recognised- defaulting to ''Beer-Lambert''');
-            end
-        end
-        
-        function par = set.side(par, value)
-            % Backwards compat values
-            if isa(value, 'double')
-                switch value
-                    case 1
-                        par.side = 'left';
-                    case 2
-                        par.side = 'right';
-                end
-            elseif isa(value, 'cell')
-                if any(strcmp(value, {'left', 'right'}))
-                    par.side = value{1};
-                end
-            elseif isa(value, 'char')
-                if any(strcmp(value, {'left', 'right'}))
-                    par.side = value;
-                end
-            else
-                par.side = 'left';
-                warning('illumination side not recognised- defaulting to ''left''');
-            end
-        end
-        
-        function par = set.taun(par, value)
-            for i = 1:length(value)
-                if isnan(value(i))
-                    par.taun(i) = 1e100;
-                else
-                    par.taun(i) = value(i);
-                end
+        function value = get.gamma(par)
+            switch par.prob_distro_function
+                case 'Boltz'
+                    value = 0;
+                case 'Blakemore'
+                    value = par.gamma_Blakemore;
             end
         end
 
-        function par = set.taup(par, value)
-            for i = 1:length(value)
-                if isnan(value(i))
-                    par.taup(i) = 1e100;
-                else
-                    par.taup(i) = value(i);
-                end
-            end
-        end
-        
         function par = set.ND(par, value)
             for i = 1:length(par.ND)
                 if value(i) >= par.Nc(i)
@@ -538,24 +509,23 @@ classdef pc
             end
         end
 
-        function value = get.gamma(par)
-            switch par.prob_distro_function
-                case 'Boltz'
-                    value = 0;
-                case 'Blakemore'
-                    value = par.gamma_Blakemore;
-            end
-        end
         %% Get active layer indexes from layer_type
         function value = get.active_layer(par)
-            value = find(strncmp('active', par.layer_type, 6));
+            value = find(strncmp('active', par.layer_type,6));
             if length(value) == 0
                 % If no flag is give assume active layer is middle
                 value = round(length(par.layer_type)/2);
-                warning('No designated ''active'' layer- assigning middle layer to be active')
             end
         end
         
+        %% Active layer thickness
+        function value = get.d_active(par)
+            value = sum(par.dcell(par.active_layer(1):par.active_layer(end)));
+        end
+    
+        function value = get.d_midactive(par)
+           value = par.dcum(par.active_layer(1)-1) + par.d_active/2;
+        end
         %% Layer thicknesses [cm]
         function value = get.dcell(par)
             % For backwards comptibility. layer_points and parr arre the now the
@@ -570,18 +540,9 @@ classdef pc
             value = par.layer_points;
         end
 
-        %% Active layer thickness
-        function value = get.d_active(par)
-            value = sum(par.dcell(par.active_layer(1):par.active_layer(end)));
-        end
-    
-        function value = get.d_midactive(par)
-           value = par.dcum0(par.active_layer(1)) + par.d_active/2;
-        end
-        
         %% Band gap energies    [eV]
         function value = get.Eg(par)
-            value = par.Phi_EA - par.Phi_IP;
+            value = par.EA - par.IP;
         end
 
         %% Built-in voltage Vbi based on difference in boundary workfunctions
@@ -592,19 +553,19 @@ classdef pc
         %% Intrinsic Fermi Energies
         % Currently uses Boltzmann stats as approximation should always be
         function value = get.Efi(par)
-            value = 0.5.*(par.Phi_EA+par.Phi_IP)+par.kB*par.T*log(par.Nc./par.Nv);
+            value = 0.5.*(par.EA+par.IP)+par.kB*par.T*log(par.Nc./par.Nv);
         end
 
         %% Donor densities
         function value = get.ND(par)
-            value = distro_fun.nfun(par.Nc, par.Phi_EA, par.EF0, par);
+            value = distro_fun.nfun(par.Nc, par.EA, par.E0, par);
         end
 
         %% Acceptor densities
         function value = get.NA(par)
-            value = distro_fun.pfun(par.Nv, par.Phi_IP, par.EF0, par);
+            value = distro_fun.pfun(par.Nv, par.IP, par.E0, par);
         end
-        
+
         %% Intrinsic carrier densities (Boltzmann)
         function value = get.ni(par)
             value = ((par.Nc.*par.Nv).^0.5).*exp(-par.Eg./(2*par.kB*par.T));
@@ -612,12 +573,12 @@ classdef pc
 
         %% Equilibrium electron densities
         function value = get.n0(par)
-            value = distro_fun.nfun(par.Nc, par.Phi_EA, par.EF0, par);
+            value = distro_fun.nfun(par.Nc, par.EA, par.E0, par);
         end
 
         %% Equilibrium hole densities
         function value = get.p0(par)
-            value = distro_fun.pfun(par.Nv, par.Phi_IP, par.EF0, par);
+            value = distro_fun.pfun(par.Nv, par.IP, par.E0, par);
 
         end
 
@@ -625,31 +586,85 @@ classdef pc
         % Uses metal Fermi energies to calculate boundary densities
         % Electrons left boundary
         function value = get.n0_l(par)
-            value = distro_fun.nfun(par.Nc(1), par.Phi_EA(1), par.Phi_left, par);
+            value = distro_fun.nfun(par.Nc(1), par.EA(1), par.Phi_left, par);
         end
 
         % Electrons right boundary
         function value = get.n0_r(par)
-            value = distro_fun.nfun(par.Nc(end), par.Phi_EA(end), par.Phi_right, par);
+            value = distro_fun.nfun(par.Nc(end), par.EA(end), par.Phi_right, par);
         end
 
         % Holes left boundary
         function value = get.p0_l(par)
-            value = distro_fun.pfun(par.Nv(1), par.Phi_IP(1), par.Phi_left, par);
+            value = distro_fun.pfun(par.Nv(1), par.IP(1), par.Phi_left, par);
         end
 
         % holes right boundary
         function value = get.p0_r(par)
-            value = distro_fun.pfun(par.Nv(end), par.Phi_IP(end), par.Phi_right, par);
+            value = distro_fun.pfun(par.Nv(end), par.IP(end), par.Phi_right, par);
         end
        
-        %% SRH trap energy coefficients
-        function value = get.nt(par)
-            value = distro_fun.nfun(par.Nc, par.Phi_EA, par.Et, par);
+%         %% Trap levels
+%         function value = get.E_trap_levels(par)
+%             % For backwards comptibility. layer_points and parr arre the now the
+%             % same thing
+%             value = zeros(par.N_trap_levels, length(par.stack));
+%             E_arr = zeros(par.N_trap_levels+2, length(par.stack));
+%             for i = 1:length(par.stack)
+%                 E_arr(:,i) = par.IP(i):(par.EA(i) - par.IP(i))./(par.N_trap_levels + 1):par.EA(i);
+%             end
+%             value = E_arr(2:end-1, :);
+%         end
+        
+        %% Trap levels
+        function value = get.E_CBtrap(par)
+            % For backwards comptibility. layer_points and parr arre the now the
+            % same thing
+            for i = 1:length(par.stack)
+                value(:,i) = linspace(par.EA(i)-((par.N_trap_levels)*par.deltaEtrap), par.EA(i)-par.deltaEtrap, par.N_trap_levels);
+            end  
         end
         
-        function value = get.pt(par)
-            value = distro_fun.pfun(par.Nv, par.Phi_IP, par.Et, par);
+        %% Trap levels
+        function value = get.E_VBtrap(par)
+            % For backwards comptibility. layer_points and parr arre the now the
+            % same thing
+            for i = 1:length(par.stack)
+                value(:,i) = linspace(par.IP(i)+par.deltaEtrap, par.IP(i)+((par.N_trap_levels)*par.deltaEtrap), par.N_trap_levels);
+            end  
+        end
+        
+        function value = get.nt_vsr(par)
+                value = distro_fun.nfun(par.Nc, par.EA, par.Et_CB, par);
+        end
+        
+        function value = get.pt_vsr(par)
+                value = distro_fun.pfun(par.Nv, par.IP, par.Et_VB, par);
+        end
+        
+        %% SRH trap energy coefficients
+        function value = get.nt_CB(par)
+            for i = 1:par.N_trap_levels
+                value(i,:) = distro_fun.nfun(par.Nc, par.EA, par.E_CBtrap(i), par);
+            end
+        end
+        
+        function value = get.pt_CB(par)
+            for i = 1:par.N_trap_levels
+                value(i,:) = distro_fun.pfun(par.Nv, par.IP, par.E_CBtrap(i,:), par);
+            end
+        end
+        
+        function value = get.nt_VB(par)
+            for i = 1:par.N_trap_levels
+                value(i,:) = distro_fun.nfun(par.Nc, par.EA, par.E_VBtrap(i,:), par);
+            end
+        end
+        
+        function value = get.pt_VB(par)
+            for i = 1:par.N_trap_levels
+                value(i,:) = distro_fun.pfun(par.Nv, par.IP, par.E_VBtrap(i,:), par);
+            end
         end
         
         %% Thickness and point arrays
@@ -671,7 +686,7 @@ classdef pc
         
         % interface switch for zeroing field in interfaces
         function value = get.int_switch(par)
-            value = ones(1, length(par.material));
+            value = ones(1, length(par.stack));
         end
         
     end

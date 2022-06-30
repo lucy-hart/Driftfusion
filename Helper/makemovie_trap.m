@@ -1,4 +1,4 @@
-function Framefile = makemovie(sol, plotfun, xrange, yrange, movie_name, Vcounter, tcounter)
+function Framefile = makemovie_trap(sol, plotfun, xrange, yrange, movie_name, Vcounter, tcounter, n_trap, p_trap)
 % Makes a frame file F from a solution
 % Currently configured to output the band diagram
 % @PLOTFUN is the name of the plotting function that you wish to use
@@ -20,25 +20,18 @@ Vapp = dfana.calcVapp(sol);
 for i = 1:length(sol.t)
     %figure(600)
     clf
-    plotfun(sol, sol.t(i))
+    plotfun(sol, sol.t(i), n_trap, p_trap)
     fig1 = gca;
     
 %% You can include limits for subplots here
-%     subplot(3,1,1);
-%     ylim([-7, -2.5])
-%     
-%     subplot(3,1,2);
-%     ylim([1e5, 1e20])
-%     
-%     subplot(3,1,3);
-%     ylim([0, 8e18])
-
-%     subplot(2,1,1);
-%     ylim([, -2.5])
+    subplot(3,1,1);
+    ylim([-7, -2.5])
     
-    subplot(2,1,2);
-    ylim([1e12, 1e18])
-
+    subplot(3,1,2);
+    ylim([1e5, 1e20])
+    
+    subplot(3,1,3);
+    ylim([0, 8e18])
     
     if xrange ~= 0
         xlim([xrange(1)*1e7, xrange(2)*1e7])
@@ -85,7 +78,7 @@ movie_name = [movie_name, '.avi'];
 
 % Write to file
 myVideo = VideoWriter(movie_name);
-myVideo.FrameRate = 20;
+myVideo.FrameRate = 10;
 open(myVideo);
 writeVideo(myVideo, Framefile);
 close(myVideo);

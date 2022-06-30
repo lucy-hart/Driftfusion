@@ -39,7 +39,7 @@ function [goodVocAsymStructCell, VOCs] = genIntStructsRealVoc(struct_eq, startIn
 % it under the terms of the GNU Affero General Public License as published
 % by the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-%
+% 
 % Ilario Gelmetti, Ph.D. student, perovskite photovoltaics
 % Institute of Chemical Research of Catalonia (ICIQ)
 % Research Group Prof. Emilio Palomares
@@ -49,6 +49,10 @@ function [goodVocAsymStructCell, VOCs] = genIntStructsRealVoc(struct_eq, startIn
 % May 2018; Last revision: May 2018
 
 %------------- BEGIN CODE --------------
+
+if ~struct_eq.par.OC
+    disp([mfilename ' - the input solution is in short circuit! ' mfilename ' runs much faster when starting from OC conditions!']);
+end
 
 % use the normal genIntStructs for obtaining a cell with structs at various
 % light intensities
@@ -65,18 +69,28 @@ goodVocAsymStructCell = badVocStructCell;
 
 %% generate solutions
 for i = 1:nsolutions
-
+    
+    % decrease annoiance by figures popping up
+    badVocStructCell{1, i}.par.figson = 0;
+    
     % in case the solution is symmetric, break it in halves
-    asymstruct_Int = badVocStructCell{1, i};
+    if badVocStructCell{1, i}.par.OC
+        disp([mfilename ' - asymmetricize solution at illumination intensity ' num2str(badVocStructCell{1, i}.par.int1)])
+        asymstruct_Int = asymmetricize(badVocStructCell{1, i});
+    else
+        asymstruct_Int = badVocStructCell{1, i};
+    end
     % the asymmetricized solution could require some stabilization after
     % breaking
     asymstruct_Int = stabilize(asymstruct_Int);
-
+    
     % use findOptimVoc for finding the applied voltage that minimizes the
     % residual current
     disp([mfilename ' - finding real Voc for illumination intensity ' num2str(badVocStructCell{1, i}.par.int1)])
     light_intensity = asymstruct_Int.par.int1;
     [asymstruct_Int_Voc, VOC] = findVocDirect(asymstruct_Int, light_intensity, 1, 101);
+    % restore figson before saving
+    asymstruct_Int_Voc.par.figson = 1;
     % replace the solution at the bad VOC with the new one
     goodVocAsymStructCell{1, i} = asymstruct_Int_Voc;
     % populate the array containing VOCs

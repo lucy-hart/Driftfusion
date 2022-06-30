@@ -22,6 +22,9 @@ tic;    % Start stopwatch
 % analytical solutions
 sol.u = 0;
 
+% Store the original parameter set
+par_origin = par;
+
 % Start with zero SRH recombination
 par.SRHset = 0;
 % Radiative rec could initially be set to zero in addition if required
@@ -31,15 +34,10 @@ par.radset = 1;
 par.tmesh_type = 2;
 par.tpoints = 40;
 
-% Set applied bias to zero
-par.V_fun_type = 'constant';
-par.V_fun_arg(1) = 0;
-
-% Set light intensities to zero
+par.Vapp = 0;
 par.int1 = 0;
 par.int2 = 0;
-
-% Time mesh
+par.OC = 0;
 par.tmesh_type = 2;
 par.tmax = 1e-9;
 par.t0 = par.tmax/1e4;

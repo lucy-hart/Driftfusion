@@ -14,17 +14,13 @@ par = pc('Input_files/1_layer_test.csv');
 
 %% Equilibrium oslutions
 soleq = equilibrate(par);
-% Find equilibrium solution with 100 Ohms series resistance in external
-% circuit
-sol_Rs = lightonRs(soleq.el, 0, -1e-3, 0, 100, 20);
+dfplot.npx(soleq.el)
 
 %% Do JV scans
-JVsol_Rs0 = doJV(soleq.el, 100e-3, 201, 1, 0, 0, 1, 1);
-JVsol_Rs100 = doJV(sol_Rs, 100e-3, 201, 1, 0, 0, 1, 1);
+% sol_CV = doCV(sol_ini, light_intensity, V0, Vmax, Vmin, scan_rate, cycles, tpoints)
+sol_CV = doCV(soleq.el, 1, 0, 1, 0, 100e-3, 1, 201);
 
 %% plot JV scan
-dfplot.JV(JVsol_Rs0, 1);
-hold on
-dfplot.JV(JVsol_Rs100, 1);
-hold off
-set(gca,'YScale','log')
+dfplot.JVapp(sol_CV, 0);
+
+%set(gca,'YScale','log')

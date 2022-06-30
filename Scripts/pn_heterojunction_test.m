@@ -1,3 +1,4 @@
+%
 %% LICENSE
 % Copyright (C) 2020  Philip Calado, Ilario Gelmetti, and Piers R. F. Barnes
 % Imperial College London
@@ -16,18 +17,27 @@ par_pn_hetero = pc('Input_files/pn_heterojunction.csv');
 
 %% Find the equilibrium solutions
 soleq_pn_hetero = equilibrate(par_pn_hetero);
+dfplot.npx(soleq_pn_hetero.el)
+dfplot.ELx(soleq_pn_hetero.el)
 
 %% Perform dark and light current-voltage scan at 50 mVs-1 from 0 V to 1.2 V
 % sol_CV = doCV(sol_ini, light_intensity, V0, Vmax, Vmin, scan_rate, cycles, tpoints)
-sol_CV_100mVs_pn_hetero = doCV(soleq_pn_hetero.el, 0, 0, 0.8, -0.2, 100e-3, 1, 281);
+sol_CV_100mVs_pn_hetero = doCV(soleq_pn_hetero.el, 1, 0, 0.6, -0.2, 100e-3, 1, 281);
+
+%% plot the current voltage curve
+dfplot.JtotVapp(sol_CV_100mVs_pn_hetero, 0)
+hold on
+set(gca, 'YScale', 'log')
+xlim([-0.2, 0.6])
+legend('100 mVs-1') 
 
 %% plot the energy level diagram and carrier densities for the device at
 % 1 V (t= 10s) during the illuminated forward scan
 dfplot.ELxnpxacx(sol_CV_100mVs_pn_hetero, 10)
 
 %% plot J-V
-dfplot.JVapp(sol_CV_100mVs_pn_hetero, par_pn_hetero.d_midactive)
-%ylim([-20e-3, 20e-3])
+dfplot.JtotVapp(sol_CV_100mVs_pn_hetero, 0)
+ylim([-20e-3, 20e-3])
 
 %% Save the workspace- this is commented out as the filepath should lead to
 % a folder on your computer. It is not recommended to store large files in

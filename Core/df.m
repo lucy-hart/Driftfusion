@@ -80,12 +80,20 @@ N_max_variables = par.N_max_variables;  % Maximum number of variables in this ve
 
 device = par.dev_sub;
 T = par.T;
+EA = device.EA;
+IP = device.IP;
 mu_n = device.mu_n;         % Electron mobility
 mu_p = device.mu_p;         % Hole mobility
 mu_c = device.mu_c;         % Cation mobility
 mu_a = device.mu_a;         % Anion mobility
 Nc = device.Nc;             % Conduction band effective density of states
 Nv = device.Nv;             % Valence band effective density of states
+Nt_CB = device.Nt_CB;        % Conduction band tail state density
+Nt_VB = device.Nt_VB;        % Valence band tail state density
+Cn_CB = device.Cn_CB;       
+Cp_CB = device.Cp_CB;
+Cn_VB = device.Cn_VB;       
+Cp_VB = device.Cp_VB;       
 c_max = device.c_max;       % Cation density upper limit
 a_max = device.a_max;       % Anion density upper limit
 gradNc = device.gradNc;     % Conduction band effective density of states gradient
@@ -96,12 +104,20 @@ epp = device.epp;           % Dielectric constant
 epp_factor = par.epp_factor;      % Maximum dielectric constant (for normalisation)
 B = device.B;               % Radiative recombination rate coefficient
 ni = device.ni;             % Intrinsic carrier density
-taun = device.taun;         % Electron SRH time constant
-taup = device.taup;         % Electron SRH time constant
 taun_vsr = device.taun_vsr; % Electron SRH time constant- volumetric interfacial surface recombination scheme
 taup_vsr = device.taup_vsr; % Electron SRH time constant- volumetric interfacial surface recombination scheme
-nt = device.nt;             % SRH electron trap constant
-pt = device.pt;             % SRH hole trap constant
+nt_CB = device.nt_CB;             % SRH electron trap constant
+pt_CB = device.pt_CB;             % SRH hole trap constant
+nt_VB = device.nt_VB;             % SRH electron trap constant
+pt_VB = device.pt_VB;             % SRH hole trap constant
+nt_vsr = device.nt_vsr;             % SRH electron trap constant
+pt_vsr = device.pt_vsr;             % SRH hole trap constant
+%E_trap_levels = device.E_trap_levels;
+deltaEtrap = par.deltaEtrap;
+E_CBtrap = device.E_CBtrap;
+E_VBtrap = device.E_VBtrap;
+E_UCB = device.E_UCB;
+E_UVB = device.E_UVB;
 NA = device.NA;             % Acceptor doping density
 ND = device.ND;             % Donor doping density
 % Set up counter ion density arrays
@@ -146,7 +162,12 @@ SRHset = par.SRHset;        % SRH recombination switch
 vsr_zone = device.vsr_zone;
 srh_zone = device.srh_zone;
 Rs_initial = par.Rs_initial;
-Field_switch = dev.Field_switch;
+
+%% Recombination
+r_srh_CBTS_fun = @calc_rsrh_CBTS;
+r_srh_VBTS_fun = @calc_rsrh_VBTS;
+ntrap_VBTS_fun = @calc_ntrap_CBTS;
+ptrap_VBTS_fun = @calc_ptrap_VBTS;
 
 %% Generation
 g1_fun = fun_gen(par.g1_fun_type);
@@ -184,16 +205,18 @@ end
 
 %% Voltage function
 Vapp_fun = fun_gen(par.V_fun_type);
+Vapp = 0;
 Vres = 0;
 J = 0;
 
 %% Solver variables
 i = 1;
-V = 0; n = 0; p = 0; a = 0; c = 0;
+V = 0; n = 0; p = 0; a = 0; c = 0; n_trap = 0 ; p_trap = 0;
 dVdx = 0; dndx = 0; dpdx = 0; dadx = 0; dcdx = 0;
 F_V = 0; F_n = 0; F_p = 0; F_c = 0; F_a = 0;
 S_V = 0; S_n = 0; S_p = 0; S_c = 0; S_a = 0;
-r_rad = 0; r_srh = 0; r_vsr = 0; r_np = 0;
+r_rad = 0; r_srh_CB = 0; r_srh_VB = 0; r_vsr = 0; r_np = 0;
+r_srh_CB_components = 0; r_srh_VB_components = 0;
 alpha = 0; beta = 0;
 G_n = 1;    % Diffusion enhancement prefactor electrons
 G_p = 1;    % Diffusion enhancement prefactor holes
@@ -213,7 +236,10 @@ options = odeset('MaxStep', par.MaxStepFactor*0.1*par.tmax, 'RelTol', par.RelTol
 % below for the: equation, initial conditions, boundary conditions
 u = pdepe(par.m,@dfpde,@dfic,@dfbc,x,t,options);
 
-%% Outputs
+%% Ouputs
+% Store final voltage reading
+par.Vapp = Vapp;
+
 % Solutions and meshes to structure
 solstruct.u = u;
 solstruct.x = x;
@@ -291,18 +317,53 @@ end
         % Electron and hole recombination
         % Radiative
         r_rad = radset*B(i)*(n*p - ni(i)^2);
+        
+        % Trapped electron and hole densities
+        if par.introduce_traps
+            trap_ramp = t/par.tmax;
+        else
+            trap_ramp = 1;
+        end
+        
         % Bulk SRH
-        r_srh = SRHset*srh_zone(i)*((n*p - ni(i)^2)/(taun(i)*(p + pt(i)) + taup(i)*(n + nt(i))));
+        if SRHset == 0 || Nt_CB(i) == 0 
+            r_srh_CB = 0;
+            n_trap = 0;
+        else
+            r_srh_CB_components = srh_zone(i)...
+                .*Nt_CB(i).*exp((E_CBtrap(:,i) - EA(i))./E_UCB(i))...
+                .*(Cn_CB(i).*Cp_CB(i)*(n*p - ni(i)^2))./(Cp_CB(i).*(p + pt_CB(:,i)) + Cn_CB(i).*(n + nt_CB(:,i)));
+            r_srh_CB = trapz(E_CBtrap(:,i), r_srh_CB_components);
+        
+            n_trap_components = trap_ramp.*Nt_CB(i).*exp((E_CBtrap(:,i) - EA(i))./E_UCB(i)).*...
+                ((Cn_CB(i)*n + Cp_CB(i).*pt_CB(:,i))./(Cn_CB(i).*(n + nt_CB(:,i)) + Cp_CB(i).*(p + pt_CB(:,i))));
+            n_trap = trapz(E_CBtrap(:,i), n_trap_components);
+        end
+            
+        if SRHset == 0 || Nt_VB(i) == 0
+            r_srh_VB = 0;
+            p_trap = 0;
+        else
+            r_srh_VB_components = srh_zone(i)...
+                .*Nt_VB(i)*exp((IP(i) - E_VBtrap(:,i))./E_UVB(i))...
+                .*(Cn_VB(i)*Cp_VB(i)*(n*p - ni(i)^2))./(Cp_VB(i).*(p + pt_VB(:,i)) + Cn_VB(i).*(n + nt_VB(:,i)));
+            r_srh_VB = trapz(E_VBtrap(:,i), r_srh_VB_components);
+            
+            p_trap_components = trap_ramp.*Nt_VB(i)*exp((IP(i) - E_VBtrap(:,i))./E_UVB(i)).*...
+                ((Cp_VB(i)*p + Cn_VB(i).*nt_VB(:,i))./(Cn_VB(i).*(n + nt_VB(:,i)) + Cp_VB(i).*(p + pt_VB(:,i))));
+            p_trap = trapz(E_VBtrap(:,i), p_trap_components);
+        end
+            
         % Volumetric surface recombination
-        alpha = (sign_xn(i)*q*dVdx/(kB*T)) + alpha0_xn(i);
-        beta = (sign_xp(i)*q*-dVdx/(kB*T)) + beta0_xp(i);
+        alpha = sign_xn(i)*q*dVdx/(kB*T) + alpha0_xn(i);
+        beta = sign_xp(i)*q*-dVdx/(kB*T) + beta0_xp(i);
         r_vsr = SRHset*vsr_zone(i)*((n*exp(-alpha*xprime_n(i))*p*exp(-beta*xprime_p(i)) - ni(i)^2)...
-            /(taun_vsr(i)*(p*exp(-beta*xprime_p(i)) + pt(i)) + taup_vsr(i)*(n*exp(-alpha*xprime_n(i)) + nt(i))));
+            /(taun_vsr(i)*(p*exp(-beta*xprime_p(i)) + pt_vsr(i)) + taup_vsr(i)*(n*exp(-alpha*xprime_n(i)) + nt_vsr(i))));
         % Total electron and hole recombination
-        r_np = r_rad + r_srh + r_vsr;
+        r_np = r_rad + r_srh_CB + r_srh_VB + r_vsr;
         
         % Source terms
-        S_V = (1/(epp_factor*epp0))*(-n + p - NA(i) + ND(i) + z_a*a + z_c*c - z_a*Nani(i) - z_c*Ncat(i));
+        S_V = (1/(epp_factor*epp0))*(-n + p - NA(i) + ND(i) + z_a*a + z_c*c - z_a*Nani(i) - z_c*Ncat(i) - n_trap + p_trap);
         S_n = g - r_np;
         S_p = g - r_np;
         S_c = 0;
