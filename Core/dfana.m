@@ -206,8 +206,8 @@ classdef dfana
             % Note this integrates across the available spectrum 
             % within AM15.xls 
             if strcmp(sol.par.optical_model, 'Beer-Lambert')
-                AM15_data = xlsread('AM15.xls');
-                Pin = 1e-3*trapz(AM15_data(:,1), AM15_data(:,2));
+                AM15_data = readtable('AM15.xls', 'VariableNamingRule', 'preserve');
+                Pin = 1e-3*trapz(AM15_data.(1), AM15_data.(2));
             else
                 warning('No incident photon spectrum available, assuming Pin = 0.1 W cm-2')
                 Pin = 0.1;

@@ -7,13 +7,13 @@
 % wavelengths not listed in the library.
 function [n_interp, k_interp] = LoadRefrIndex(name,wavelengths)
 
-%Data in IndRefr, Column names in IndRefr_names
-[IndRefr,IndRefr_names]=xlsread('Index_of_Refraction_library.xls');
+%Data in IndRefr
+IndRefr=readtable('Index_of_Refraction_library.xls', 'VariableNamingRule', 'preserve');
 
 % Load index of refraction data in spread sheet, will crash if misspelled
-file_wavelengths=IndRefr(:,strmatch('Wavelength',IndRefr_names));
-n=IndRefr(:,strmatch(strcat(name,'_n'),IndRefr_names));
-k=IndRefr(:,strmatch(strcat(name,'_k'),IndRefr_names));
+file_wavelengths=IndRefr.(1);
+n=IndRefr.(strcat(name,'_n'));
+k=IndRefr.(strcat(name,'_k'));
 
 % Interpolate/Extrapolate data linearly to desired wavelengths
 n_interp=interp1(file_wavelengths, n, wavelengths, 'linear', 'extrap');
