@@ -41,7 +41,7 @@ for m=1:num_devices
     j_el = -dfana.calcJ(CV_solutions_el{m}).tot(:,1);
     plot(v(:), j(:)*1000, 'color', colors_JV{m}, 'LineWidth', 3) 
     hold on
-    plot(v_el(1:151), j_el(1:151)*1000, '-.', 'color', colors_JV{m}, 'LineWidth', 3)
+    plot(v_el(1:151), j_el(1:151)*1000, '--', 'color', colors_JV{m}, 'LineWidth', 3)
     hold on
 end
 plot(v(:), zeros(1,length(v)), 'black', 'LineWidth', 1)
@@ -121,7 +121,7 @@ figure('Name', 'PLQYPlot', 'Position', [100 100 1250 2000])
 for i = 1:num_devices
     semilogy(V(1:151), 100*(J_values(1:151,2,i))./J_values(1:151,1,i), 'color', colors_JV{i}, 'LineWidth', 3) 
     hold on 
-    semilogy(v_el(1:151), 100*(J_values_el(1:151,2,i))./J_values_el(1:151,1,i), '-.', 'color', colors_JV{i}, 'LineWidth', 3)     
+    semilogy(v_el(1:151), 100*(J_values_el(1:151,2,i))./J_values_el(1:151,1,i), '--', 'color', colors_JV{i}, 'LineWidth', 3)     
     hold on
 end
 hold off
@@ -135,7 +135,7 @@ ylabel('PLQY (%)', 'FontSize', 30)
 ax2=gca;
 
 %% Save Plots at 300 dpi
-save = 0;
+save = 1;
 fig_num = 2;
 
 if save == 1 && fig_num == 1
