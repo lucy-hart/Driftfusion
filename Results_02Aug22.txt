@@ -1,0 +1,49 @@
+ESA Prelim Results 2.0
+
+No offset (PCBM)
+Ion:
+           Jsc_f: -0.0236
+           Voc_f: 1.0602
+           mpp_f: 0.0187
+    efficiency_f: 18.7289
+          mppV_f: 0.8900
+            FF_f: 0.7485
+No Ion:
+           Jsc_f: -0.0245
+           Voc_f: 1.0044
+           mpp_f: 0.0193
+    efficiency_f: 19.3317
+          mppV_f: 0.8400
+            FF_f: 0.7875
+
+Neg Offset (Kloc-6)
+Ion: 
+           Jsc_f: -0.0224
+           Voc_f: 1.0451
+           mpp_f: 0.0158
+    efficiency_f: 15.7582
+          mppV_f: 0.8300
+            FF_f: 0.6720
+No Ion:
+           Jsc_f: -0.0243
+           Voc_f: 0.7942
+           mpp_f: 0.0129
+    efficiency_f: 12.9253
+          mppV_f: 0.6000
+            FF_f: 0.6693
+
+Pos Offset (ICBA)
+Ion:
+           Jsc_f: -0.0179
+           Voc_f: 1.0700
+           mpp_f: 0.0037
+    efficiency_f: 3.6608
+          mppV_f: 0.3900
+            FF_f: 0.1916
+No Ion:
+           Jsc_f: -0.0244
+           Voc_f: 1.0769
+           mpp_f: 0.0124
+    efficiency_f: 12.3914
+          mppV_f: 0.5500
+            FF_f: 0.4709
