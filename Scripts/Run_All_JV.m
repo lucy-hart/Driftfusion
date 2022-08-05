@@ -32,6 +32,9 @@ end
 figure('Name', 'JVPlot', 'Position', [100 100 1250 1250])
 colors_JV = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880],[0 0.4470 0.7410],[0.9290 0.6940 0.1250]};
 
+hold on
+plot(v(:), zeros(1,length(v)), 'black', 'LineWidth', 1)
+plot(zeros(1,50), linspace(-30, 10, 50), 'black', 'LineWidth', 1)
 for m=1:num_devices
     v = dfana.calcVapp(JV_solutions_ion{m});
     v_el = dfana.calcVapp(JV_solutions_el{m});
@@ -42,13 +45,13 @@ for m=1:num_devices
     plot(v_el(1:151), j_el(1:151)*1000, '--', 'color', colors_JV{m}, 'LineWidth', 3)
     hold on
 end
-plot(v(:), zeros(1,length(v)), 'black', 'LineWidth', 1)
 hold off
 
+box on 
 set(gca, 'FontSize', 25)
 xlim([-0.2, 1.2])
 ylim([-27,8])
-legend({'ETM 1','', 'ETM 2','', 'ETM 3','',''}, 'Location', 'northwest', 'FontSize', 30)
+legend({'','','ETM 1','', 'ETM 2','', 'ETM 3',''}, 'Location', 'northwest', 'FontSize', 30)
 xlabel('Voltage(V)', 'FontSize', 30)
 ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
 ax1 = gcf;
@@ -111,11 +114,11 @@ xlabel('Voltage (V)')
 ylim([-0.03, 0.01])
 ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{interface}', 'J_{contact}','J_{ext}'}, 'Location', 'bestoutside')
-ax2 = gca;
+ax2 = gcf;
 %% Save Plots at 300 dpi
 save = 1;
 fig_num = 1;
-PS = 1;
+ETM = 1;
 
 if save == 1 && fig_num == 1
     exportgraphics(ax1, ...

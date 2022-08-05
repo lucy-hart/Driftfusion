@@ -1,6 +1,6 @@
 % Make plot of JV curves at different scan rates
 
-num = 3;
+num = 1;
 scan_rates = [1e-2, 1e-1, 1];
 JV_Solutions = cell(1,5);
 
