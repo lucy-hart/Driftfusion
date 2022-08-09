@@ -4,7 +4,7 @@
 lw = 3;
 fontsize = 30;
 ticksize = 20;
-save = 0;
+save = 1;
 %% Plot energy levels and carrier popultions at open circuit for PS1 and PS2
 % to illustrate band bending at perovskite/ETM interface cause by deep LUMO
 % of ETM in PS1. 
@@ -22,7 +22,39 @@ x_values = CV_solutions_ion{num}.x * 1e7;
 
 %Make band bending more obvious
 %Shift value up by 0.2 eV in the bulk and modulate by a sigmoid
+%This is bad science
 Efn_dramatic_bending = Efn(T,numstart:1100) + 0.2./(1+exp((x_values(numstart:1100)-411.9)/0.02));
+
+figure('Name', 'Band Bending Kloc6 Inset', 'Position', [100 100 1250 2000])
+set(gca, 'DefaultLineLineWidth', 5)
+num_crop = 25;
+
+hold on
+
+% Do background colours
+% Arguments of patch give the coordinates of the corners of the polygon to
+% be shaded
+patch('XData',[x_values(1200)-2 x_values(end)-2 x_values(end)-2 x_values(1200)-2], ...
+    'YData',[-1 -1 -10 -10],  'FaceColor', colors_JV{3},...
+    'FaceAlpha', 0.3, 'EdgeColor', 'none')
+
+plot(x_values(numstart+num_crop:1100), Ecb(T,numstart+num_crop:1100), 'b',...
+    x_values(1200:numstop_PS1-num_crop)-2, Ecb(T,1200:numstop_PS1-num_crop), 'b',...
+    x_values(numstart+num_crop:1100), Efn(T,numstart+num_crop:1100), 'b--',...
+    x_values(1200:numstop_PS1-num_crop)-2, Efn(T,1200:numstop_PS1-num_crop), 'b--')
+plot(x_values(numstart+num_crop:1100-1), Efn(T,numstart).*ones(1,length(x_values(numstart+num_crop:1100))-1), ...
+    'color', [0.9290 0.6940 0.1250], 'LineStyle', '--')
+
+hold off
+
+xlim([x_values(numstart+num_crop), x_values(numstop_PS1-num_crop)-2])
+ylim([-4.2, -3.6])
+set(gca, 'YTick',[], 'XTick', [])
+box on
+leg = legend('','', '', '', '', 'E_{f,n} (bulk)', ...
+    'NumColumns', 1, 'Location', 'west', 'Fontsize', 50);
+leg.ItemTokenSize = [80, 18];
+fig1a_inset = gcf;
 
 figure('Name', 'Band Bending Kloc6', 'Position', [100 100 1250 2000])
 set(gca, 'DefaultLineLineWidth', lw)
@@ -281,13 +313,16 @@ legend('F_{ion}', 'F_{no ions}', '', 'NumColumns', 1, 'Position', [0.72 0.8 0.15
 fig5 = gcf;
 %% Save Images
 %Set details of what you're saving
-fig_num = 5;
-PS_distplot = 2;
+fig_num = 1;
+PS_distplot = 1;
 PS_fieldplot = 2;
 
 if save == 1 && fig_num == 1
     exportgraphics(fig1a, ...
     'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\BandBending_Kloc6.png', ...
+    'Resolution', 300)
+    exportgraphics(fig1a_inset, ...
+    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\BandBending_Kloc6_inset.png', ...
     'Resolution', 300)
     exportgraphics(fig1b, ...
     'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\BandBending_PCBM.png', ...
