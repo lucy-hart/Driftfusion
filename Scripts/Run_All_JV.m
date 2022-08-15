@@ -31,13 +31,13 @@ end
 %% Plot JVs
 figure('Name', 'JVPlot', 'Position', [100 100 1250 1250])
 colors_JV = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880],[0 0.4470 0.7410],[0.9290 0.6940 0.1250]};
+v = dfana.calcVapp(JV_solutions_ion{1});
+v_el = dfana.calcVapp(JV_solutions_el{1});
 
 hold on
 plot(v(:), zeros(1,length(v)), 'black', 'LineWidth', 1)
 plot(zeros(1,50), linspace(-30, 10, 50), 'black', 'LineWidth', 1)
 for m=1:num_devices
-    v = dfana.calcVapp(JV_solutions_ion{m});
-    v_el = dfana.calcVapp(JV_solutions_el{m});
     j = dfana.calcJ(JV_solutions_ion{m}).tot(:,1);
     j_el = dfana.calcJ(JV_solutions_el{m}).tot(:,1);
     plot(v(:), j(:)*1000, 'color', colors_JV{m}, 'LineWidth', 3) 
@@ -94,8 +94,8 @@ end
 
 %% Plot contributons to the current
 %J_rad not corrected for EL - see EL_Measurements
-figure(333)
-num=2;
+figure('Name', 'CurrentContributions')
+num = 3;
 line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560]...
                 [0 0.4470 0.7410], [0.3010 0.7450 0.9330], [0.4660 0.6740 0.1880]};
 V = dfana.calcVapp(JV_solutions_ion{1});
@@ -116,16 +116,16 @@ ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{interface}', 'J_{contact}','J_{ext}'}, 'Location', 'bestoutside')
 ax2 = gcf;
 %% Save Plots at 300 dpi
-save = 1;
+save = 0;
 fig_num = 1;
 ETM = 1;
 
 if save == 1 && fig_num == 1
     exportgraphics(ax1, ...
-    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\Figures\JV.png', ...
+    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\JV.png', ...
     'Resolution', 300)
 elseif save == 1 && fig_num == 2
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\Figures\CurrentContributions_PS' num2str(PS_distplot) '.png'];
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\CurrentContributions_PS' num2str(PS_distplot) '.png'];
     exportgraphics(ax2, filename, 'Resolution', 300)
 end 
 

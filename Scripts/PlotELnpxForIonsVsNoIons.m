@@ -1,5 +1,3 @@
-%Need to run this after CalculateQFLS so that OC_time has been calculated 
-
 %Plot parameters
 lw = 3;
 fontsize = 30;
@@ -106,7 +104,7 @@ fig1b = gcf;
 %% Plot carrier populations at SC and OC, with and without mobile ions
 % and the ion population at OC 
 
-num = 1;
+num = 2;
 x_values = JV_solutions_ion{num}.x * 1e7;
 if num ~= 1
     pos_el = [0.68 0.8 0.1 0.05];
@@ -158,7 +156,54 @@ hold off
 
 fig2 = gcf;
 
-%OC
+%OC (el)
+T = OC_time_el(num);
+
+figure('Name', 'Carrier Densities OC', 'Position', [100 100 1250 2000])
+set(gca, 'DefaultLineLineWidth', lw, 'FontSize', ticksize)
+
+hold on
+
+% Do background colours
+% Arguments of patch give the coordinates of the corners of the polygon to
+% be shaded
+patch('XData',[0 x_values(500) x_values(500) 0], 'YData',[30 30 2 2], 'FaceColor', colors_JV{1},...
+    'FaceAlpha', 0.3, 'EdgeColor', 'none')
+patch('XData',[x_values(500) x_values(600) x_values(600) x_values(500)], 'YData',[30 30 2 2], 'FaceColor', colors_JV{2},...
+    'FaceAlpha', 0.5, 'EdgeColor', 'none')
+patch('XData',[x_values(1100) x_values(1200) x_values(1200) x_values(1100)], 'YData',[30 30 2 2], 'FaceColor', colors_JV{2},...
+    'FaceAlpha', 0.5, 'EdgeColor', 'none')
+patch('XData',[x_values(1200) x_values(end) x_values(end) x_values(1200)], 'YData',[30 30 2 2],  'FaceColor', colors_JV{3},...
+    'FaceAlpha', 0.3, 'EdgeColor', 'none')
+
+semilogy(x_values, log10(JV_solutions_ion{num}.u(T,:,2)), 'b-',...
+         x_values, log10(JV_solutions_ion{num}.u(T,:,3)), 'r-')
+semilogy(x_values, log10(JV_solutions_el{num}.u(T,:,2)), 'b--',...
+         x_values, log10(JV_solutions_el{num}.u(T,:,3)), 'r--')
+
+hold off 
+
+ylim([9,20])
+if num == 1
+    xlim([0, x_values(1540)])
+else
+    xlim([0, max(x_values)])
+end
+ylabel('log_{10}(Carrier Density/cm^{-3})', 'Fontsize', fontsize)
+xlabel('Device depth (nm)', 'Fontsize', fontsize)
+yticks([10 12 14 16 18 20])
+xticks([0 100 200 300 400])
+legend('','','','','electrons','holes', 'NumColumns', 1, 'Position', pos_el, 'Fontsize', fontsize)
+if num == 1
+    leg_title = [num2str(Voc_el(num), 2) ' V'];
+else
+    leg_title = [num2str(Voc_el(num), 3) ' V'];
+end
+title(legend, leg_title, 'Fontsize', fontsize)
+
+fig3a = gcf;
+
+%OC (ion)
 T = OC_time_ion(num);
 
 figure('Name', 'Carrier Densities OC', 'Position', [100 100 1250 2000])
@@ -180,9 +225,6 @@ patch('XData',[x_values(1200) x_values(end) x_values(end) x_values(1200)], 'YDat
 
 semilogy(x_values, log10(JV_solutions_ion{num}.u(T,:,2)), 'b-',...
          x_values, log10(JV_solutions_ion{num}.u(T,:,3)), 'r-')
-
-T = OC_time_el(num);
-
 semilogy(x_values, log10(JV_solutions_el{num}.u(T,:,2)), 'b--',...
          x_values, log10(JV_solutions_el{num}.u(T,:,3)), 'r--')
 
@@ -199,9 +241,11 @@ xlabel('Device depth (nm)', 'Fontsize', fontsize)
 yticks([10 12 14 16 18 20])
 xticks([0 100 200 300 400])
 legend('','','','','electrons','holes', 'NumColumns', 1, 'Position', pos_el, 'Fontsize', fontsize)
-title(legend, 'Open Circuit', 'Fontsize', fontsize)
+leg_title = [num2str(Voc_ion(num), 3) ' V'];
+title(legend, leg_title, 'Fontsize', fontsize)
 
-fig3 = gcf;
+fig3b = gcf;
+
 
 %Ions OC
 figure('Name', 'Cation Densities OC', 'Position', [100 100 1250 2000])
@@ -244,23 +288,26 @@ fig4 = gcf;
 
 %% Save Images
 %Set details of what you're saving
-fig_num = 1.5;
+fig_num = 3;
 ETM_distplot = 2;
 ETM_fieldplot = 2;
 
 if save == 1 && fig_num == 1
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\Figures\FieldScreening_ETM' num2str(ETM_fieldplot) '.png'];
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\FieldScreening_ETM' num2str(ETM_fieldplot) '.png'];
     exportgraphics(fig1a, filename, 'Resolution', 300)
 elseif save == 1 && fig_num == 1.5
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\Figures\CationDistributionsSC_ETM' num2str(ETM_distplot) '.png'];
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\CationDistributionsSC_ETM' num2str(ETM_distplot) '.png'];
     exportgraphics(fig1b, filename, 'Resolution', 300)
 elseif save == 1 && fig_num == 2
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\Figures\CarrierDistributionsSC_ETM' num2str(ETM_distplot) '.png'];
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\CarrierDistributionsSC_ETM' num2str(ETM_distplot) '.png'];
     exportgraphics(fig2, filename, 'Resolution', 300)
 elseif save == 1 && fig_num == 3
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\Figures\CarrierDistributionsOC_ETM' num2str(ETM_distplot) '.png'];
-    exportgraphics(fig3, filename, 'Resolution', 300)
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\CarrierDistributionsOCel_ETM' num2str(ETM_distplot) '.png'];
+    exportgraphics(fig3a, filename, 'Resolution', 300)
+elseif save == 1 && fig_num == 3.5
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\CarrierDistributionsOCion_ETM' num2str(ETM_distplot) '.png'];
+    exportgraphics(fig3b, filename, 'Resolution', 300)
 elseif save == 1 && fig_num == 4
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\Figures\CationDistributionsOC_ETM' num2str(ETM_distplot) '.png'];
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\CationDistributionsOC_ETM' num2str(ETM_distplot) '.png'];
     exportgraphics(fig4, filename, 'Resolution', 300)
 end
