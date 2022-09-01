@@ -96,7 +96,7 @@ end
 %% Plot contributons to the current
 %J_rad not corrected for EL - see EL_Measurements
 figure(333)
-num=2;
+num=3;
 line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560]...
                 [0 0.4470 0.7410], [0.3010 0.7450 0.9330], [0.4660 0.6740 0.1880]};
 V = dfana.calcVapp(CV_solutions_ion{1});
@@ -147,6 +147,24 @@ elseif save == 1 && fig_num == 2
     'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\PLQY.png', ...
     'Resolution', 300)
 end 
+
+%% Plot Jnonrad/Jrad results
+figure('Name', 'Jnr/Jrad', 'Position', [100 100 1250 2000])
+for i = 1:num_devices
+    semilogy(V(1:151), (sum(J_values(1:151,3:5,i),2)./(J_values(1:151,2,i)))./(sum(J_values(31,3:5,i),2)./(J_values(31,2,i))) ...
+        , 'color', colors_JV{i}, 'LineWidth', 3) 
+    hold on 
+end
+hold off
+
+set(gca, 'FontSize', 20)
+xlim([0, 1.2])
+ylim([0.3, 3])
+legend({'ETM 1','ETM 2','ETM 3'}, 'Location', 'southeast', 'FontSize', 30)
+xlabel('Voltage (V)', 'FontSize', 30)
+ylabel('J_{non rad}/J_{rad} (norm)', 'FontSize', 30)
+ax2=gca;
+
 
 
 
