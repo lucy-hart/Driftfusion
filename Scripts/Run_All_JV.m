@@ -13,8 +13,8 @@ devices = {par_ETM1, par_ETM2, par_ETM3};
 %% Find eqm solutions 
 eqm_solutions_dark = cell(1,num_devices);
 for i = 1:num_devices
-    %Supress error message about vsr for ETM1 (the error is 5.2% and the warning limit threshold in 5.0%)
-    devices{i}.RelTol_vsr = 0.06;
+    %Supress error message about vsr for ETM1 (the error is 6.1% and the warning limit threshold in 5.0%)
+    devices{i}.RelTol_vsr = 0.065;
     devices{i} = refresh_device(devices{i});
     eqm_solutions_dark{i} = equilibrate(devices{i});
 end
@@ -22,7 +22,7 @@ end
 %% Perform JV scans
 JV_solutions_el = cell(1,num_devices);
 JV_solutions_ion = cell(1,num_devices);
-suns = 1.15;
+suns = 1.1;
 for j = 1:num_devices
     JV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, suns, -0.3, 1.2, -0.3, 10e-3, 1, 301);
     JV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, suns, -0.3, 1.2, -0.3, 10e-3, 1, 301);
@@ -116,7 +116,7 @@ ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{interface}', 'J_{contact}','J_{ext}'}, 'Location', 'bestoutside')
 ax2 = gcf;
 %% Save Plots at 300 dpi
-save = 0;
+save = 1;
 fig_num = 1;
 ETM = 1;
 

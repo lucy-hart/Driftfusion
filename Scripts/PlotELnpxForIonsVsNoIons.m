@@ -21,15 +21,20 @@ end
 
 %% Plot E field at SC with and without effects of mobile ions
 %and ion density at SC
-
 figure('Name', 'Field Screening', 'Position', [100 100 1250 2000])
 set(gca, 'DefaultLineLineWidth', lw, 'FontSize', ticksize)
 
-num = 2;
-upper_lim = [2.0e4, 4.5e4, 6.0e4];
-ytick_cell = {[0 0.5e4 1.0e4 1.5e4 2.0e4];
+num = 3;
+if num ~= 1
+    pos_ion = [0.66 0.8 0.1 0.05];
+else
+    pos_ion = [0.68 0.8 0.1 0.05];
+end
+
+upper_lim = [3.5e4, 4.5e4, 4.5e4];
+ytick_cell = {[0 0.5e4 1.0e4 1.5e4 2.0e4 2.5e4, 3.0e4];
     [0  1.0e4  2.0e4  3.0e4  4.0e4];
-    [0 1.0e4 2.0e4 3.0e4 4.0e4 5.0e4 6.0e4]};
+    [0 1.0e4 2.0e4 3.0e4 4.0e4]};
 
 T = 31;
 
@@ -59,7 +64,7 @@ fig1a = gcf;
 %Ions SC
 upper_lim_ion = [1.4e18, 1.5e18, 1.4e18];
 
-figure('Name', 'Cation Densities OC', 'Position', [100 100 1250 2000])
+figure('Name', 'Cation Densities SC', 'Position', [100 100 1250 2000])
 set(gca, 'DefaultLineLineWidth', lw, 'FontSize', ticksize)
 
 hold on
@@ -288,9 +293,9 @@ fig4 = gcf;
 
 %% Save Images
 %Set details of what you're saving
-fig_num = 3;
-ETM_distplot = 2;
-ETM_fieldplot = 2;
+fig_num = 1;
+ETM_distplot = 3;
+ETM_fieldplot = 3;
 
 if save == 1 && fig_num == 1
     filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\FieldScreening_ETM' num2str(ETM_fieldplot) '.png'];

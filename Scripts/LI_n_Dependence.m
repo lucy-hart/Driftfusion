@@ -1,12 +1,9 @@
-% See how distribution of carriers in PCBM device varies with intensity
+% See how distribution of carriers in PCBM device varies with intensity.
+% Run after Run_all_JV.m so that the dark eqm has already been calculated
+% for each ETM. 
 
-%% Read in data
-par = pc('Input_files/PTAA_MAPI_PCBM_v2.csv');
-
-%% Do JV scans
-eqm = equilibrate(par);
-CV_sol_ion_HL = doCV(eqm.ion, 1.0, -0.3, 1.3, -0.3, 1e-3, 1, 321);
-CV_sol_ion_LL = doCV(eqm.ion, 0.5, -0.3, 1.3, -0.3, 1e-3, 1, 321);
+%% Set intensities and calcuate SS solutions at OC
+intensities = logspace(-1, 1, 10);
 
 %% Calculate n values
 num_start = sum(CV_sol_ion_HL.par.layer_points(1:2))+1;
