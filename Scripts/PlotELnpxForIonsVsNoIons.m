@@ -3,7 +3,7 @@
 %Plot parameters
 lw = 3;
 fontsize = 30;
-ticksize = 20;
+ticksize = 25;
 save = 1;
 %% Plot energy levels and carrier popultions at open circuit for PS1 and PS2
 % to illustrate band bending at perovskite/ETM interface cause by deep LUMO
@@ -273,7 +273,7 @@ if num == 3
 else
     yticks([2e17 4e17 6e17 8e17 10e17])
 end
-legend('','','','','Short Circuit','Open Circuit', 'NumColumns', 1, 'Position', pos_ion, 'Fontsize', fontsize)
+legend('','','', '','Short Circuit','Open Circuit', 'NumColumns', 1, 'Position', pos_ion, 'Fontsize', fontsize)
 title(legend, 'Ion Distribution', 'Fontsize', fontsize)
 
 fig4 = gcf;

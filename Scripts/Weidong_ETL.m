@@ -35,6 +35,9 @@ figure('Name', 'JVPlot', 'Position', [100 100 1250 1250])
 colors_JV = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880],[0 0.4470 0.7410],[0.9290 0.6940 0.1250]};
 
 for m=1:num_devices
+    if m ~= 2
+        continue
+    end
     v = dfana.calcVapp(CV_solutions_ion{m});
     v_el = dfana.calcVapp(CV_solutions_el{m});
     j = -dfana.calcJ(CV_solutions_ion{m}).tot(:,1);
@@ -47,11 +50,11 @@ end
 plot(v(:), zeros(1,length(v)), 'black', 'LineWidth', 1)
 hold off
 
-set(gca, 'FontSize', 20)
+set(gca, 'FontSize', 25)
 xlim([0, 1.2])
 ylim([0,27])
-legend({'ETM 1','', 'ETM 2','', 'ETM 3','',''}, 'Location', 'southwest', 'FontSize', 30)
-xlabel('Voltage(V)', 'FontSize', 30)
+%legend({'ETM 1','', 'ETM 2','', 'ETM 3','',''}, 'Location', 'southwest', 'FontSize', 30)
+xlabel('Voltage (V)', 'FontSize', 30)
 ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
 ax1 = gca;
 %% Break down contributions to the current
