@@ -46,28 +46,3 @@ Delta_mu_ion = (QFLS_OC_ion-QFLS_SC_ion)*1000;
 Delta_mu_el = (QFLS_OC_el-QFLS_SC_el)*1000;
 QFLS_Loss = (QFLS_OC_ion-Voc_ion)*1000;
 
-%% Plot QFLS vs Vapp for el vs ion cases
-
-figure('Name', 'QFLSPlot', 'Position', [100 100 1250 2000])
-for w=1:num_devices
-    plot(V(1:161), QFLS_ion(1:161,w), 'color', colors_JV{w}) 
-    hold on 
-    semilogy(V(1:161), QFLS_el(1:161,w), '-.', 'color', colors_JV{w})     
-    hold on
-end
-hold off
-xlim([0, 1.2])
-xlabel('Voltage (V)')
-ylabel('QFLS (eV)')
-ylim([0.85, 1.2])
-if num_devices == 4
-    legend({'Kloc-6','', 'PCBM','', 'ICBA','','IPH',''}, 'Location', 'northwest')
-elseif num_devices == 3
-    legend({'ETM 1','', 'ETM 2','', 'ETM 3',''}, 'Location', 'northwest')
-end
-
-%%
-fig = gca;
-exportgraphics(fig, ...
-    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\QFLS.png', ...
-    'Resolution', 300)

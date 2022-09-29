@@ -1,8 +1,8 @@
-function Plot_Current_Contributions(CVsol)
+function Plot_Current_Contributions(CVsol, opt)
 %Script to plot the currents from radiative and non-radiative (split into
 %SRH, surface and VSR) losses, alongside the current measured in a JV sweep and the
 %generation current. 
-
+%If opt = 1, will also plot J_nonrad/J_rad ratio
 %% Break down contributions to the current
 %Columns in J_values are J_gen, J_rad, J_srh, J_vsr, J_shunt and J_ext
 num_values = length(CVsol.t);
@@ -39,4 +39,11 @@ ylim([J_values(1,1)*1.1, 0.01])
 ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{surface}', '', 'J_{ext}'}, 'Location', 'bestoutside')
 
+%% Plot J_nonrad/J_rad
+if opt == 1
+    figure('Name', 'J_nonrad/J_rad', 'Position', [50 50 1000 1000])
+    plot(V(:), sum(100*J_values(:,3:5),2)./J_values(:,2))
+    xlim([0, CVsol.par.V_fun_arg(2)])
+    xlabel('Voltage (V)')
+    ylabel('J_{non rad}/J_{rad}')
 end
