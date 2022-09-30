@@ -28,8 +28,8 @@ end
 
 %% Plot JVs
 figure('Name', 'JVPlot', 'Position', [100 100 1250 2000])
-%Colour order is red, green, blue, yellow
-colors_JV = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880],[0 0.4470 0.7410],[0.9290 0.6940 0.1250]};
+%Colour order is red, green, blue
+colors_JV = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880],[0 0.4470 0.7410]};
 
 m=1;
 v = dfana.calcVapp(CV_solutions_ion{m});
