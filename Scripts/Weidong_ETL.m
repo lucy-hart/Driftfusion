@@ -51,14 +51,11 @@ ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
 legend({'  Mobile Ions', '  No Mobile Ions'}, 'Location', 'southwest', 'FontSize', 30)
 ax1 = gca;
 %% Break down contributions to the current
-%Columns in J_values are J_gen, J_rad, J_srh, J_vsr and J_ext
-%Don't take btb from back layer as unlikely to escape the device, parasitic
-%absorption of metal back contact
+%Columns in J_values are J_gen, J_rad, J_srh, J_vsr (left), J_vsr (right) and J_ext
 
 num_values = length(CV_solutions_ion{1}.t);
-num_stop = sum(CV_solutions_ion{1}.par.layer_points(1:3));
 J_values = zeros(num_values,7,num_devices);
-J_values_el = zeros(num_values,2,num_devices);
+J_values_el = zeros(num_values,7,num_devices);
 Voc_ion = zeros(num_devices,2);
 Voc_el = zeros(num_devices,2);
 e = -CV_solutions_ion{1}.par.e;
@@ -67,16 +64,18 @@ for k=1:num_devices
     CVsol = CV_solutions_ion{k};
     loss_currents = dfana.calcr(CVsol,'sub');
     x = CVsol.par.x_sub;
+    num_points = length(x);
     gxt = dfana.calcg(CVsol);
     J = dfana.calcJ(CVsol);
     j_surf_rec = dfana.calcj_surf_rec(CVsol);
 
     J_values(:,1,k) = e*trapz(x, gxt(1,:))';
-    J_values(:,2,k) = e*trapz(x(1:num_stop), loss_currents.btb(:,1:num_stop), 2)';
+    J_values(:,2,k) = e*trapz(x, loss_currents.btb, 2)';
     J_values(:,3,k) = e*trapz(x, loss_currents.srh, 2)';
-    J_values(:,4,k) = e*trapz(x, loss_currents.vsr, 2)';
-    J_values(:,5,k) = e*(j_surf_rec.tot);
-    J_values(:,6,k) = J.tot(:,1);
+    J_values(:,4,k) = e*trapz(x(1:num_points), loss_currents.vsr(:,1:num_points), 2)';
+    J_values(:,5,k) = e*trapz(x(num_points+1:end), loss_currents.vsr(:,num_points+1:end), 2)';
+    J_values(:,6,k) = e*(j_surf_rec.tot);
+    J_values(:,7,k) = J.tot(:,1);
 
     Voc_ion(k,1) = CVstats(CVsol).Voc_f;
     Voc_ion(k,2) = interp1(v(1:ceil(num_values/2)), J_values(1:ceil(num_values/2),2,k), Voc_ion(k,1));
@@ -87,10 +86,18 @@ for k=1:num_devices
     CVsol = CV_solutions_el{k};
     loss_currents = dfana.calcr(CVsol,'sub');
     x = CVsol.par.x_sub;
+    num_points = length(x);
     gxt = dfana.calcg(CVsol);
+    J = dfana.calcJ(CVsol);
+    j_surf_rec = dfana.calcj_surf_rec(CVsol);
 
     J_values_el(:,1,k) = e*trapz(x, gxt(1,:))';
-    J_values_el(:,2,k) = e*trapz(x(1:num_stop), loss_currents.btb(:,1:num_stop), 2)';
+    J_values_el(:,2,k) = e*trapz(x, loss_currents.btb, 2)';
+    J_values_el(:,3,k) = e*trapz(x, loss_currents.srh, 2)';
+    J_values_el(:,4,k) = e*trapz(x(1:num_points), loss_currents.vsr(:,1:num_points), 2)';
+    J_values_el(:,5,k) = e*trapz(x(num_points+1:end), loss_currents.vsr(:,num_points+1:end), 2)';
+    J_values_el(:,6,k) = e*(j_surf_rec.tot);
+    J_values_el(:,7,k) = J.tot(:,1);
 
     Voc_el(k,1) = CVstats(CVsol).Voc_f;
     Voc_el(k,2) = interp1(v(1:ceil(num_values/2)), J_values_el(1:ceil(num_values/2),2,k), Voc_el(k,1));
@@ -102,9 +109,9 @@ end
 figure(333)
 num=1;
 line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560]...
-                [0 0.4470 0.7410], [0.3010 0.7450 0.9330], [0.4660 0.6740 0.1880]};
+                [0 0.4470 0.7410], [0.3010 0.7450 0.9330], 'black',[0.4660 0.6740 0.1880]};
 V = dfana.calcVapp(CV_solutions_ion{1});
-for n = 1:6
+for n = 1:7
     if n ==2 
     plot(V(:), J_values(:,n,num)*100, 'color', line_colour{n})
     else
@@ -118,8 +125,25 @@ xlim([0, 1.2])
 xlabel('Voltage (V)')
 ylim([-0.03, 0.01])
 ylabel('Current Density (Acm^{-2})')
-legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{interface}', 'J_{contact}','J_{ext}'}, 'Location', 'bestoutside')
+legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{interface (left)}', 'J_{interface (right)}', '','J_{ext}'}, 'Location', 'bestoutside')
 
+%% Losses at SC, ions vs no ions
+x = categorical({'With Mobile Ions', 'Without Mobile Ions'});
+y = [-J_values(31,2,1) -J_values(31,3,1) -J_values(31,4,1) -J_values(31,5,1); ...
+    -J_values_el(31,2,1) -J_values_el(31,3,1) -J_values_el(31,4,1) -J_values_el(31,5,1)];
+
+bar_colours = {[0.9290 0.6940 0.1250],[0 0.4470 0.7410],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330]};
+figure('Name', 'RecombinationSC_ElvsIon','Position', [100 100 1250 2000])
+box on
+b = bar(x, y, 'stacked','FaceColor','flat');
+
+for k = 1:4
+    b(k).CData = bar_colours{k};
+end
+
+set(gca, 'FontSize', 30)
+ylabel('Recombination Current Density (Acm^{-2})', 'FontSize', 30)
+legend({'', '  J_{bulk}', '  J_{surface}', ''}, 'Location', 'northeast', 'FontSize', 30)
 %% Plot PLQY results
 %One plot for effect of changing mobility 
 %Another plot for effect of changing energetics

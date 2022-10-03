@@ -42,7 +42,9 @@ legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{surface}', '', 'J_{ext}'}, 'Loc
 %% Plot J_nonrad/J_rad
 if opt == 1
     figure('Name', 'J_nonrad/J_rad', 'Position', [50 50 1000 1000])
-    plot(V(:), sum(100*J_values(:,3:5),2)./J_values(:,2))
+    J_values(:,2) = J_values(:,2)/100;
+    norm = sum(J_values(31,3:5),2)/J_values(31,2);
+    plot(V(:), sum(J_values(:,3:5),2)./(norm*J_values(:,2)))
     xlim([0, CVsol.par.V_fun_arg(2)])
     xlabel('Voltage (V)')
     ylabel('J_{non rad}/J_{rad}')
