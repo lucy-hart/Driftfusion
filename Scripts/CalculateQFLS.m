@@ -50,20 +50,22 @@ QFLS_Loss = (QFLS_OC_ion-Voc_ion)*1000;
 
 figure('Name', 'QFLSPlot', 'Position', [100 100 1250 2000])
 for w=1:num_devices
-    plot(V(1:161), QFLS_ion(1:161,w), 'color', colors_JV{w}) 
+    plot(V(1:151), QFLS_ion(1:151,w), 'color', colors_JV{w}, 'LineWidth', 3) 
     hold on 
-    semilogy(V(1:161), QFLS_el(1:161,w), '-.', 'color', colors_JV{w})     
+    semilogy(V(1:151), QFLS_el(1:151,w), '--', 'color', colors_JV{w}, 'LineWidth', 3)     
     hold on
 end
 hold off
+
+set(gca, 'FontSize', 25)
 xlim([0, 1.2])
-xlabel('Voltage (V)')
-ylabel('QFLS (eV)')
-ylim([0.85, 1.2])
+xlabel('Voltage (V)', 'FontSize', 30)
+ylabel('QFLS (eV)', 'FontSize', 30)
+ylim([0.9, 1.2])
 if num_devices == 4
     legend({'Kloc-6','', 'PCBM','', 'ICBA','','IPH',''}, 'Location', 'northwest')
 elseif num_devices == 3
-    legend({'ETM 1','', 'ETM 2','', 'ETM 3',''}, 'Location', 'northwest')
+    legend({'ETM 1','', 'ETM 2','', 'ETM 3',''}, 'Location', 'southeast', 'FontSize', 30)
 end
 
 %%

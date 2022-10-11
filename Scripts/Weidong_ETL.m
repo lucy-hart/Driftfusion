@@ -129,13 +129,25 @@ for i = 1:num_devices
 end
 hold off
 
-set(gca, 'FontSize', 20)
+set(gca, 'FontSize', 25)
+ax2 = gca;
 xlim([0, 1.2])
-ylim([1e-5, 0.3])
-legend({'ETM 1','', 'ETM 2','', 'ETM 3',''}, 'Location', 'southeast', 'FontSize', 30)
 xlabel('Voltage (V)', 'FontSize', 30)
+legend({'ETM 1','', 'ETM 2','', 'ETM 3',''}, 'Location', 'southeast', 'FontSize', 30)
+yyaxis left
+ylim([1e-5, 0.3])
 ylabel('PLQY (%)', 'FontSize', 30)
-ax2=gca;
+%Plot QFLS on right y axis
+kT = 0.0257;
+ni = eqm_solutions_dark{2}.ion.par.ni(3);
+B = eqm_solutions_dark{2}.ion.par.B(3);
+J_gen = J_values(1,1,2);
+J_dark = e*B*400e-7*ni^2;
+yyaxis right
+ylim([kT*log(1e-7*J_gen/J_dark), kT*log(0.003*J_gen/J_dark)])
+ylabel('QFLS (V)', 'FontSize', 30)
+ax2.YAxis(1).Color = 'k';
+ax2.YAxis(2).Color = 'k';
 
 %% Save Plots at 300 dpi
 save = 1;
@@ -147,7 +159,7 @@ if save == 1 && fig_num == 1
     'Resolution', 300)
 elseif save == 1 && fig_num == 2
     exportgraphics(ax2, ...
-    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\PLQY.png', ...
+    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\PLQYandQFLS.png', ...
     'Resolution', 300)
 end 
 
