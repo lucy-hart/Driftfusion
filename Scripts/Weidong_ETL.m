@@ -35,9 +35,6 @@ figure('Name', 'JVPlot', 'Position', [100 100 1250 1250])
 colors_JV = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880],[0 0.4470 0.7410],[0.9290 0.6940 0.1250]};
 
 for m=1:num_devices
-    if m ~= 2
-        continue
-    end
     v = dfana.calcVapp(CV_solutions_ion{m});
     v_el = dfana.calcVapp(CV_solutions_el{m});
     j = -dfana.calcJ(CV_solutions_ion{m}).tot(:,1);
@@ -53,7 +50,7 @@ hold off
 set(gca, 'FontSize', 25)
 xlim([0, 1.2])
 ylim([0,27])
-%legend({'ETM 1','', 'ETM 2','', 'ETM 3','',''}, 'Location', 'southwest', 'FontSize', 30)
+legend({'ETM 1','', 'ETM 2','', 'ETM 3','',''}, 'Location', 'southwest', 'FontSize', 30)
 xlabel('Voltage (V)', 'FontSize', 30)
 ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
 ax1 = gca;
@@ -130,24 +127,12 @@ end
 hold off
 
 set(gca, 'FontSize', 25)
-ax2 = gca;
 xlim([0, 1.2])
 xlabel('Voltage (V)', 'FontSize', 30)
 legend({'ETM 1','', 'ETM 2','', 'ETM 3',''}, 'Location', 'southeast', 'FontSize', 30)
-yyaxis left
 ylim([1e-5, 0.3])
 ylabel('PLQY (%)', 'FontSize', 30)
-%Plot QFLS on right y axis
-kT = 0.0257;
-ni = eqm_solutions_dark{2}.ion.par.ni(3);
-B = eqm_solutions_dark{2}.ion.par.B(3);
-J_gen = J_values(1,1,2);
-J_dark = e*B*400e-7*ni^2;
-yyaxis right
-ylim([kT*log(1e-7*J_gen/J_dark), kT*log(0.003*J_gen/J_dark)])
-ylabel('QFLS (V)', 'FontSize', 30)
-ax2.YAxis(1).Color = 'k';
-ax2.YAxis(2).Color = 'k';
+ax2 = gca;
 
 %% Save Plots at 300 dpi
 save = 1;
@@ -159,7 +144,7 @@ if save == 1 && fig_num == 1
     'Resolution', 300)
 elseif save == 1 && fig_num == 2
     exportgraphics(ax2, ...
-    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\PLQYandQFLS.png', ...
+    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\PLQY.png', ...
     'Resolution', 300)
 end 
 
