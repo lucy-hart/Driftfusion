@@ -56,8 +56,8 @@ ax1 = gca;
 num_values = length(CV_solutions_ion{1}.t);
 J_values = zeros(num_values,7,num_devices);
 J_values_el = zeros(num_values,7,num_devices);
-Voc_ion = zeros(num_devices,2);
-Voc_el = zeros(num_devices,2);
+Voc_values_ion = zeros(num_devices,2);
+Voc_values_el = zeros(num_devices,2);
 e = -CV_solutions_ion{1}.par.e;
 
 for k=1:num_devices
@@ -77,8 +77,8 @@ for k=1:num_devices
     J_values(:,6,k) = e*(j_surf_rec.tot);
     J_values(:,7,k) = J.tot(:,1);
 
-    Voc_ion(k,1) = CVstats(CVsol).Voc_f;
-    Voc_ion(k,2) = interp1(v(1:ceil(num_values/2)), J_values(1:ceil(num_values/2),2,k), Voc_ion(k,1));
+    Voc_values_ion(k,1) = CVstats(CVsol).Voc_f;
+    Voc_values_ion(k,2) = interp1(v(1:ceil(num_values/2)), J_values(1:ceil(num_values/2),2,k), Voc_values_ion(k,1));
 
 end    
 
@@ -99,8 +99,8 @@ for k=1:num_devices
     J_values_el(:,6,k) = e*(j_surf_rec.tot);
     J_values_el(:,7,k) = J.tot(:,1);
 
-    Voc_el(k,1) = CVstats(CVsol).Voc_f;
-    Voc_el(k,2) = interp1(v(1:ceil(num_values/2)), J_values_el(1:ceil(num_values/2),2,k), Voc_el(k,1));
+    Voc_values_el(k,1) = CVstats(CVsol).Voc_f;
+    Voc_values_el(k,2) = interp1(v(1:ceil(num_values/2)), J_values_el(1:ceil(num_values/2),2,k), Voc_values_el(k,1));
     
 end   
 
@@ -151,35 +151,22 @@ figure('Name', 'PLQYPlot Mobility', 'Position', [100 100 1250 2000])
 mob_order = [2,3,1];
 for i = 1:3
     j = mob_order(i);
-    semilogy(V(1:151), 100*(J_values(1:151,2,i))./J_values(1:151,1,i), 'color', colors_JV{j}, 'LineWidth', 3) 
+    semilogy(V(1:151), (J_values(1:151,2,i))./J_values(1:151,1,i), 'color', colors_JV{j}, 'LineWidth', 3) 
     hold on 
-    semilogy(Voc_ion(i,1), 100*Voc_ion(i,2)/J_values(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
-    semilogy(V(1:151), 100*(J_values_el(1:151,2,i))./J_values_el(1:151,1,i), '--', 'color', colors_JV{j}, 'LineWidth', 3) 
-    semilogy(Voc_el(i,1), 100*Voc_el(i,2)/J_values_el(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
+    semilogy(Voc_values_ion(i,1), Voc_values_ion(i,2)/J_values(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
+    semilogy(V(1:151), (J_values_el(1:151,2,i))./J_values_el(1:151,1,i), '--', 'color', colors_JV{j}, 'LineWidth', 3) 
+    semilogy(Voc_values_el(i,1), Voc_values_el(i,2)/J_values_el(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
 end
 hold off
 
 set(gca, 'FontSize', 25)
 xlim([0, 1.2])
-ylim([1e-5, 0.3])
+ylim([1e-7, 0.003])
 legend({'  5 x 10^{-4}', '', '','','  5 x 10^{-5}', '', '', '', '  5 x 10^{-6}', '', '', ''}, 'Location', 'southeast', 'FontSize', 30)
 xlabel('Voltage (V)', 'FontSize', 30)
 ylabel('PLQY (%)', 'FontSize', 30)
 title(legend, 'ETM Mobility (cm^{2}/Vs)', 'Fontsize', 30)
-yyaxis right
-kT = 0.0257;
-J_gen = -J_values(70,1,1);
-ni = CV_solutions_ion{1}.par.ni(3);
-B = CV_solutions_ion{1}.par.B(3);
-w = CV_solutions_ion{1}.par.d(3);
-J0 = -e*w*B*ni^2;
-ylim([kT*log((1e-7*J_gen)/J0), kT*log((0.003*J_gen)/J0)])
-ylabel('QFLS (eV)', 'FontSize', 30)
-yticks([0.90, 0.95, 1.00, 1.05, 1.10])
-yticklabels({'0.90', '0.95', '1.00', '1.05', '1.10'})
-ax2=gca;
-ax2.YAxis(1).Color = 'k';
-ax2.YAxis(2).Color = 'k';
+ax2 = gca;
 
 figure('Name', 'PLQYPlot Energetics', 'Position', [100 100 1250 2000])
 energetics_order_devices = [4,1,5];
@@ -187,27 +174,19 @@ for j = 1:3
     i = energetics_order_devices(j);
     semilogy(V(1:151), 100*(J_values(1:151,2,i))./J_values(1:151,1,i), 'color', colors_JV{j}, 'LineWidth', 3) 
     hold on 
-    semilogy(Voc_ion(i,1), 100*Voc_ion(i,2)/J_values(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
+    semilogy(Voc_values_ion(i,1), 100*Voc_values_ion(i,2)/J_values(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
     semilogy(V(1:151), 100*(J_values_el(1:151,2,i))./J_values_el(1:151,1,i), '--', 'color', colors_JV{j}, 'LineWidth', 3) 
-    semilogy(Voc_el(i,1), 100*Voc_el(i,2)/J_values_el(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
+    semilogy(Voc_values_el(i,1), 100*Voc_values_el(i,2)/J_values_el(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
 end
-hold off
 
 set(gca, 'FontSize', 25)
 xlim([0, 1.2])
 ylim([1e-5, 0.3])
-legend({'  4.15', '', '', '', '  3.95', '', '', '', '  3.75', '', '', ''}, 'Location', 'southeast', 'FontSize', 30)
 xlabel('Voltage (V)', 'FontSize', 30)
 ylabel('PLQY (%)', 'FontSize', 30)
+legend({'  4.15', '', '', '', '  3.95', '', '', '', '  3.75', '', '', ''}, 'Location', 'southeast', 'FontSize', 30)
 title(legend, '|ETM LUMO| (eV)', 'Fontsize', 30)
-yyaxis right
-ylim([kT*log((1e-7*J_gen)/J0), kT*log((0.003*J_gen)/J0)])
-ylabel('QFLS (eV)', 'FontSize', 30)
-yticks([0.90, 0.95, 1.00, 1.05, 1.10])
-yticklabels({'0.90', '0.95', '1.00', '1.05', '1.10'})
-ax3=gca;
-ax3.YAxis(1).Color = 'k';
-ax3.YAxis(2).Color = 'k';
+ax3 = gca;
 
 %% Save Plots at 300 dpi
 save = 1;
