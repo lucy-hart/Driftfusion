@@ -1,5 +1,4 @@
-par = pc('Input_files/PTAA_MAPI_PCBM_v4.csv');
-%par = pc('Input_files/PTAA_MAPI_PCBM_HigherLUMO.csv');
+par = pc('Input_files/PTAA_FACsPbIBr_PCBM.csv');
 
 par.RelTol_vsr = 0.1;
 par = refresh_device(par);
