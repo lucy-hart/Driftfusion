@@ -2,7 +2,7 @@
 %ETL material used in his FaCs devices.
 
 %% Read in data files 
-par_pcbm = pc('Input_files/PTAA_MAPI_PCBM_v4.csv');
+par_pcbm = pc('Input_files/PTAA_MAPI_PCBM_v5.csv');
 par_pcbm_LowerMob = pc('Input_files/PTAA_MAPI_PCBM_LowerMob.csv');
 par_pcbm_LowestMob = pc('Input_files/PTAA_MAPI_PCBM_LowestMob.csv');
 par_pcbm_HigherLUMO = pc('Input_files/PTAA_MAPI_PCBM_HigherLUMO.csv');
@@ -10,6 +10,16 @@ par_pcbm_LowerLUMO = pc('Input_files/PTAA_MAPI_PCBM_LowerLUMO.csv');
 
 devices = {par_pcbm, par_pcbm_LowerMob, par_pcbm_LowestMob, par_pcbm_LowerLUMO, par_pcbm_HigherLUMO};
 num_devices = length(devices);
+
+%Change light source to laser 
+for i = 1:num_devices
+    par = devices{i};
+    par.light_source1 = 'laser';
+    par.laser_lambda1 = 532;
+    par.pulsepow = 62;
+    par.RelTol_vsr = 0.1;
+    devices{i} = refresh_device(par);
+end
 
 %% Find eqm solutions 
 eqm_solutions_dark = cell(1,num_devices);
@@ -21,9 +31,9 @@ end
 CV_solutions_el = cell(1,num_devices);
 CV_solutions_ion = cell(1,num_devices);
 for j = 1:num_devices
-    suns = 1.15;
-    CV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, suns, -0.3, 1.2, -0.3, 10e-3, 1, 301);
-    CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, suns, -0.3, 1.2, -0.3, 10e-3, 1, 301);
+    suns = 1;
+    CV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, suns, -0.3, 1.3, -0.3, 10e-3, 1, 321);
+    CV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, suns, -0.3, 1.3, -0.3, 10e-3, 1, 321);
 end
 
 %% Plot JVs
@@ -39,12 +49,12 @@ j_el = -dfana.calcJ(CV_solutions_el{m}).tot(:,1);
 
 plot(v(:), j(:)*1000, 'color', colors_JV{2}, 'LineWidth', 3) 
 hold on
-plot(v_el(1:151), j_el(1:151)*1000, '--', 'color', colors_JV{2}, 'LineWidth', 3)
+plot(v_el(1:161), j_el(1:161)*1000, '--', 'color', colors_JV{2}, 'LineWidth', 3)
 plot(v(:), zeros(1,length(v)), 'black', 'LineWidth', 1)
 hold off
 
 set(gca, 'FontSize', 25)
-xlim([0, 1.2])
+xlim([0, 1.3])
 ylim([0,27])
 xlabel('Voltage (V)', 'FontSize', 30)
 ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
@@ -77,8 +87,8 @@ for k=1:num_devices
     J_values(:,6,k) = e*(j_surf_rec.tot);
     J_values(:,7,k) = J.tot(:,1);
 
-    Voc_values_ion(k,1) = CVstats(CVsol).Voc_f;
-    Voc_values_ion(k,2) = interp1(v(1:ceil(num_values/2)), J_values(1:ceil(num_values/2),2,k), Voc_values_ion(k,1));
+    Voc_values_ion(k,1) = CVstats(CVsol).Voc_r;
+    Voc_values_ion(k,2) = interp1(v(ceil(num_values/2):end), J_values(ceil(num_values/2):end,2,k), Voc_values_ion(k,1));
 
 end    
 
@@ -99,8 +109,8 @@ for k=1:num_devices
     J_values_el(:,6,k) = e*(j_surf_rec.tot);
     J_values_el(:,7,k) = J.tot(:,1);
 
-    Voc_values_el(k,1) = CVstats(CVsol).Voc_f;
-    Voc_values_el(k,2) = interp1(v(1:ceil(num_values/2)), J_values_el(1:ceil(num_values/2),2,k), Voc_values_el(k,1));
+    Voc_values_el(k,1) = CVstats(CVsol).Voc_r;
+    Voc_values_el(k,2) = interp1(v(ceil(num_values/2):end), J_values_el(ceil(num_values/2):end,2,k), Voc_values_el(k,1));
     
 end   
 
@@ -129,8 +139,8 @@ legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{interface (left)}', 'J_{interfa
 
 %% Losses at SC, ions vs no ions
 x = categorical({'With Mobile Ions', 'Without Mobile Ions'});
-y = [-J_values(31,2,1) -J_values(31,3,1) -J_values(31,4,1) -J_values(31,5,1); ...
-    -J_values_el(31,2,1) -J_values_el(31,3,1) -J_values_el(31,4,1) -J_values_el(31,5,1)];
+y = [-J_values(291,2,1) -J_values(291,3,1) -J_values(291,4,1) -J_values(291,5,1); ...
+    -J_values_el(291,2,1) -J_values_el(291,3,1) -J_values_el(291,4,1) -J_values_el(291,5,1)];
 
 bar_colours = {[0.9290 0.6940 0.1250],[0 0.4470 0.7410],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330]};
 figure('Name', 'RecombinationSC_ElvsIon','Position', [100 100 1250 2000])
@@ -151,31 +161,31 @@ figure('Name', 'PLQYPlot Mobility', 'Position', [100 100 1250 2000])
 mob_order = [2,3,1];
 for i = 1:3
     j = mob_order(i);
-    semilogy(V(1:151), (J_values(1:151,2,i))./J_values(1:151,1,i), 'color', colors_JV{j}, 'LineWidth', 3) 
+    semilogy(V(161:end), 100*(J_values(161:end,2,i))./J_values(161:end,1,i), 'color', colors_JV{j}, 'LineWidth', 3) 
     hold on 
-    semilogy(Voc_values_ion(i,1), Voc_values_ion(i,2)/J_values(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
-    semilogy(V(1:151), (J_values_el(1:151,2,i))./J_values_el(1:151,1,i), '--', 'color', colors_JV{j}, 'LineWidth', 3) 
-    semilogy(Voc_values_el(i,1), Voc_values_el(i,2)/J_values_el(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
+    semilogy(Voc_values_ion(i,1), 100*Voc_values_ion(i,2)/J_values(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
+    semilogy(V(161:end), 100*(J_values_el(161:end,2,i))./J_values_el(161:end,1,i), '--', 'color', colors_JV{j}, 'LineWidth', 3) 
+    semilogy(Voc_values_el(i,1), 100*Voc_values_el(i,2)/J_values_el(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
 end
 hold off
 
 set(gca, 'FontSize', 25)
 xlim([0, 1.2])
-ylim([1e-7, 0.003])
-legend({'  5 x 10^{-4}', '', '','','  5 x 10^{-5}', '', '', '', '  5 x 10^{-6}', '', '', ''}, 'Location', 'southeast', 'FontSize', 30)
+ylim([1e-5, 0.3])
+legend({'  10^{-3}', '', '','','  10^{-4}', '', '', '', '  10^{-5}', '', '', ''}, 'Location', 'southeast', 'FontSize', 30)
 xlabel('Voltage (V)', 'FontSize', 30)
 ylabel('PLQY (%)', 'FontSize', 30)
-title(legend, 'ETM Mobility (cm^{2}/Vs)', 'Fontsize', 30)
+title(legend, 'ETM Mobility (cm^{2}/V/s)', 'Fontsize', 30)
 ax2 = gca;
 
 figure('Name', 'PLQYPlot Energetics', 'Position', [100 100 1250 2000])
 energetics_order_devices = [4,1,5];
 for j = 1:3
     i = energetics_order_devices(j);
-    semilogy(V(1:151), 100*(J_values(1:151,2,i))./J_values(1:151,1,i), 'color', colors_JV{j}, 'LineWidth', 3) 
+    semilogy(V(161:end), 100*(J_values(161:end,2,i))./J_values(161:end,1,i), 'color', colors_JV{j}, 'LineWidth', 3) 
     hold on 
     semilogy(Voc_values_ion(i,1), 100*Voc_values_ion(i,2)/J_values(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
-    semilogy(V(1:151), 100*(J_values_el(1:151,2,i))./J_values_el(1:151,1,i), '--', 'color', colors_JV{j}, 'LineWidth', 3) 
+    semilogy(V(161:end), 100*(J_values_el(161:end,2,i))./J_values_el(161:end,1,i), '--', 'color', colors_JV{j}, 'LineWidth', 3) 
     semilogy(Voc_values_el(i,1), 100*Voc_values_el(i,2)/J_values_el(70,1,i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
 end
 
@@ -190,7 +200,7 @@ ax3 = gca;
 
 %% Save Plots at 300 dpi
 save = 1;
-fig_num = 3;
+fig_num = 1;
 
 if save == 1 && fig_num == 1
     exportgraphics(ax1, ...

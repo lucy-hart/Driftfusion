@@ -53,7 +53,7 @@ hold off
 fig1 = gcf;
 
 %Ions
-upper_lim_ion = 1e18;
+upper_lim_ion = 7e17;
 T = 31;
 
 figure('Name', 'Cation Densities', 'Position', [100 100 1250 2000])
@@ -83,7 +83,7 @@ xlim([0, max(x_values)])
 ylabel('Cation Density (cm^{-3})', 'Fontsize', fontsize)
 xlabel('Device depth (nm)', 'Fontsize', fontsize)
 xticks([0 100 200 300 400])
-yticks([2e17 4e17 6e17 8e17 10e17])
+yticks([2e17 4e17 6e17])
 
 fig2 = gcf;
 
@@ -106,9 +106,9 @@ x_values = CV_solutions_ion{num}.x * 1e7;
 box on
 hold on
 
-plot(x_values-12, -FV_ion(T,:), 'Color', [0.4940 0.1840 0.5560])
-plot(x_values-12, -FV_el(T,:), 'Color', [0.4940 0.1840 0.5560], 'LineStyle', '--')
-plot(x_values-12, zeros(length(x_values)), 'Color', 'black', 'LineWidth', 2)
+plot(x_values-10, -FV_ion(T,:), 'Color', [0.4940 0.1840 0.5560])
+plot(x_values-10, -FV_el(T,:), 'Color', [0.4940 0.1840 0.5560], 'LineStyle', '--')
+plot(x_values-10, zeros(length(x_values)), 'Color', 'black', 'LineWidth', 2)
 
 hold off
 
