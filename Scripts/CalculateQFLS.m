@@ -49,13 +49,13 @@ for i = 1:3
 end
 hold off
 
-set(gca, 'FontSize', 25)
+set(gca, 'FontSize', 35)
 xlim([0, 1.3])
 ylim([0.85, 1.2])
 legend({'  10^{-3}', '', '  10^{-4}', '', '  10^{-5}', ''}, 'Location', 'southeast', 'FontSize', 30)
 %legend({'  10^{-3}', '', '','','  10^{-4}', '', '', '', '  10^{-5}', '', '', ''}, 'Location', 'southeast', 'FontSize', 30)
-xlabel('Voltage (V)', 'FontSize', 30)
-ylabel('QFLS (eV)', 'FontSize', 30)
+xlabel('Voltage (V)', 'FontSize', 40)
+ylabel('QFLS (eV)', 'FontSize', 40)
 title(legend, 'ETM Mobility (cm^{2}/V/s)', 'Fontsize', 30)
 ax4 = gca;
 
@@ -70,18 +70,18 @@ for j = 1:3
     %plot(Voc_values_el(i,1), QFLS_OC_el(i), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
 end
 
-set(gca, 'FontSize', 25)
+set(gca, 'FontSize', 35)
 xlim([0, 1.3])
 ylim([0.85, 1.2])
-xlabel('Voltage (V)', 'FontSize', 30)
-ylabel('QFLS (eV)', 'FontSize', 30)
+xlabel('Voltage (V)', 'FontSize', 40)
+ylabel('QFLS (eV)', 'FontSize', 40)
 legend({'  4.15', '', '  3.95', '', '  3.75', ''}, 'Location', 'southeast', 'FontSize', 30)
 %legend({'  4.15', '', '', '', '  3.95', '', '', '', '  3.75', '', '', ''}, 'Location', 'southeast', 'FontSize', 30)
 title(legend, '|ETM LUMO| (eV)', 'Fontsize', 30)
 ax5 = gca;
 
 %%
-figure('Name', 'QFLSPlot Energetics', 'Position', [100 100 1250 2000])
+figure('Name', 'QFLSPlot', 'Position', [100 100 1250 2000])
 energetics_order_devices = [4,1,5];
 box on
 hold on 
@@ -90,17 +90,17 @@ plot(Voc_values_ion(1,1), QFLS_OC_ion(1), 'ko', 'MarkerSize', 15, 'LineWidth', 2
 plot(V(161:end), QFLS_el(161:end,1), '--', 'color', colors_JV{2}, 'LineWidth', 3) 
 plot(Voc_values_el(i,1), QFLS_OC_el(1), 'ko', 'MarkerSize', 15, 'LineWidth', 2)
 
-set(gca, 'FontSize', 25)
+set(gca, 'FontSize', 35)
 xlim([0, 1.3])
 ylim([0.85, 1.2])
-xlabel('Voltage (V)', 'FontSize', 30)
-ylabel('QFLS (eV)', 'FontSize', 30)
-legend({'  Mobile Ions', '','  No Mobile Ions',''}, 'Location', 'southeast', 'FontSize', 30)
+xlabel('Voltage (V)', 'FontSize', 40)
+ylabel('QFLS (eV)', 'FontSize', 40)
+legend({'  Mobile Ions', '','  No Mobile Ions',''}, 'Location', 'southeast', 'FontSize', 40)
 ax6 = gca;
 
 %% Save Plots at 300 dpi
 save = 1;
-fig_num = 2;
+fig_num = 3;
 
 if save == 1 && fig_num == 1
     exportgraphics(ax4, ...

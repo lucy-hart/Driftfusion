@@ -2,15 +2,15 @@
 
 %Plot parameters
 lw = 3;
-fontsize = 30;
-ticksize = 25;
+fontsize = 40;
+ticksize = 35;
 
 %% Plot carrier populations at SC (top) and OC (middle), with and without mobile ions
 % and the ion population at OC vs SC (bottom)
 
 num = 1;
 x_values = CV_solutions_ion{num}.x * 1e7;
-pos_el = [0.68 0.8 0.1 0.05];
+pos_el = [0.62 0.75 0.1 0.05];
 pos_ion = [0.66 0.8 0.1 0.05];
 
 %SC
@@ -118,13 +118,13 @@ xticks([0 100 200 300 400])
 yticks(ytick_cell{2})
 ylabel('|Electric Field Strength| (Vcm^{-1})', 'FontSize', fontsize)
 xlabel('Perovskite depth (nm)', 'FontSize', fontsize)
-legend('  F_{ion}', '  F_{no ions}', '', 'NumColumns', 1, 'Position', [0.72 0.8 0.15 0.02], 'FontSize', fontsize)
+legend('  F_{ion}', '  F_{no ions}', '', 'NumColumns', 1, 'Position', [0.70 0.8 0.15 0.02], 'FontSize', fontsize)
 
 fig3 = gcf;
 %% Save Images
 %Set details of what you're saving
 save = 1;
-fig_num = 3;
+fig_num = 1;
 
 if save == 1 && fig_num == 1
     exportgraphics(fig1, ...

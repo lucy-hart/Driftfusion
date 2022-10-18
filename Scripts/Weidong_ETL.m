@@ -53,12 +53,12 @@ plot(v_el(1:161), j_el(1:161)*1000, '--', 'color', colors_JV{2}, 'LineWidth', 3)
 plot(v(:), zeros(1,length(v)), 'black', 'LineWidth', 1)
 hold off
 
-set(gca, 'FontSize', 25)
+set(gca, 'FontSize', 35)
 xlim([0, 1.3])
 ylim([0,27])
-xlabel('Voltage (V)', 'FontSize', 30)
-ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
-legend({'  Mobile Ions', '  No Mobile Ions'}, 'Location', 'southwest', 'FontSize', 30)
+xlabel('Voltage (V)', 'FontSize', 40)
+ylabel('Current Density (mAcm^{-2})', 'FontSize', 40)
+legend({'  Mobile Ions', '  No Mobile Ions'}, 'Location', 'southwest', 'FontSize', 40)
 ax1 = gca;
 %% Break down contributions to the current
 %Columns in J_values are J_gen, J_rad, J_srh, J_vsr (left), J_vsr (right) and J_ext

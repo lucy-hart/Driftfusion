@@ -39,13 +39,13 @@ for m = 1:length(ion_densities)
 end
 hold off
 
-set(gca, 'FontSize', 25)
+set(gca, 'FontSize', 35)
 xlim([0, 1.2])
 ylim([5e-5, 1])
-xlabel('Voltage (V)', 'FontSize', 30)
-ylabel('PLQY (%)', 'FontSize', 30)
-title(legend, 'Ion Density (cm^{-3})', 'Fontsize', 30)
-legend({'  1 x 10^{16}', '  5 x 10^{16}', '  1 x 10^{17}', '  5 x 10^{17}', '  1 x 10^{18}'}, 'Location', 'northwest', 'FontSize', 30)
+xlabel('Voltage (V)', 'FontSize', 40)
+ylabel('PLQY (%)', 'FontSize', 40)
+title(legend, 'Ion Density (cm^{-3})', 'Fontsize', 40)
+legend({'  1 x 10^{16}', '  5 x 10^{16}', '  1 x 10^{17}', '  5 x 10^{17}', '  1 x 10^{18}'}, 'Location', 'northwest', 'FontSize', 40)
 ax1 = gca;
 
 %% Calculate and Plot QFLS
@@ -83,13 +83,13 @@ for m = 1:length(ion_densities)
 end
 hold off
 
-set(gca, 'FontSize', 25)
+set(gca, 'FontSize', 35)
 xlim([0, 1.3])
-ylim([0.9, 1.25])
-xlabel('Voltage (V)', 'FontSize', 30)
-ylabel('QFLS (eV)', 'FontSize', 30)
-title(legend, 'Ion Density (cm^{-3})', 'Fontsize', 30)
-legend({'  1 x 10^{16}', '  5 x 10^{16}', '  1 x 10^{17}', '  5 x 10^{17}', '  1 x 10^{18}'}, 'Location', 'northwest', 'FontSize', 30)
+ylim([0.9, 1.3])
+xlabel('Voltage (V)', 'FontSize', 40)
+ylabel('QFLS (eV)', 'FontSize', 40)
+title(legend, 'Ion Density (cm^{-3})', 'Fontsize', 40)
+legend({'  1 x 10^{16}', '  5 x 10^{16}', '  1 x 10^{17}', '  5 x 10^{17}', '  1 x 10^{18}'}, 'Location', 'northwest', 'FontSize', 40)
 ax2 = gca;
 %% Save Plot
 save = 1;
