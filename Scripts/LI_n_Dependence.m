@@ -1,16 +1,21 @@
 % See how distribution of carriers in PCBM and ICBA devices varies with intensity
 
 %% Read in data
-par1 = pc('Input_files/ptaa_mapi_PCBM_v4.csv');
-par2 = pc('Input_files/ptaa_mapi_icba_V4.csv');
+par1 = pc('Input_files/PTAA_MAPI_PCBM_v5.csv');
+par2 = pc('Input_files/PTAA_MAPI_PCBM_HigherLUMO.csv');
+par3 = pc('Input_files/PTAA_MAPI_PCBM_LowerLUMO.csv');
 
-par1.RelTol_vsr = 0.1;
-par1 = refresh_device(par1);
-par2.RelTol_vsr = 0.1;
-par2 = refresh_device(par2);
-
-pars = {par1, par2};
+pars = {par1, par2, par3};
 num_devices = length(pars);
+for i = 1:num_devices
+    par = pars{i};
+    par.light_source1 = 'laser';
+    par.laser_lambda1 = 532;
+    par.pulsepow = 62;
+    par.RelTol_vsr = 0.1;
+    pars{i} = refresh_device(par);
+end
+
 eqm = cell(1,num_devices);
 
 for i = 1:num_devices
@@ -21,7 +26,8 @@ num_samples = 10;
 
 LightInt = logspace(log10(0.1), log10(5), num_samples);
 Voc = zeros(num_devices, num_samples);
-OC_time_idx = zeros(num_devices, num_samples);
+QFLS_SC = zeros(num_devices, num_samples);
+QFLS_OC = zeros(num_devices, num_samples);
 JVsols = cell(num_devices, num_samples);
 JVstats = cell(num_devices, num_samples);
 
@@ -29,7 +35,7 @@ JVstats = cell(num_devices, num_samples);
 error = zeros(num_devices, num_samples);
 for j = 1:num_samples
     for i = 1:num_devices
-        if LightInt(j) > 1.5
+        if LightInt(j) > 1.25
             try
                 JVsols{i,j} = doCV(eqm{i}.ion, LightInt(j), -0.3, 1.2, -0.3, 10e-3, 1, 301);            
             catch
@@ -37,7 +43,7 @@ for j = 1:num_samples
                 JVsols{i,j} = 0;
                 error(i,j) = 1;
             end
-        elseif LightInt(j) <= 1.5 && LightInt(j) > 0.75
+        elseif LightInt(j) <= 1.25 && LightInt(j) > 0.75
             try
                 JVsols{i,j} = doCV(eqm{i}.ion, LightInt(j), -0.3, 1.1, -0.3, 10e-3, 1, 281);
             catch
@@ -57,17 +63,35 @@ for j = 1:num_samples
     end
 end
 
-%% Store Voc and FF Values Values
-FF = zeros(num_devices, num_samples);
+%% Store Voc and QFLS values
+num_start = sum(JVsols{1,1}.par.layer_points(1:2))+1;
+num_stop = num_start + JVsols{1,1}.par.layer_points(3)-1;
+x = JVsols{1,1}.par.x_sub;
+d = JVsols{1,1}.par.d(3);
 for j = 1:num_samples
     for i = 1:num_devices
-    JVstats{i,j} = CVstats(JVsols{i,j});
-    Voc(i,j) = JVstats{i,j}.Voc_f;
-    FF(i,j) = JVstats{i,j}.FF_f;
+        JVstats{i,j} = CVstats(JVsols{i,j});
+        Voc(i,j) = JVstats{i,j}.Voc_r;
+        num_values = length(JVsols{i,j}.t);
+        [~, ~, Efn_ion, Efp_ion] = dfana.calcEnergies(JVsols{i,j});
+        QFLS_ion = trapz(x(num_start:num_stop), Efn_ion(:, num_start:num_stop)-Efp_ion(:,num_start:num_stop),2)/d;
+        Vapp = dfana.calcVapp(JVsols{i,j});
+        start_point = ceil(num_values/2);
+        QFLS_SC(i,j) = interp1(Vapp(start_point:end), QFLS_ion(start_point:end), 0);
+        QFLS_OC(i,j) = interp1(Vapp(start_point:end), QFLS_ion(start_point:end), Voc(i,j));
     end
 end
 
-%% Voc vs LI and FF vs LI
+%% Get gradients
+alpha = zeros(3, num_samples, num_devices);
+kT = 0.0257;
+for k = 1:num_devices
+    alpha(1,:,k) = (1/kT)*gradient(Voc(k,:), log(LightInt(2))-log(LightInt(1)));
+    alpha(2,:,k) = (1/kT)*gradient(QFLS_OC(k,:), log(LightInt(2))-log(LightInt(1)));
+    alpha(3,:,k) = (1/kT)*gradient(QFLS_SC(k,:), log(LightInt(2))-log(LightInt(1)));
+end
+
+%% Voc vs LI and QFLS_SC/OC vs LI
 colours = {[0.9290 0.6940 0.1250], [0.4940 0.1840 0.5560], [0.8500 0.3250 0.0980]};
 markers = {'s', 'd', 'o'};
 
@@ -82,30 +106,34 @@ for i = 1:num_devices
 end
 
 xlim([0.09,6])
-ylim([0.92, 1.12])
+ylim([0.9, 1.15])
 ax = gca;
 ax.FontSize = 25;
 xlabel('Light Intensity (% of 1 Sun)', 'FontSize', 30)
 ylabel('V_{OC} (V)', 'FontSize', 30)
-legend('PCBM', 'ICBA', 'Location', 'northwest', 'FontSize', 30);
+legend({'  3.95', '  3.75', '  4.15'}, 'Location', 'southeast', 'FontSize', 30)
+title(legend, '|ETM LUMO| (eV)', 'Fontsize', 30)
 
-figure('Name', 'FF vs LI', 'Position', [100, 100, 1000, 1000])
+figure('Name', 'QFLS vs LI', 'Position', [100, 100, 1000, 1000])
 box on
 for i = 1:num_devices
-    semilogx(LightInt, FF(i,:), 'color', colours{i}, 'marker', markers{i}, 'MarkerFaceColor', colours{i}, ...
-        'MarkerSize', 10,'LineWidth', 2)
+    semilogx(LightInt, QFLS_SC(i,:), 'color', colours{i}, 'marker', markers{i}, ...
+        'MarkerSize', 10, 'LineWidth', 2)
     if i == 1
         hold on
     end
+    semilogx(LightInt, QFLS_OC(i,:), 'color', colours{i}, 'marker', markers{i}, 'MarkerFaceColor', colours{i}, ...
+        'MarkerSize', 10, 'LineWidth', 2)
 end
 
 xlim([0.09,6])
-ylim([0.65, 0.8])
+ylim([0.8, 1.2])
 ax = gca;
 ax.FontSize = 25;
 xlabel('Light Intensity (% of 1 Sun)', 'FontSize', 30)
-ylabel('Fill Factor', 'FontSize', 30)
-legend('PCBM', 'ICBA', 'Location', 'southwest', 'FontSize', 30)
+ylabel('QFLS (eV)', 'FontSize', 30)
+legend({'  3.95', '', '  3.75', '', '  4.15', ''}, 'Location', 'southeast', 'FontSize', 30)
+title(legend, '|ETM LUMO| (eV)', 'Fontsize', 30)
 
 %% Get 1 Sun solutions
 OneSunJVs = cell(1,num_devices);

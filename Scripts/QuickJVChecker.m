@@ -10,7 +10,7 @@ par = refresh_device(par);
 eqm_QJV = equilibrate(par);
 
 %%
-CV_sol_ion = doCV(eqm_QJV.ion, 1, -0.3, 1.3, -0.3, 10e-3, 1, 321);
+CV_sol_ion = doCV(eqm{1}.ion, LightInt(5), -0.3, 1.2, -0.3, 10e-3, 1, 301);
 %CV_sol_el = doCV(eqm_QJV.el, 1.15, -0.3, 1.2, -0.3, 10e-3, 1, 301);
 
 %%

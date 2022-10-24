@@ -199,7 +199,7 @@ title(legend, '|ETM LUMO| (eV)', 'Fontsize', 30)
 ax3 = gca;
 
 %% Save Plots at 300 dpi
-save = 1;
+save = 0;
 fig_num = 1;
 
 if save == 1 && fig_num == 1
