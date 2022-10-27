@@ -5,16 +5,23 @@ par.light_source1 = 'laser';
 par.laser_lambda1 = 532;
 par.pulsepow = 62;
 par.RelTol_vsr = 0.1;
+par.Rs = 1e6;
 par = refresh_device(par);
 
 eqm_QJV = equilibrate(par);
 
+%% Stability checks
+%darkeqm_0p2V = jumptoV(eqm_QJV.ion, 0.2, 10, 1, 0, 1, 0);
+%lighteqm_0p2V = lightonRs(darkeqm_0p2V, 1, -0, 1, 0, 1000);
+%lighteqm_SC = jumptoV(lighteqm_0p2V, 0, 10, 1, 1, 1, 0);
+%light_eqm_OC = lightonRs(eqm_QJV.ion, 1, 10, 1, 1e6, 1000);
+
 %%
-CV_sol_ion = doCV(eqm{1}.ion, LightInt(5), -0.3, 1.2, -0.3, 10e-3, 1, 301);
+CV_sol_ion = doCV(eqm_QJV.ion, 1, -0.3, 1.2, -0.3, 10e-3, 1, 301);
 %CV_sol_el = doCV(eqm_QJV.el, 1.15, -0.3, 1.2, -0.3, 10e-3, 1, 301);
 
 %%
-Plot_Current_Contributions(CV_sol_ion,0)
+Plot_Current_Contributions(CV_sol_ion,1)
 stats = CVstats(CV_sol_ion)
 
 %%

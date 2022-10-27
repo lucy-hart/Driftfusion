@@ -100,7 +100,7 @@ ax6 = gca;
 
 %% Save Plots at 300 dpi
 save = 1;
-fig_num = 3;
+fig_num = 2;
 
 if save == 1 && fig_num == 1
     exportgraphics(ax4, ...

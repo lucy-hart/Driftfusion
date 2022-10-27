@@ -2,8 +2,8 @@
 
 %% Read in data
 par1 = pc('Input_files/PTAA_MAPI_PCBM_v5.csv');
-par2 = pc('Input_files/PTAA_MAPI_PCBM_HigherLUMO.csv');
-par3 = pc('Input_files/PTAA_MAPI_PCBM_LowerLUMO.csv');
+par2 = pc('Input_files/PTAA_MAPI_PCBM_LowerLUMO.csv');
+par3 = pc('Input_files/PTAA_MAPI_PCBM_HigherLUMO.csv');
 
 pars = {par1, par2, par3};
 num_devices = length(pars);
