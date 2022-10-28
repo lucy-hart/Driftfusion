@@ -121,6 +121,48 @@ xlabel('Perovskite depth (nm)', 'FontSize', fontsize)
 legend('  F_{ion}', '  F_{no ions}', '', 'NumColumns', 1, 'Position', [0.70 0.8 0.15 0.02], 'FontSize', fontsize)
 
 fig3 = gcf;
+
+%% Plot recombination currents as function of location in device at Voc
+num = 4;
+x_values = CV_solutions_ion{num}.x * 1e7;
+num_points = length(CV_solutions_ion{num}.t);
+pos_ion = [0.66 0.8 0.1 0.05];
+
+figure('Name', 'Recombination vs x', 'Position', [100 100 1250 2000])
+set(gca, 'DefaultLineLineWidth', lw, 'FontSize', ticksize)
+
+box on
+hold on
+
+% Do background colours
+% Arguments of patch give the coordinates of the corners of the polygon to
+% be shaded
+patch('XData',[0 x_values(500) x_values(500) 0], 'YData',[1e25 1e25 -2e24 -2e24], 'FaceColor', colors_JV{1},...
+    'FaceAlpha', 0.3, 'EdgeColor', 'none')
+patch('XData',[x_values(500) x_values(600) x_values(600) x_values(500)], 'YData',[1e25 1e25 -2e24 -2e24], 'FaceColor', colors_JV{2},...
+    'FaceAlpha', 0.5, 'EdgeColor', 'none')
+patch('XData',[x_values(1100) x_values(1200) x_values(1200) x_values(1100)], 'YData',[1e25 1e25 -2e24 -2e24], 'FaceColor', colors_JV{2},...
+    'FaceAlpha', 0.5, 'EdgeColor', 'none')
+patch('XData',[x_values(1200) x_values(1700) x_values(1700) x_values(1200)], 'YData',[1e25 1e25 -2e24 -2e24],  'FaceColor', colors_JV{3},...
+    'FaceAlpha', 0.3, 'EdgeColor', 'none')
+
+rec_currents = dfana.calcr(CV_solutions_ion{num},'sub');
+rec_total = dfana.calcj_surf_rec(CV_solutions_ion{num}).tot + rec_currents.btb + rec_currents.vsr + rec_currents.srh;
+rec_total_oc = interp1(V(ceil(num_points/2):end), rec_total(ceil(num_points/2):end,:), Voc_values_ion(num,1));
+
+plot(x*1e7, rec_total_oc(1:1700), 'Color', [0.4940 0.1840 0.5560])
+
+xlim([0, 430])
+ylim([-2e24, 9e24])
+ylabel('Recombination Rate (cm^{-3}s^{-1})', 'Fontsize', fontsize)
+xlabel('Device depth (nm)', 'Fontsize', fontsize)
+xticks([0 100 200 300 400])
+title('E_{LUMO} = -4.15 eV', 'Fontsize', fontsize)
+
+hold off 
+
+fig4 = gcf;
+
 %% Save Images
 %Set details of what you're saving
 save = 1;
