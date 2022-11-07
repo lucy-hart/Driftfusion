@@ -24,7 +24,7 @@ par = sol_ini.par;
 if log_timemesh
     par.tmesh_type = 2;
     par.tmax = tmax;
-    par.t0 = tmax/1e4;
+    par.t0 = tmax/1e5;
 else
     % Setup time mesh
     par.tmesh_type = 1;
