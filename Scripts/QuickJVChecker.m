@@ -1,16 +1,17 @@
-par = pc('Input_files/PTAA_FACsPbIBr_PCBM.csv');
+par = pc('Input_files/SAMS_MAPI_C60.csv');
 
 par.RelTol_vsr = 0.1;
+par.d(5) = 60e-7;
 par = refresh_device(par);
 
 eqm_QJV = equilibrate(par);
 
 %%
-CV_sol_ion = doCV(eqm_QJV.ion, 1.15, -0.3, 1.2, -0.3, 10e-3, 1, 321);
+CV_sol_ion = doCV(eqm_QJV.ion, 1, -0.3, 1.2, -0.3, 10e-3, 1, 321);
 %CV_sol_el = doCV(eqm_QJV.el, 1.15, -0.3, 1.2, -0.3, 10e-3, 1, 301);
 
 %%
-Plot_Current_Contributions(CV_sol_ion,1)
+Plot_Current_Contributions(CV_sol_ion,0)
 stats = CVstats(CV_sol_ion)
 
 %%
