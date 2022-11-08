@@ -37,7 +37,7 @@ else
         V_half(end+1) = V_other_half;
         Vapp = V_half;
     else
-        J = [J_half J_other_half];
+        J = [J_half; J_other_half];
         Vapp = [V_half V_other_half]';
     end
 end
@@ -46,8 +46,18 @@ end
 change_sweep_direction_index = find(Vapp == max(Vapp),1);
 J_f = J(1:change_sweep_direction_index);
 V_f = Vapp(1:change_sweep_direction_index);
+for i=1:length(V_f)
+    if abs(V_f(i)) < 1e-10
+        V_f(i) = 0;
+    end
+end
 J_r = J(change_sweep_direction_index:length(sol.t));
 V_r = Vapp(change_sweep_direction_index:length(sol.t));
+for i=1:length(V_r)
+    if abs(V_r(i)) < 1e-10
+        V_r(i) = 0;
+    end
+end
 
 %% Find stats for forward scan
 stats.Jsc_f = interp1(V_f, J_f, 0, 'linear');
@@ -58,9 +68,9 @@ end
 
 stats.Voc_f = interp1(J_f, V_f, 0, 'linear');
 if isnan(stats.Voc_f)
-    warning('No Voc available- try increasing applied voltage range')
-    stats.Voc_f = 0;
-end
+            warning('No Voc available- try increasing applied voltage range')
+            stats.Voc_f = 0;
+end 
 
 % Incident optical power
 Pin = dfana.calcPin(sol);
@@ -68,11 +78,22 @@ Pin = dfana.calcPin(sol);
 A_f = 0; % Hysteresis Factor
 if stats.Jsc_f ~= 0 && stats.Voc_f ~= 0
     pow_f = J_f.*V_f;
-    stats.mpp_f = abs(min(pow_f));
-    stats.efficiency_f = 100*(stats.mpp_f/Pin);
-    stats.mppV_f = Vapp(-pow_f == stats.mpp_f);
+    stats.mpp_f = min(pow_f);
+    if stats.mpp_f > 0
+        warning('Maximum power does not occur in the fourth quadrant')
+        stats.mpp_f = 0;
+        stats.mppV_f = 0;
+    elseif stats.mpp_f < 0
+        stats.mpp_f = abs(stats.mpp_f);
+        stats.mppV_f = Vapp(-pow_f == stats.mpp_f);
+    end
+    stats.efficiency_f = 100*(stats.mpp_f/Pin);  
     stats.FF_f = -stats.mpp_f/(stats.Jsc_f*stats.Voc_f);
-    A_f = abs(trapz(V_f(V_f >=0 & V_f <= stats.Voc_f), J_f(V_f >= 0 & V_f <= stats.Voc_f)));
+    try
+        A_f = abs(trapz(V_f(V_f >=0 & V_f <= stats.Voc_f), J_f(V_f >= 0 & V_f <= stats.Voc_f)));
+    catch
+        warning('Cannot calculate a hystersis factor, area may be too small.')
+    end
 end
 
 %% Find stats for reverse scan
@@ -84,18 +105,30 @@ end
 
 stats.Voc_r = interp1(J_r, V_r, 0, 'linear');
 if isnan(stats.Voc_r)
-    warning('No Voc available- try increasing applied voltage range')
-    stats.Voc_r = 0;
-end
+            warning('No Voc available- try increasing applied voltage range')
+            stats.Voc_r = 0;
+end 
 
 A_r = 0; %Hysteresis Factor
 if stats.Jsc_r ~= 0 && stats.Voc_r ~= 0
     pow_r = J_r.*V_r;
-    stats.mpp_r = abs(min(pow_r));
+    stats.mpp_r = min(pow_r);
+    if stats.mpp_r > 0
+        warning('Maximum power does not occur in the fourth quadrant')
+        stats.mpp_r = 0;
+        stats.mppV_r = 0;
+    elseif stats.mpp_r < 0
+        stats.mpp_r = abs(stats.mpp_r);
+        stats.mppV_r = Vapp(-pow_r == stats.mpp_r);
+    end
     stats.efficiency_r = 100*(stats.mpp_r/Pin);
     stats.mppV_r = Vapp(-pow_r == stats.mpp_r);
     stats.FF_r = -stats.mpp_r/(stats.Jsc_r*stats.Voc_r);
-    A_r = abs(trapz(V_r(V_r >=0 & V_r <= stats.Voc_r), J_r(V_r >= 0 & V_r <= stats.Voc_r)));
+    try
+        A_r = abs(trapz(V_r(V_r >=0 & V_r <= stats.Voc_r), J_r(V_r >= 0 & V_r <= stats.Voc_r)));
+    catch
+        warning('Cannot calculate a hystersis factor, area may be too small.')
+    end
 end
 
 %% Sign to identify inverted hysteresis

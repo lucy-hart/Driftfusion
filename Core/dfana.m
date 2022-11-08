@@ -269,7 +269,7 @@ classdef dfana
             r.tot = r.btb + r.srh + r.vsr;
             
         end
-
+        
         function j_surf_rec = calcj_surf_rec(sol)
             % Calculates the absolute surface recombination flux for system
             % boundaries.
@@ -308,8 +308,25 @@ classdef dfana
                 j_surf_rec.l = jp_l;
                 j_surf_rec.r = jp_r;  
             end
-            
             j_surf_rec.tot = j_surf_rec.l + j_surf_rec.r;
+        end
+        
+        function j_surf_rec = calcj_surf_rec_lucy(sol)
+            [u,t,x_input,par,~,n,p,a,c,V] = dfana.splitsol(sol);
+            [~, j, ~] = dfana.calcJ(sol);
+            
+            jn_l = j.n(:,1);
+            jn_r = j.n(:,end);
+
+            jp_l = j.p(:,1);
+            jp_r = j.p(:,end);
+            
+            for i = 1:length(t)
+            j_surf_rec.l(i) = jn_l(i);
+            j_surf_rec.r(i) = jp_r(i);
+            j_surf_rec.tot(i) = abs(j_surf_rec.l(i))+abs(j_surf_rec.r(i));%+2*j_gen(1);               
+            end
+            
         end
         
         function [Jdd, jdd, xout] = calcJdd(sol)
