@@ -59,32 +59,47 @@ for i= 1:n_values
         par = refresh_device(par);
 
         soleq{i,j} = equilibrate(par);
-        try            
-            if params{i,j}(1) > 0.15 || params{i,j}(2) < - 0.15
-                solCV_el{i, j} = doCV(soleq{i, j}.el, 1, -0.2, 1.0, -0.2, 1e-4, 1, 241);
-            elseif (0 < params{i,j}(1)) && (params{i,j}(1)< 0.15) || (params{i,j}(2) > - 0.15) && (params{i,j}(2) < 0)
-                solCV_el{i, j} = doCV(soleq{i, j}.el, 1, -0.2, 1.15, -0.2, 1e-4, 1, 271);
-            else
-                solCV_el{i, j} = doCV(soleq{i, j}.el, 1, -0.2, 1.2, -0.2, 1e-4, 1, 281);
+
+        Voc_max = 1.2;
+        num_points = 281;
+        while Voc_max >= 1.05
+            try            
+                solCV_el{i, j} = doCV(soleq{i, j}.el, 1, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);           
+                error_log_el(i,j) = 0;
+                el_results{i,j} = CVstats(solCV_el{i, j});
+                Voc_max = 0;                
+            catch
+                if Voc_max > 1.05
+                    warning("Electronic-only JV solution failed, reducing Vmax by 0.05 V")
+                    Voc_max = Voc_max - 0.05;
+                    num_points = num_points - 10;
+                elseif Voc_max == 1.05
+                    warning("Electronic-only JV solution failed.")
+                    error_log_el(i,j) = 1;
+                    el_results{i,j} = 0;
+                end
             end
-            error_log_el(i,j) = 0;
-            el_results{i,j} = CVstats(solCV_el{i, j});
-        catch
-            warning("Electronic-only JV solution failed, try reducing Vmax")
-            error_log_el(i,j) = 1;
         end
 
-        try            
-            if params{i,j}(1) > 0.15 || params{i,j}(2) < - 0.15
-                solCV_ion{i, j} = doCV(soleq{i, j}.ion, 1, -0.2, 1.1, -0.2, 1e-4, 1, 271);
-            else
-                solCV_ion{i, j} = doCV(soleq{i, j}.ion, 1, -0.2, 1.2, -0.2, 1e-4, 1, 281);
+        Voc_max = 1.2;
+        num_points = 281; 
+        while Voc_max >= 1.05
+            try
+                solCV_ion{i, j} = doCV(soleq{i, j}.ion, 1, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);
+                error_log_ion(i,j) = 0;
+                ion_results{i,j} = CVstats(solCV_ion{i, j});
+                Voc_max = 0;
+            catch
+                if Voc_max > 1.05
+                    warning("Ionic JV solution failed, reducing Vmax by 0.05 V")
+                    Voc_max = Voc_max - 0.05;
+                    num_points = num_points - 10;
+                elseif Voc_max == 1.05
+                    warning("Ionic JV solution failed.")
+                    error_log_ion(i,j) = 1;
+                    ion_results{i,j} = 0;
+                end
             end
-            error_log_ion(i,j) = 0;
-            ion_results{i,j} = CVstats(solCV_ion{i, j});
-        catch
-            warning("JV solution failed, try reducing Vmax")
-            error_log_ion(i,j) = 1;
         end
     end
 end
@@ -92,36 +107,70 @@ end
 toc
 
 %% Plot results 
-Voc_array_ion = zeros(n_values, n_values);
-Voc_array_el = zeros(n_values, n_values);
+Stats_array_ion = zeros(n_values, n_values, 4);
+Stats_array_el = zeros(n_values, n_values, 4);
 for i = 1:n_values
     for j = 1:n_values
         try
-            Voc_array_ion(i,j) = ion_results{i,j}.Voc_f;
+            Stats_array_ion(i,j,1) = 1e3*ion_results{i,j}.Jsc_f;
+            Stats_array_ion(i,j,2) = ion_results{i,j}.Voc_f;
+            Stats_array_ion(i,j,3) = ion_results{i,j}.FF_f;
+            Stats_array_ion(i,j,4) = ion_results{i,j}.efficiency_f;
         catch
-            warning('No Voc value')
-            Voc_array_ion(i,j) = 0;
+            warning('No Stats (ion)')
+            Stats_array_ion(i,j,:) = 0;
         end
 
         try
-            Voc_array_el(i,j) = el_results{i,j}.Voc_f;
+            Stats_array_el(i,j,1) = 1e3*el_results{i,j}.Jsc_f;
+            Stats_array_el(i,j,2) = el_results{i,j}.Voc_f;
+            Stats_array_el(i,j,3) = el_results{i,j}.FF_f;
+            Stats_array_el(i,j,4) = el_results{i,j}.efficiency_f;
         catch
-            warning('No Voc value')
-            Voc_array_el(i,j) = 0;
+            warning('No Stats (el)')
+            Stats_array_el(i,j,:) = 0;
         end
     end
 end 
 
 %%
-figure(1)
-contourf(Delta_HOMO, Delta_LUMO, Voc_array_el, [0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.10, 1.15, 1.20], 'LineWidth', 0.1)
-xlabel('\DeltaE_{HOMO} (eV)')
-ylabel('\DeltaE_{LUMO} (eV)')
-ylim([-0.3, 0.2])
+figure('Name', 'JV Params vs Energy Offsets')
+ion = 1;
+num = 2;
+labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
+if ion == 1 
+    data = Stats_array_ion;
+elseif ion == 0
+    data = Stats_array_el;
+end
+%Coutourf has coumn and row inidices as x and y respectively
+contourf(Delta_LUMO, Delta_HOMO, data(:,:,num), 'LineWidth', 0.1)
+xlabel('\DeltaE_{LUMO} (eV)')
+ylabel('\DeltaE_{HOMO} (eV)')
+ylim([-0.2, 0.3])
 c = colorbar;
-c.Label.String = 'V_{OC}';
+c.Label.String = labels(num);
 
 %%
+figure('Name', 'JV Params 2 vs Energy Offsets')
+num = 4;
+labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
+if ion == 1 
+    data = Stats_array_ion;
+elseif ion == 0
+    data = Stats_array_el;
+end
+%Coutourf has coumn and row inidices as x and y respectively
+contourf(Delta_LUMO, Delta_HOMO, (Stats_array_ion(:,:,num) - Stats_array_el(:,:,num))./(Stats_array_el(:,:,num)), 'LineWidth', 0.1)
+xlabel('\DeltaE_{LUMO} (eV)')
+ylabel('\DeltaE_{HOMO} (eV)')
+ylim([-0.2, 0.3])
+c = colorbar;
+c.Label.String = labels(num);
+
+%%
+doFigure = 0; 
+if doFigure == 1
 figure(6)
 LevelList = linspace(-23,0,24);
 
@@ -148,8 +197,11 @@ ylim([0,1.2])
 xlim([-0.19,1.19])
 c = colorbar;
 c.Label.String = 'Current Density (mAcm^{-3})';
+end
+
+
 
 %% Save results and solutions
 
-%filename = 'tld_symmetric_Vbi_vs_Ncat_Piers_vsr.mat';
-%save(filename, 'el_results', 'ion_results', 'solCV_el', 'solCV_ion')
+filename = 'tld_symmetric_DeltaEHOMO_vs_DeltaELUMO.mat';
+save(filename, 'el_results', 'ion_results', 'solCV_el', 'solCV_ion')

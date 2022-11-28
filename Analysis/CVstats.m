@@ -60,7 +60,13 @@ for i=1:length(V_r)
 end
 
 %% Find stats for forward scan
-stats.Jsc_f = interp1(V_f, J_f, 0, 'linear');
+if length(J_f) == length(unique(J_f))
+    stats.Jsc_f = interp1(V_f, J_f, 0, 'linear');
+else
+    [Jtemp, rep_idx] = unique(J_f, 'stable', 'first');
+    Vtemp = [V_f(1:rep_idx-1), V_f(rep_idx+1:end)];
+    stats.Jsc_f = interp1(Vtemp, Jtemp, 0, 'linear');
+end 
 if isnan(stats.Jsc_f)
     warning('No Jsc available- Vapp must pass through 0 to obtain Jsc')
     stats.Jsc_f = 0;
