@@ -24,7 +24,7 @@ end
 figure('Name', 'Field Screening', 'Position', [100 100 1250 2000])
 set(gca, 'DefaultLineLineWidth', lw, 'FontSize', ticksize)
 
-num = 3;
+num = 2;
 if num ~= 1
     pos_ion = [0.66 0.8 0.1 0.05];
 else
@@ -105,6 +105,54 @@ legend('','','','','Short Circuit', 'NumColumns', 1, 'Position', pos_ion, 'Fonts
 title(legend, 'Ion Distribution', 'Fontsize', fontsize)
 
 fig1b = gcf;
+
+%% Plot E field at OC with and without effects of mobile ions
+figure('Name', 'Field at OC', 'Position', [100 100 1250 2000])
+set(gca, 'DefaultLineLineWidth', lw, 'FontSize', ticksize)
+
+lower_lim = [3.5e4, -3e5, 4.5e4];
+upper_lim = [3.5e4, 3e5, 4.5e4];
+ytick_cell = {[0 0.5e4 1.0e4 1.5e4 2.0e4 2.5e4, 3.0e4];
+    [0  1.0e4  2.0e4  3.0e4  4.0e4];
+    [0 1.0e4 2.0e4 3.0e4 4.0e4]};
+
+T = OC_time_ion(num);
+
+FV_ion = dfana.calcF(JV_solutions_ion{num}, 'whole');
+FV_el = dfana.calcF(JV_solutions_el{num}, 'whole');
+x_values = JV_solutions_ion{num}.x * 1e7;
+
+hold on
+
+% Do background colours
+% Arguments of patch give the coordinates of the corners of the polygon to
+% be shaded
+patch('XData',[0 x_values(500) x_values(500) 0], 'YData',[1e10 1e10 -1e10 -1e10], 'FaceColor', colors_JV{1},...
+    'FaceAlpha', 0.3, 'EdgeColor', 'none')
+patch('XData',[x_values(500) x_values(600) x_values(600) x_values(500)], 'YData',[1e10 1e10 -1e10 -1e10], 'FaceColor', colors_JV{2},...
+    'FaceAlpha', 0.5, 'EdgeColor', 'none')
+patch('XData',[x_values(1100) x_values(1200) x_values(1200) x_values(1100)], 'YData',[1e10 1e10 -1e10 -1e10], 'FaceColor', colors_JV{2},...
+    'FaceAlpha', 0.5, 'EdgeColor', 'none')
+patch('XData',[x_values(1200) x_values(end) x_values(end) x_values(1200)], 'YData',[1e10 1e10 -1e10 -1e10],  'FaceColor', colors_JV{3},...
+    'FaceAlpha', 0.3, 'EdgeColor', 'none')
+
+plot(x_values, -FV_ion(T,:), 'Color', [0.4940 0.1840 0.5560])
+plot(x_values, -FV_el(T,:), 'Color', [0.4940 0.1840 0.5560], 'LineStyle', '--')
+plot(x_values, zeros(length(x_values)), 'Color', 'black', 'LineWidth', 2)
+
+hold off
+
+box on
+xlim([0, max(x_values)])
+ylim([lower_lim(num), upper_lim(num)])
+xticks([0 100 200 300 400])
+%yticks(ytick_cell{num})
+ylabel('|Electric Field Strength| (Vcm^{-1})', 'FontSize', fontsize)
+xlabel('Perovskite depth (nm)', 'FontSize', fontsize)
+legend('', '', '', '', 'F_{ion}', 'F_{no ions}', '', 'NumColumns', 1, 'Position', [0.68 0.8 0.15 0.02], 'FontSize', fontsize)
+
+fig1c = gcf;
+
 
 %% Plot carrier populations at SC and OC, with and without mobile ions
 % and the ion population at OC 
@@ -276,7 +324,7 @@ semilogy(x_values, (JV_solutions_ion{num}.u(T,:,4)), 'color', colors_JV{2}, 'Lin
 
 hold off 
 
-ylim([1e8, 3.2e18])
+ylim([1e8, 1e18])
 if num == 1
     xlim([0, x_values(1540)])
 else
@@ -285,7 +333,7 @@ end
 ylabel('Cation Density (cm^{-3})', 'Fontsize', fontsize)
 xlabel('Device depth (nm)', 'Fontsize', fontsize)
 xticks([0 100 200 300 400])
-yticks([10e17 20e17 30e17])
+yticks([2e17 4e17 6e17 8e17 10e17])
 legend('','','','','Open Circuit', 'NumColumns', 1, 'Position', pos_ion, 'Fontsize', fontsize)
 title(legend, 'Ion Distribution', 'Fontsize', fontsize)
 
@@ -293,26 +341,26 @@ fig4 = gcf;
 
 %% Save Images
 %Set details of what you're saving
-fig_num = 1;
-ETM_distplot = 3;
-ETM_fieldplot = 3;
+fig_num = 1.5;
+ETM_distplot = 2;
+ETM_fieldplot = 2;
 
 if save == 1 && fig_num == 1
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\FieldScreening_ETM' num2str(ETM_fieldplot) '.png'];
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\IonEfficiency\ESAFigures_1Sun\FieldScreening_ETM' num2str(ETM_fieldplot) '.png'];
     exportgraphics(fig1a, filename, 'Resolution', 300)
 elseif save == 1 && fig_num == 1.5
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\CationDistributionsSC_ETM' num2str(ETM_distplot) '.png'];
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\IonEfficiency\ESAFigures_1Sun\CationDistributionsSC_ETM' num2str(ETM_distplot) '.png'];
     exportgraphics(fig1b, filename, 'Resolution', 300)
 elseif save == 1 && fig_num == 2
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\CarrierDistributionsSC_ETM' num2str(ETM_distplot) '.png'];
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\IonEfficiency\ESAFigures_1Sun\CarrierDistributionsSC_ETM' num2str(ETM_distplot) '.png'];
     exportgraphics(fig2, filename, 'Resolution', 300)
 elseif save == 1 && fig_num == 3
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\CarrierDistributionsOCel_ETM' num2str(ETM_distplot) '.png'];
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\IonEfficiency\ESAFigures_1Sun\CarrierDistributionsOCel_ETM' num2str(ETM_distplot) '.png'];
     exportgraphics(fig3a, filename, 'Resolution', 300)
 elseif save == 1 && fig_num == 3.5
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\CarrierDistributionsOCion_ETM' num2str(ETM_distplot) '.png'];
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\IonEfficiency\ESAFigures_1Sun\CarrierDistributionsOCion_ETM' num2str(ETM_distplot) '.png'];
     exportgraphics(fig3b, filename, 'Resolution', 300)
 elseif save == 1 && fig_num == 4
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\CationDistributionsOC_ETM' num2str(ETM_distplot) '.png'];
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\IonEfficiency\ESAFigures_1Sun\CationDistributionsOC_ETM' num2str(ETM_distplot) '.png'];
     exportgraphics(fig4, filename, 'Resolution', 300)
 end

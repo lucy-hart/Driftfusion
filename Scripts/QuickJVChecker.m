@@ -3,8 +3,8 @@ par=pc('Input_files/EnergyOffsetSweepParameters.csv');
 %par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_PosOffset.csv');
 
-DHOMO = 0.3;
-DLUMO = -0;
+DHOMO = 0;
+DLUMO = -0.3;
 
 %HTL Energetics
 par.Phi_left = -5.3;
@@ -31,7 +31,7 @@ par = refresh_device(par);
 eqm_QJV = equilibrate(par);
 
 %%
-CV_sol_ion = doCV(eqm_QJV.ion, 1, -0.2, 1.15, -0.2, 1e-4, 1, 271);
+CV_sol_ion = doCV(eqm_QJV.ion, 1, -0.2, 1.25, -0.2, 1e-4, 1, 271);
 CV_sol_el = doCV(eqm_QJV.el, 1, -0.2, 1.18, -0.2, 10e-3, 1, 277);
 
 %%

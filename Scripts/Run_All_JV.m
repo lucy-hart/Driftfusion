@@ -22,7 +22,7 @@ end
 %% Perform JV scans
 JV_solutions_el = cell(1,num_devices);
 JV_solutions_ion = cell(1,num_devices);
-suns = 1.1;
+suns = 1;
 for j = 1:num_devices
     JV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, suns, -0.3, 1.2, -0.3, 10e-3, 1, 301);
     JV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, suns, -0.3, 1.2, -0.3, 10e-3, 1, 301);
@@ -50,7 +50,7 @@ hold off
 box on 
 set(gca, 'FontSize', 25)
 xlim([-0.2, 1.2])
-ylim([-27,8])
+ylim([-25,8])
 legend({'','','ETM 1','', 'ETM 2','', 'ETM 3',''}, 'Location', 'northwest', 'FontSize', 30)
 xlabel('Voltage(V)', 'FontSize', 30)
 ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
@@ -122,10 +122,10 @@ ETM = 1;
 
 if save == 1 && fig_num == 1
     exportgraphics(ax1, ...
-    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\JV.png', ...
+    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\IonEfficiency\ESAFigures_1Sun\JV.png', ...
     'Resolution', 300)
 elseif save == 1 && fig_num == 2
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\ESA\FigureDump\CurrentContributions_PS' num2str(PS_distplot) '.png'];
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\IonEfficiency\ESAFigures_1Sun\CurrentContributions_PS' num2str(PS_distplot) '.png'];
     exportgraphics(ax2, filename, 'Resolution', 300)
 end 
 
