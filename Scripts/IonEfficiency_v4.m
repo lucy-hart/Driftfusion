@@ -136,8 +136,9 @@ end
 %%
 figure('Name', 'JV Params vs Energy Offsets')
 ion = 1;
-num = 2;
+num = 1;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
+lims = [[-23 -19]; [0.77 1.17]; [0.1 0.85]; [1 21]];
 if ion == 1 
     data = Stats_array_ion;
 elseif ion == 0
@@ -150,23 +151,28 @@ ylabel('\DeltaE_{HOMO} (eV)')
 ylim([-0.2, 0.3])
 c = colorbar;
 c.Label.String = labels(num);
+clim(lims(num,:))
 
 %%
-figure('Name', 'JV Params 2 vs Energy Offsets')
+figure('Name', 'Normalised PCE vs Energy Offsets')
 num = 4;
-labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
+labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "$\mathrm{\frac{PCE_{ion}}{PCE_{no ion}}}$ - 1"];
 if ion == 1 
     data = Stats_array_ion;
 elseif ion == 0
     data = Stats_array_el;
 end
 %Coutourf has coumn and row inidices as x and y respectively
-contourf(Delta_LUMO, Delta_HOMO, (Stats_array_ion(:,:,num) - Stats_array_el(:,:,num))./(Stats_array_el(:,:,num)), 'LineWidth', 0.1)
+contourf(Delta_LUMO, Delta_HOMO, (Stats_array_ion(:,:,num) - Stats_array_el(:,:,num))./(Stats_array_el(:,:,num)), ...
+    'SHowText', true, 'LineWidth', 0.1)
 xlabel('\DeltaE_{LUMO} (eV)')
 ylabel('\DeltaE_{HOMO} (eV)')
 ylim([-0.2, 0.3])
 c = colorbar;
+c.Label.Interpreter = 'latex';
 c.Label.String = labels(num);
+c.Label.FontSize = 20;
+clim([-0.85 0.05])
 
 %%
 doFigure = 0; 
@@ -203,5 +209,5 @@ end
 
 %% Save results and solutions
 
-filename = 'tld_symmetric_DeltaEHOMO_vs_DeltaELUMO.mat';
+filename = 'tld_symmetric_DeltaEHOMO_vs_DeltaELUMO_v2.mat';
 save(filename, 'el_results', 'ion_results', 'solCV_el', 'solCV_ion')
