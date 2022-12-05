@@ -1,13 +1,15 @@
-par = pc('Input_files/SAMS_MAPI_C60.csv');
+%par = pc('Input_files/HTL_MAPI_NoOffset.csv');
+%par = pc('Input_files/HTL_MAPI_NegOffset.csv');
+par = pc('Input_files/HTL_MAPI_PosOffset.csv');
 
-par.RelTol_vsr = 0.1;
-par.d(5) = 60e-7;
-par = refresh_device(par);
+%par.RelTol_vsr = 0.1;
+%par.d(5) = 60e-7;
+%par = refresh_device(par);
 
 eqm_QJV = equilibrate(par);
 
 %%
-CV_sol_ion = doCV(eqm_QJV.ion, 1, -0.3, 1.2, -0.3, 10e-3, 1, 321);
+CV_sol_ion = doCV(eqm_QJV.ion, 1, -0.3, 1.3, -0.3, 10e-3, 1, 321);
 %CV_sol_el = doCV(eqm_QJV.el, 1.15, -0.3, 1.2, -0.3, 10e-3, 1, 301);
 
 %%
