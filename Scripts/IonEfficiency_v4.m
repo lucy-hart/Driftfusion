@@ -28,7 +28,7 @@ ion_results = cell(n_values, n_values);
 el_results = cell(n_values, n_values);
 
 %% Do (many) JV sweeps
-par=pc('Input_files/EnergyOffsetSweepParameters.csv');
+par=pc('Input_files/EnergyOffsetSweepParameters_v2.csv');
 
 %Reset the electrode work functions in each loop to be safe as they are
 %changed for the cases where E_LUMO (E_HOMO) is far below (above) the CB
@@ -71,8 +71,8 @@ for i= 1:n_values
             catch
                 if Voc_max > 1.05
                     warning("Electronic-only JV solution failed, reducing Vmax by 0.05 V")
-                    Voc_max = Voc_max - 0.05;
-                    num_points = num_points - 10;
+                    Voc_max = Voc_max - 0.03;
+                    num_points = num_points - 6;
                 elseif Voc_max == 1.05
                     warning("Electronic-only JV solution failed.")
                     error_log_el(i,j) = 1;
@@ -92,8 +92,8 @@ for i= 1:n_values
             catch
                 if Voc_max > 1.05
                     warning("Ionic JV solution failed, reducing Vmax by 0.05 V")
-                    Voc_max = Voc_max - 0.05;
-                    num_points = num_points - 10;
+                    Voc_max = Voc_max - 0.03;
+                    num_points = num_points - 6;
                 elseif Voc_max == 1.05
                     warning("Ionic JV solution failed.")
                     error_log_ion(i,j) = 1;
@@ -135,7 +135,7 @@ end
 
 %%
 figure('Name', 'JV Params vs Energy Offsets')
-ion = 1;
+ion = 0;
 num = 1;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 lims = [[-23 -19]; [0.77 1.17]; [0.1 0.85]; [1 21]];
@@ -208,6 +208,8 @@ end
 
 
 %% Save results and solutions
-
-filename = 'tld_symmetric_DeltaEHOMO_vs_DeltaELUMO_v2.mat';
-save(filename, 'el_results', 'ion_results', 'solCV_el', 'solCV_ion')
+save_file = 0;
+if save_file == 1
+    filename = 'tld_symmetric_DeltaEHOMO_vs_DeltaELUMO_v2.mat';
+    save(filename, 'el_results', 'ion_results', 'solCV_el', 'solCV_ion')
+end

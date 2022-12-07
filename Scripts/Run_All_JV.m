@@ -116,7 +116,7 @@ ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{interface}', 'J_{contact}','J_{ext}'}, 'Location', 'bestoutside')
 ax2 = gcf;
 %% Save Plots at 300 dpi
-save = 1;
+save = 0;
 fig_num = 1;
 ETM = 1;
 
