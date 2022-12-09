@@ -46,8 +46,8 @@ xlim([-0.25, 1.25])
 ylim([-23, 5])
 xlabel('Voltage (V)', 'FontSize', 30)
 ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
-title(legend, '|E_{CB}-E_{LUMO}|')
-legend({'', '', ' - 0.2 eV', '   0.0 eV', ' + 0.2 eV'}, 'Location', 'northwest', 'FontSize', 30)
+title(legend, 'E_{LUMO} - E_{CB}')
+legend({'', '', ' -0.2 eV', '  0.0 eV', '+0.2 eV'}, 'Location', 'northwest', 'FontSize', 30)
 fig1 = gcf;
 %% Break down contributions to the current
 %Columns in J_values are J_gen, J_rad, J_srh, J_vsr (left), J_vsr (right) and J_ext

@@ -1,15 +1,11 @@
 % See how distribution of carriers in PCBM and ICBA devices varies with intensity
 
 %% Read in data
-par1 = pc('Input_files/ptaa_mapi_PCBM_v4.csv');
-par2 = pc('Input_files/ptaa_mapi_icba_V4.csv');
+par1 = pc('Input_files/HTL_MAPI_NoOffset.csv');
+par2 = pc('Input_files/HTL_MAPI_NegOffset.csv');
+par3 = pc('Input_files/HTL_MAPI_PosOffset.csv');
 
-par1.RelTol_vsr = 0.1;
-par1 = refresh_device(par1);
-par2.RelTol_vsr = 0.1;
-par2 = refresh_device(par2);
-
-pars = {par1, par2};
+pars = {par1, par2, par3};
 num_devices = length(pars);
 eqm = cell(1,num_devices);
 
@@ -31,7 +27,7 @@ for j = 1:num_samples
     for i = 1:num_devices
         if LightInt(j) > 1.5
             try
-                JVsols{i,j} = doCV(eqm{i}.ion, LightInt(j), -0.3, 1.2, -0.3, 10e-3, 1, 301);            
+                JVsols{i,j} = doCV(eqm{i}.ion, LightInt(j), -0.3, 1.4, -0.3, 10e-3, 1, 341);            
             catch
                 warning('Could not complete JV scan. Assigning value of 0')
                 JVsols{i,j} = 0;
@@ -39,7 +35,7 @@ for j = 1:num_samples
             end
         elseif LightInt(j) <= 1.5 && LightInt(j) > 0.75
             try
-                JVsols{i,j} = doCV(eqm{i}.ion, LightInt(j), -0.3, 1.1, -0.3, 10e-3, 1, 281);
+                JVsols{i,j} = doCV(eqm{i}.ion, LightInt(j), -0.3, 1.3, -0.3, 10e-3, 1, 321);
             catch
                 warning('Could not complete JV scan. Assigning value of 0')
                 JVsols{i,j} = 0;
@@ -47,7 +43,7 @@ for j = 1:num_samples
             end
         elseif LightInt(j) <= 0.75
             try
-                JVsols{i,j} = doCV(eqm{i}.ion, LightInt(j), -0.3, 1.05, -0.3, 10e-3, 1, 271);
+                JVsols{i,j} = doCV(eqm{i}.ion, LightInt(j), -0.3, 1.2, -0.3, 10e-3, 1, 301);
             catch
                 warning('Could not complete JV scan. Assigning value of 0')
                 JVsols{i,j} = 0;
@@ -63,7 +59,7 @@ for j = 1:num_samples
     for i = 1:num_devices
     JVstats{i,j} = CVstats(JVsols{i,j});
     Voc(i,j) = JVstats{i,j}.Voc_f;
-    FF(i,j) = JVstats{i,j}.FF_f;
+    %FF(i,j) = JVstats{i,j}.FF_f;
     end
 end
 
@@ -74,7 +70,7 @@ markers = {'s', 'd', 'o'};
 figure('Name', 'Voc vs LI', 'Position', [100, 100, 1000, 1000])
 box on
 for i = 1:num_devices
-    semilogx(LightInt, Voc(i,:), 'color', colours{i}, 'marker', markers{i}, 'MarkerFaceColor', colours{i}, ...
+    semilogx(LightInt, (1/0.0257)*gradient(Voc(i,:), log(LightInt(:))) , 'color', colours{i}, 'marker', markers{i}, 'MarkerFaceColor', colours{i}, ...
         'MarkerSize', 10, 'LineWidth', 2)
     if i == 1
         hold on
@@ -82,13 +78,14 @@ for i = 1:num_devices
 end
 
 xlim([0.09,6])
-ylim([0.92, 1.12])
+ylim([1, 2])
 ax = gca;
 ax.FontSize = 25;
 xlabel('Light Intensity (% of 1 Sun)', 'FontSize', 30)
-ylabel('V_{OC} (V)', 'FontSize', 30)
-legend('PCBM', 'ICBA', 'Location', 'northwest', 'FontSize', 30);
-
+ylabel('Suns-V_{OC} Ideality', 'FontSize', 30)
+title(legend, 'E_{LUMO} - E_{CB}')
+legend({' -0.2 eV', '  0.0 eV', '+0.2 eV'}, 'Location', 'northwest', 'FontSize', 30)
+%%
 figure('Name', 'FF vs LI', 'Position', [100, 100, 1000, 1000])
 box on
 for i = 1:num_devices

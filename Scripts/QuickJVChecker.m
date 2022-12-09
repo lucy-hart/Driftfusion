@@ -1,6 +1,7 @@
 %par = pc('Input_files/HTL_MAPI_NoOffset.csv');
 %par = pc('Input_files/HTL_MAPI_NegOffset.csv');
-par = pc('Input_files/HTL_MAPI_PosOffset.csv');
+%par = pc('Input_files/HTL_MAPI_PosOffset.csv');
+par = pc('Input_files/SAMS_MAPbIBr_C60.csv');
 
 %par.RelTol_vsr = 0.1;
 %par.d(5) = 60e-7;
