@@ -1,9 +1,9 @@
-par = pc('Input_files/PTAA_MAPI_PCBM_v6.csv');
+par = pc('Input_files/PTAA_MAPI_PCBM_v5.csv');
 %par = pc('Input_files/PTAA_MAPI_PCBM_HigherLUMO.csv');
 
 par.light_source1 = 'laser';
 par.laser_lambda1 = 532;
-par.pulsepow = 62;
+par.pulsepow = 63;
 par.RelTol_vsr = 0.1;
 par.Rs = 1e6;
 par = refresh_device(par);
