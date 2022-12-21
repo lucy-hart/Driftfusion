@@ -1,11 +1,12 @@
-% See how distribution of carriers in PCBM and ICBA devices varies with intensity
+
 
 %% Read in data
-par1 = pc('Input_files/HTL_MAPI_NoOffset.csv');
+par1 = pc('Input_files/HTL_MAPI_NegOffset.csv');
 par2 = pc('Input_files/HTL_MAPI_NegOffset.csv');
 par3 = pc('Input_files/HTL_MAPI_PosOffset.csv');
 
-pars = {par1, par2, par3};
+pars = {par1};
+%pars = {par1, par2, par3};
 num_devices = length(pars);
 eqm = cell(1,num_devices);
 
@@ -53,13 +54,12 @@ for j = 1:num_samples
     end
 end
 
-%% Store Voc and FF Values Values
+%% Store Voc Values
 FF = zeros(num_devices, num_samples);
 for j = 1:num_samples
     for i = 1:num_devices
     JVstats{i,j} = CVstats(JVsols{i,j});
     Voc(i,j) = JVstats{i,j}.Voc_f;
-    %FF(i,j) = JVstats{i,j}.FF_f;
     end
 end
 
@@ -70,6 +70,7 @@ markers = {'s', 'd', 'o'};
 figure('Name', 'Voc vs LI', 'Position', [100, 100, 1000, 1000])
 box on
 for i = 1:num_devices
+    %order = [2,1,3];
     semilogx(LightInt, (1/0.0257)*gradient(Voc(i,:), log(LightInt(:))) , 'color', colours{i}, 'marker', markers{i}, 'MarkerFaceColor', colours{i}, ...
         'MarkerSize', 10, 'LineWidth', 2)
     if i == 1
@@ -85,54 +86,64 @@ xlabel('Light Intensity (% of 1 Sun)', 'FontSize', 30)
 ylabel('Suns-V_{OC} Ideality', 'FontSize', 30)
 title(legend, 'E_{LUMO} - E_{CB}')
 legend({' -0.2 eV', '  0.0 eV', '+0.2 eV'}, 'Location', 'northwest', 'FontSize', 30)
-%%
-figure('Name', 'FF vs LI', 'Position', [100, 100, 1000, 1000])
-box on
-for i = 1:num_devices
-    semilogx(LightInt, FF(i,:), 'color', colours{i}, 'marker', markers{i}, 'MarkerFaceColor', colours{i}, ...
-        'MarkerSize', 10,'LineWidth', 2)
-    if i == 1
-        hold on
+
+%% Charge Stored in different layers vs LI 
+num_stop_HTL = JVsols{1,1}.par.layer_points(1);
+num_start_pero = sum(JVsols{1,1}.par.layer_points(1:2))+1;
+num_stop_pero = num_start_pero + JVsols{1,1}.par.layer_points(3)-1;
+num_start_ETL = sum(JVsols{1,1}.par.layer_points(1:4))+1;
+
+x = JVsols{1,1}.x;
+Vapp = dfana.calcVapp(JVsols{1,1});
+num_t = length(JVsols{1,1}.t);
+area = 0.045; 
+e = 1.6e-19;
+device_num = 1;
+
+Qn = zeros(num_devices,num_samples,3,2);
+Qp = zeros(num_devices,num_samples,3,2);
+
+for i=1:num_devices
+    for j=1:num_samples
+        %Dark eqm Values
+        Qn(i,j,1,1) = e*area*trapz(x(1:num_stop_HTL), eqm{i}.ion.u(end,1:num_stop_HTL,2),2);
+        Qp(i,j,1,1) = e*area*trapz(x(1:num_stop_HTL), eqm{i}.ion.u(end,1:num_stop_HTL,3),2);
+        Qn(i,j,2,1) = e*area*trapz(x(num_start_pero:num_stop_pero), eqm{i}.ion.u(end,num_start_pero:num_stop_pero,2),2);
+        Qp(i,j,2,1) = e*area*trapz(x(num_start_pero:num_stop_pero), eqm{i}.ion.u(end,num_start_pero:num_stop_pero,3),2);
+        Qn(i,j,3,1) = e*area*trapz(x(num_start_ETL:end), eqm{i}.ion.u(end,num_start_ETL:end,2),2);
+        Qp(i,j,3,1) = e*area*trapz(x(num_start_ETL:end), eqm{i}.ion.u(end,num_start_ETL:end,3),2);
+
+        %Interpolate solutions at Voc
+        %u has form u(time:position:species)
+        stop = ceil(num_t/2);
+        n = interp1(Vapp(1:stop), JVsols{i,j}.u(1:stop,:,2), Voc(j));
+        p = interp1(Vapp(1:stop), JVsols{i,j}.u(1:stop,:,3), Voc(j));
+
+        Qn(i,j,1,2) = e*area*trapz(x(1:num_stop_HTL), n(1:num_stop_HTL));
+        Qp(i,j,1,2) = e*area*trapz(x(1:num_stop_HTL), p(1:num_stop_HTL));
+        Qn(i,j,2,2) = e*area*trapz(x(num_start_pero:num_stop_pero), n(num_start_pero:num_stop_pero));
+        Qp(i,j,2,2) = e*area*trapz(x(num_start_pero:num_stop_pero), p(num_start_pero:num_stop_pero));
+        Qn(i,j,3,2) = e*area*trapz(x(num_start_ETL:end), n(num_start_ETL:end));
+        Qp(i,j,3,2) = e*area*trapz(x(num_start_ETL:end), p(num_start_ETL:end));
     end
 end
 
-xlim([0.09,6])
-ylim([0.65, 0.8])
-ax = gca;
-ax.FontSize = 25;
-xlabel('Light Intensity (% of 1 Sun)', 'FontSize', 30)
-ylabel('Fill Factor', 'FontSize', 30)
-legend('PCBM', 'ICBA', 'Location', 'southwest', 'FontSize', 30)
-
-%% Get 1 Sun solutions
-OneSunJVs = cell(1,num_devices);
-OneSunJV_Stats = cell(1,num_devices);
-for i = 1:num_devices
-    OneSunJVs{i} = doCV(eqm{i}.ion, 1, -0.3, 1.2, -0.3, 10e-3, 1, 301); 
-    OneSunJV_Stats{i} = CVstats(OneSunJVs{i});
-end 
-
-%% JVs at 1 Sun and 0.1 Sun
-figure('Name', 'JV 1 Sun')
-box on
+%%
+%Plot charge vs Voc data
+figure('Name', 'Q vs Voc')
+box on 
+semilogy(Voc, Qp(1,:,1,2), 'color', 'red', 'Marker', 'o')
 hold on
-for i = 1:num_devices
-    J = dfana.calcJ(OneSunJVs{i}).tot;
-    V = dfana.calcVapp(OneSunJVs{i});
-    num_points = length(V);
-    plot(V(1:ceil(num_points/2)), 1e3*J(1:ceil(num_points/2),1), 'color', colours{i}, 'LineWidth', 2)
-    J = dfana.calcJ(JVsols{i,1}).tot;
-    V = dfana.calcVapp(JVsols{i,1});
-    num_points = length(V);
-    plot(V(1:ceil(num_points/2)), 1000*J(1:ceil(num_points/2),1), 'color', colours{i}, 'LineWidth', 2)
-end
-xline(0)
-yline(0)
-hold off 
+semilogy(Voc, Qn(1,:,2,2), 'color', 'blue', 'Marker', 'x')
+semilogy(Voc, Qp(1,:,2,2), 'color', 'red', 'Marker', 'x')
+semilogy(Voc, Qn(1,:,3,2), 'color', 'blue', 'Marker', 's')
+ylabel('Charge (C)')
+xlabel('Open-Circuit Voltage (V)')
 
-xlim([-0.2, 1.2])
-ylim([-25, 1])
-xlabel('Voltage (V)')
-ylabel('Current Density (mAcm^{-2})')
-legend('PCBM', '', 'ICBA', '')
-
+%%
+%Just ETL electrons on linear axis
+figure('Name', 'Q vs Voc')
+box on 
+plot(Voc, Qn(1,:,3,2), 'color', 'blue', 'Marker', 's')
+ylabel('Charge (C)')
+xlabel('Open-Circuit Voltage (V)')
