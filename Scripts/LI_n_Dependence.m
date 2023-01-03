@@ -1,12 +1,11 @@
 
 
 %% Read in data
-par1 = pc('Input_files/HTL_MAPI_NegOffset.csv');
+par1 = pc('Input_files/HTL_MAPI_NoOffset.csv');
 par2 = pc('Input_files/HTL_MAPI_NegOffset.csv');
 par3 = pc('Input_files/HTL_MAPI_PosOffset.csv');
 
-pars = {par1};
-%pars = {par1, par2, par3};
+pars = {par1, par2, par3};
 num_devices = length(pars);
 eqm = cell(1,num_devices);
 
@@ -70,8 +69,8 @@ markers = {'s', 'd', 'o'};
 figure('Name', 'Voc vs LI', 'Position', [100, 100, 1000, 1000])
 box on
 for i = 1:num_devices
-    %order = [2,1,3];
-    semilogx(LightInt, (1/0.0257)*gradient(Voc(i,:), log(LightInt(:))) , 'color', colours{i}, 'marker', markers{i}, 'MarkerFaceColor', colours{i}, ...
+    order = [2,1,3];
+    semilogx(LightInt, (1/0.0257)*gradient(Voc(order(i),:), log(LightInt(:))) , 'color', colours{i}, 'marker', markers{i}, 'MarkerFaceColor', colours{i}, ...
         'MarkerSize', 10, 'LineWidth', 2)
     if i == 1
         hold on
@@ -98,7 +97,6 @@ Vapp = dfana.calcVapp(JVsols{1,1});
 num_t = length(JVsols{1,1}.t);
 area = 0.045; 
 e = 1.6e-19;
-device_num = 1;
 
 Qn = zeros(num_devices,num_samples,3,2);
 Qp = zeros(num_devices,num_samples,3,2);
@@ -131,12 +129,28 @@ end
 %%
 %Plot charge vs Voc data
 figure('Name', 'Q vs Voc')
+device_num = 1;
+
 box on 
-semilogy(Voc, Qp(1,:,1,2), 'color', 'red', 'Marker', 'o')
+semilogy(Voc(device_num,:), Qp(device_num,:,1,2), 'color', 'red', 'Marker', 'o')
 hold on
-semilogy(Voc, Qn(1,:,2,2), 'color', 'blue', 'Marker', 'x')
-semilogy(Voc, Qp(1,:,2,2), 'color', 'red', 'Marker', 'x')
-semilogy(Voc, Qn(1,:,3,2), 'color', 'blue', 'Marker', 's')
+semilogy(Voc(device_num,:), Qn(device_num,:,2,2), 'color', 'blue', 'Marker', 'x')
+semilogy(Voc(device_num,:), Qp(device_num,:,2,2), 'color', 'red', 'Marker', 'x')
+semilogy(Voc(device_num,:), Qn(device_num,:,3,2), 'color', 'blue', 'Marker', 's')
+ylabel('Charge (C)')
+xlabel('Open-Circuit Voltage (V)')
+
+%%
+%Plot charge vs Voc data corrected for dark value
+figure('Name', 'Q vs Voc')
+device_num = 3;
+
+box on 
+semilogy(Voc(device_num,:), Qp(device_num,:,1,2)-Qp(device_num,:,1,1), 'color', 'red', 'Marker', 'o')
+hold on
+semilogy(Voc(device_num,:), Qn(device_num,:,2,2)-Qn(device_num,:,2,1), 'color', 'blue', 'Marker', 'x')
+semilogy(Voc(device_num,:), Qp(device_num,:,2,2)-Qp(device_num,:,2,1), 'color', 'red', 'Marker', 'x')
+semilogy(Voc(device_num,:), Qn(device_num,:,3,2)-Qn(device_num,:,3,1), 'color', 'blue', 'Marker', 's')
 ylabel('Charge (C)')
 xlabel('Open-Circuit Voltage (V)')
 
@@ -144,6 +158,6 @@ xlabel('Open-Circuit Voltage (V)')
 %Just ETL electrons on linear axis
 figure('Name', 'Q vs Voc')
 box on 
-plot(Voc, Qn(1,:,3,2), 'color', 'blue', 'Marker', 's')
+plot(Voc(device_num,:), Qn(1,:,3,2), 'color', 'blue', 'Marker', 's')
 ylabel('Charge (C)')
 xlabel('Open-Circuit Voltage (V)')
