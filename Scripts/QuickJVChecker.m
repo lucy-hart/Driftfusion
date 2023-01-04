@@ -1,4 +1,4 @@
-par = pc('Input_files/PTAA_MAPI_PCBM_v5.csv');
+par = pc('Input_files/PTAA_MAPI_PCBM_v6.csv');
 %par = pc('Input_files/PTAA_MAPI_PCBM_HigherLUMO.csv');
 
 par.light_source1 = 'laser';
@@ -19,7 +19,7 @@ eqm_QJV = equilibrate(par);
 
 %%
 CV_sol_ion = doCV(eqm_QJV.ion, 1, -0.3, 1.2, -0.3, 10e-3, 1, 301);
-%CV_sol_el = doCV(eqm_QJV.el, 1.15, -0.3, 1.2, -0.3, 10e-3, 1, 301);
+%CV_sol_el = doCV(eqm_QJV.el, 1, -0.3, 1.2, -0.3, 10e-3, 1, 301);
 
 %%
 Plot_Current_Contributions(CV_sol_ion,1)
