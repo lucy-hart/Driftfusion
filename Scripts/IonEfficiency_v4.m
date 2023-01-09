@@ -1,6 +1,4 @@
-%Use this file for energy related things (TL Fermi levels, energy offsets
-%and Vbi)
-
+%Use this file for sweeping the HOMO and LUMO level offsets
 tic
 %% Define parameter space
 %Rows are HOMO offsets

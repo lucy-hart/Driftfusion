@@ -1,17 +1,18 @@
 %par=pc('Input_files/EnergyOffsetSweepParameters_v2.csv');
-%par = pc('Input_files/PTAA_MAPI_NegOffset.csv');
+par = pc('Input_files/PTAA_MAPI_NegOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
-par = pc('Input_files/PTAA_MAPI_PosOffset.csv');
+%par = pc('Input_files/PTAA_MAPI_PosOffset.csv');
 
 Fiddle_with_Energetics = 0;
+Fiddle_with_IonConc = 0;
 %%
 if Fiddle_with_Energetics == 1
 
     %row
-    DHOMO = 0.3;
+    DHOMO = -0.15;
     %DHOMO = Delta_HOMO(4);
     %column
-    DLUMO = -0.0;
+    DLUMO = 0.15;
     %DLUMO = Delta_LUMO(11);
 
     %HTL Energetics
@@ -38,10 +39,19 @@ if Fiddle_with_Energetics == 1
 
 end
 
+if Fiddle_with_IonConc == 1
+
+   par.Ncat(:) = 1e18;
+   par.Nani(:) = 1e18;
+
+   par = refresh_device(par);
+
+end
+
 eqm_QJV = equilibrate(par);
 
 %%
-CV_sol_ion = doCV(eqm_QJV.ion, 1, -0.2, 1.25, -0.2, 1e-4, 1, 291);
+CV_sol_ion = doCV(eqm_QJV.ion, 1.1, -0.2, 1.20, -0.2, 1, 1, 281);
 %CV_sol_el = doCV(eqm_QJV.el, 1, -0.2, 1.17, -0.2, 1e-4, 1, 275);
 
 %%

@@ -1,6 +1,8 @@
 %Use this file for energy related things (TL Fermi levels, energy offsets
 %and Vbi)
 
+%TURN SAVE OFF TO START OFF WITH!!
+
 tic
 %% Define parameter space
 %Rows are variable parameter, columns are the ion concentrations
@@ -148,6 +150,8 @@ c = colorbar;
 c.Label.String = 'Current Density (mAcm^{-3})';
 
 %% Save results and solutions
-
-filename = 'tld_symmetric_Vbi_vs_Ncat_Piers_vsr.mat';
-save(filename, 'el_results', 'ion_results', 'solCV_el', 'solCV_ion')
+save = 0;
+if save ==1;
+    filename = 'tld_symmetric_Vbi_vs_Ncat_Piers_vsr.mat';
+    save(filename, 'el_results', 'ion_results', 'solCV_el', 'solCV_ion')
+end
