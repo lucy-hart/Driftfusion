@@ -46,6 +46,7 @@ xlabel('Device depth (nm)', 'Fontsize', fontsize)
 yticks([10 12 14 16 18 20])
 xticks([0 100 200 300 400])
 legend('','','','','  electrons','  holes', 'NumColumns', 1, 'Position', pos_el, 'Fontsize', fontsize)
+title('ETM Mobility = 10^{-3} cm^{2}/V/s')
 title(legend, 'Short Circuit', 'Fontsize', fontsize)
 
 hold off 
@@ -170,12 +171,12 @@ fig_num = 1;
 
 if save == 1 && fig_num == 1
     exportgraphics(fig1, ...
-    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\v2\CarrierDistributionsSC_PCBM.png', ...
+    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\v2\CarrierDistributionsSC_LowMob.png', ...
     'Resolution', 300)
 elseif save == 1 && fig_num == 2
-    filename = 'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\v2\CationDistributionSC_PCBM.png';
+    filename = 'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\v2\CationDistributionSC_LowMob.png';
     exportgraphics(fig2, filename, 'Resolution', 300)
 elseif save == 1 && fig_num == 3
-    filename = 'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\v2\FieldDistriution_PCBM.png';
+    filename = 'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Weidong_ETL\Paper\v2\FieldDistriution_LowestMob.png';
     exportgraphics(fig3, filename, 'Resolution', 300)
 end

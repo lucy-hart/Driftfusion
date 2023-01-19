@@ -1,5 +1,5 @@
-par = pc('Input_files/PTAA_MAPI_PCBM_v6.csv');
-%par = pc('Input_files/PTAA_MAPI_PCBM_HigherLUMO.csv');
+%par = pc('Input_files/PTAA_MAPI_PCBM_v6.csv');
+par = pc('Input_files/PTAA_MAPI_PCBM_HigherLUMO.csv');
 
 par.light_source1 = 'laser';
 par.laser_lambda1 = 532;
@@ -18,7 +18,7 @@ eqm_QJV = equilibrate(par);
 %light_eqm_OC = lightonRs(eqm_QJV.ion, 1, 10, 1, 1e6, 1000);
 
 %%
-CV_sol_ion = doCV(eqm_QJV.ion, 1, -0.3, 1.2, -0.3, 10e-3, 1, 301);
+CV_sol_ion = doCV(eqm_QJV.ion, 1, -0.2, 1.2, -0.2, 10e-3, 1, 301);
 %CV_sol_el = doCV(eqm_QJV.el, 1, -0.3, 1.2, -0.3, 10e-3, 1, 301);
 
 %%

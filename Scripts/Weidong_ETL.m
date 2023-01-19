@@ -138,21 +138,23 @@ ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{interface (left)}', 'J_{interface (right)}', '','J_{ext}'}, 'Location', 'bestoutside')
 
 %% Losses at SC, ions vs no ions
+num = 3;
 x = categorical({'With Mobile Ions', 'Without Mobile Ions'});
-y = [-J_values(291,2,1) -J_values(291,3,1) -J_values(291,4,1) -J_values(291,5,1); ...
-    -J_values_el(291,2,1) -J_values_el(291,3,1) -J_values_el(291,4,1) -J_values_el(291,5,1)];
+y = [-J_values(291,2,num) -J_values(291,3,num) -J_values(291,4,num) -J_values(291,5,num); ...
+    -J_values_el(291,2,num) -J_values_el(291,3,num) -J_values_el(291,4,num) -J_values_el(291,5,num)];
 
 bar_colours = {[0.9290 0.6940 0.1250],[0 0.4470 0.7410],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330]};
 figure('Name', 'RecombinationSC_ElvsIon','Position', [100 100 1250 2000])
 box on
-b = bar(x, y, 'stacked','FaceColor','flat');
+b = bar(x, 1000*y, 'stacked','FaceColor','flat');
 
 for k = 1:4
     b(k).CData = bar_colours{k};
 end
 
 set(gca, 'FontSize', 30)
-ylabel('Recombination Current Density (Acm^{-2})', 'FontSize', 30)
+ylabel('Recombination Current Density (mAcm^{-2})', 'FontSize', 30)
+ylim([0, 2.8])
 legend({'', '  J_{bulk}', '  J_{surface}', ''}, 'Location', 'northeast', 'FontSize', 30)
 %% Plot PLQY results
 %One plot for effect of changing mobility 
