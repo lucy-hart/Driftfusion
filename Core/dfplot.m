@@ -670,7 +670,7 @@ classdef dfplot
             Nani = repmat(dev.Nani, length(t), 1);
             Ncat = repmat(dev.Ncat, length(t), 1);
 
-            figure(1);
+            figure('Name', 'ELxnpxacx');
             subplot(3,1,1);
             dfplot.x2d(sol, x, {Efn, Efp, Ecb, Evb}, {'E_{fn}', 'E_{fp}', 'E_{CB}', 'E_{VB}'}, {'--', '--', '-', '-'}, 'Energy [eV]', tarr, xrange, 0, 0)
 

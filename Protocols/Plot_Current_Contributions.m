@@ -33,7 +33,9 @@ for n = 1:6
 end
 plot(V(1:num_values), zeros(1,num_values), 'black', 'LineWidth', 1)
 hold off
-xlim([0, CVsol.par.V_fun_arg(2)])
+V1 = CVsol.par.V_fun_arg(2);
+V2 = CVsol.par.V_fun_arg(3);
+xlim([0, max([V1, V2])])
 xlabel('Voltage (V)')
 ylim([J_values(1,1)*1.1, 0.01])
 ylabel('Current Density (Acm^{-2})')

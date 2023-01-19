@@ -28,6 +28,11 @@ t0 = 0;
 t1 = abs(y1-y0)/k;
 t2 = t1+abs(y2-y1)/k;
 
+%lt = less than function
+%returns an array with elements set to 1 when A<B; otherwise, the element
+%is 0
+%b = mod(a,m) returns the remainder after division of a by m (a modulo m)
+%ge = greater than or equal to function
 y = lt(mod(t,tperiod), t1).*(y0+(y1-y0).*mod(t,tperiod)./t1) +...
     ge(mod(t,tperiod), t1).*lt(mod(t,tperiod), t2).*(y1+((y2-y1).*mod((t-t1),tperiod)./(t2-t1))) +...
     ge(mod(t,tperiod), t2).*lt(mod(t,tperiod), tmax).*(y2+((y0-y2).*mod((t-t2),tperiod)./(tperiod-t2)));

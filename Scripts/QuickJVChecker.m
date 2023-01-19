@@ -51,9 +51,25 @@ end
 eqm_QJV = equilibrate(par);
 
 %%
-CV_sol_ion = doCV(eqm_QJV.ion, 1.1, -0.2, 1.20, -0.2, 1, 1, 281);
+CV_sol_ion = doCV(eqm_QJV.ion, 1.1, -0.2, 1.20, -0.2, 1e-4, 1, 281);
 %CV_sol_el = doCV(eqm_QJV.el, 1, -0.2, 1.17, -0.2, 1e-4, 1, 275);
 
+%%
+%Make one sun solution at a given applied voltage
+Vapp = 0.62; %Uniform ion distribution from JV
+sol_ill = changeLight(eqm_QJV.ion, 1.1, 0, 1);
+sol_ill_bias = genVappStructs(sol_ill, Vapp, 1);
+try
+    CV_sol_startbias = doCV(sol_ill_bias, 1.1, Vapp, -0.20, 1.20, 1e-4, 1, 281);
+catch
+    warning('No joy.')
+end
+%%
+Plot_Current_Contributions(CV_sol_startbias)
+stats_ions_bias = CVstats(CV_sol_startbias)
+
+dfplot.ELxnpxacx(CV_sol_ion, 1e4*(0.2+Vapp))
+dfplot.ELxnpxacx(sol_ill_bias, sol_ill_bias.t(end))
 %%
 Plot_Current_Contributions(CV_sol_ion)
 stats_ion = CVstats(CV_sol_ion)
