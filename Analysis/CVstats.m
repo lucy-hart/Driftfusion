@@ -28,9 +28,9 @@ else
     J = dfana.calcJ(sol);
     J = J.tot(:,1);
     J_half = J(start:end);
-    J_other_half = J(1:start-1);
+    J_other_half = J(2:start-1);
     V_half = Vapp(start:end);
-    V_other_half = Vapp(1:start-1);
+    V_other_half = Vapp(2:start-1);
     if length(J_other_half) == 1
         J_half(end+1) = J_other_half;
         J = J_half;
@@ -51,8 +51,8 @@ for i=1:length(V_f)
         V_f(i) = 0;
     end
 end
-J_r = J(change_sweep_direction_index:length(sol.t));
-V_r = Vapp(change_sweep_direction_index:length(sol.t));
+J_r = J(change_sweep_direction_index:end);
+V_r = Vapp(change_sweep_direction_index:end);
 for i=1:length(V_r)
     if abs(V_r(i)) < 1e-10
         V_r(i) = 0;
