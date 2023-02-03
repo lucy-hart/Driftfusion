@@ -1,6 +1,7 @@
 %par=pc('Input_files/EnergyOffsetSweepParameters_v2.csv');
-par = pc('Input_files/PTAA_MAPI_NegOffset.csv');
-%par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
+%par = pc('Input_files/PTAA_MAPI_NegOffset.csv');
+%par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
+par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_PosOffset.csv');
 
 Fiddle_with_Energetics = 0;
@@ -51,30 +52,32 @@ end
 eqm_QJV = equilibrate(par);
 
 %%
-%CV_sol_ion = doCV(eqm_QJV.ion, 1.1, -0.2, 1.20, -0.2, 1e-4, 1, 281);
-CV_sol_el = doCV(eqm_QJV.el, 1, -0.2, 1.17, -0.2, 1e-4, 1, 275);
+CV_sol_ion = doCV(eqm_QJV.ion, 1.1, -0.2, 1.20, -0.2, 1e-4, 1, 281);
+%CV_sol_el = doCV(eqm_QJV.el, 1, -0.2, 1.17, -0.2, 1e-4, 1, 275);
 
-Plot_Current_Contributions(CV_sol_el)
-%stats_ion = CVstats(CV_sol_ion)
-stats_el = CVstats(CV_sol_el)
+Plot_Current_Contributions(CV_sol_ion) 
+stats_ion = CVstats(CV_sol_ion)
+%stats_el = CVstats(CV_sol_el)
 
 %%
 %Make one sun solution at a given applied voltage
-%Vapp = 0.62; %Uniform ion distribution from JV for negtive offset case
-Vapp = stats_ion.Voc_f; %Uniform ion distribution from JV
-sol_ill = changeLight(eqm_QJV.ion, 1.1, 0, 1);
-sol_ill_bias = genVappStructs(sol_ill, Vapp, 1);
-try
-    CV_sol_startbias = doCV(sol_ill_bias, 1.1, Vapp, -0.20, 1.20, 100, 1, 281);
-catch
-    warning('No joy.')
-end
+run = 0; 
+if run == 1
+    %Vapp = 0.62; %Uniform ion distribution from JV for negtive offset case
+    Vapp = stats_ion.Voc_f; %Uniform ion distribution from JV
+    sol_ill = changeLight(eqm_QJV.ion, 1.1, 0, 1);
+    sol_ill_bias = genVappStructs(sol_ill, Vapp, 1);
+    try
+        CV_sol_startbias = doCV(sol_ill_bias, 1.1, Vapp, -0.20, 1.20, 100, 1, 281);
+    catch
+        warning('No joy.')
+    end
 
-Plot_Current_Contributions(CV_sol_startbias)
-stats_ions_bias = CVstats(CV_sol_startbias)
+    Plot_Current_Contributions(CV_sol_startbias)
+    stats_ions_bias = CVstats(CV_sol_startbias)
 
-dfplot.ELxnpxacx(CV_sol_ion, 1e4*(0.2+Vapp))
-dfplot.ELxnpxacx(sol_ill_bias, sol_ill_bias.t(end))
-
+    dfplot.ELxnpxacx(CV_sol_ion, 1e4*(0.2+Vapp))
+    dfplot.ELxnpxacx(sol_ill_bias, sol_ill_bias.t(end))
+end     
 
 

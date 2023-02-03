@@ -19,7 +19,7 @@ dark_eqm = equilibrate(par);
 %Voc is 1.09 V
 prebias = [0.75, 0.85, 0.90, 0.95, 1.09];
 
-scan_rates = [1e-2, 1e-1, 2e-1, 1, 2, 5, 100, 1000];
+scan_rates = [1e-2, 1e-1, 2e-1, 1, 2, 100, 1000];
 
 JV_Solutions_ScanRate_PartOne = cell(length(prebias),length(scan_rates));
 JV_Solutions_ScanRate_PartTwo = cell(length(prebias),length(scan_rates));
@@ -112,9 +112,9 @@ plot_fw = 1;
 plot_bw = 1;
 zero = zeros(50,1);
 if plot_fw == 0
-    labels = {'','',' 0.01 Vs^{-1}',' 0.1 Vs^{-1}',' 0.2 Vs^{-1}',' 1 Vs^{-1}',' 2 Vs^{-1}',' 5 Vs^{-1}',' 100 Vs^{-1}',' 1000 Vs^{-1}'};
+    labels = {'','',' 0.01 Vs^{-1}',' 0.1 Vs^{-1}',' 0.2 Vs^{-1}',' 1 Vs^{-1}',' 2 Vs^{-1}',' 100 Vs^{-1}',' 1000 Vs^{-1}'};
 elseif plot_fw == 1
-    labels = {'','',' 0.01 Vs^{-1}','',' 0.1 Vs^{-1}','', ' 0.2 Vs^{-1}', '',' 1 Vs^{-1}', '',' 2 Vs^{-1}', '',' 5 Vs^{-1}', '',' 100 Vs^{-1}','',' 1000 Vs^{-1}',''};
+    labels = {'','',' 0.01 Vs^{-1}','',' 0.1 Vs^{-1}','', ' 0.2 Vs^{-1}', '',' 1 Vs^{-1}', '',' 2 Vs^{-1}', '',' 100 Vs^{-1}','',' 1000 Vs^{-1}',''};
 end
 
 box on

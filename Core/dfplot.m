@@ -689,7 +689,7 @@ classdef dfplot
             Nani = repmat(dev.Nani, length(t), 1);
             Ncat = repmat(dev.Ncat, length(t), 1);
 
-            figure(24)
+            figure('Name', 'Vxacx')
             subplot(2,1,1);
             dfplot.x2d(sol, x, {V}, {'V'},...
                 {'-'}, 'Electro. potential [V]', tarr, xrange, 0, 0);
@@ -706,7 +706,7 @@ classdef dfplot
             Vion = dfana.calcVion(sol);
             Vel = V - Vion;
 
-            figure(25)
+            figure('Name', 'Vionxacx')
             subplot(2,1,1);
             dfplot.x2d(sol, x, {V, Vion, Vel}, {'V', 'Vion', 'Vel'},...
                 {'--', '.', '-'}, 'Electro. potential [V]', tarr, xrange, 0, 0);
