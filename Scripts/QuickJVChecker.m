@@ -1,10 +1,10 @@
-par = pc('Input_files/HTL_MAPI_NoOffset.csv');
+%par = pc('Input_files/HTL_MAPI_NoOffset.csv');
 %par = pc('Input_files/HTL_MAPI_NegOffset.csv');
 %par = pc('Input_files/HTL_MAPI_PosOffset.csv');
 %par = pc('Input_files/HTL_MAPI_PosOffset_Bilayer.csv');
-%par = pc('Input_files/SAMS_MAPbIBr_C60.csv');
+par = pc('Input_files/SAMS_MAPbIBr_C60.csv');
 %par = pc('Input_files/SAMS_MAPbIBr_PCBM.csv');
-%par = pc('Input_files/SAMS_MAPI_C60.csv');
+%par = pc('Input_files/SAMS_MAPbIBr_ICBA.csv');
 %par = pc('Input_files/PTAA_FaCsPbIBr_PCBM.csv');
 
 %par.RelTol_vsr = 0.1;
