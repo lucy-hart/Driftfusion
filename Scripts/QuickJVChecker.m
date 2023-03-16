@@ -1,11 +1,14 @@
 %par=pc('Input_files/EnergyOffsetSweepParameters_v2.csv');
+par=pc('Input_files/EnergyOffsetSweepParameters_v3.csv');
 %par = pc('Input_files/PTAA_MAPI_NegOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
-par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
+%par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_PosOffset.csv');
+%par = pc('Input_files/PTAA_MAPI_PCBM_ForPaper.csv');
 
-Fiddle_with_Energetics = 0;
+Fiddle_with_Energetics = 1;
 Fiddle_with_IonConc = 0;
+IonConc = 1e15;
 %%
 if Fiddle_with_Energetics == 1
 
@@ -17,7 +20,7 @@ if Fiddle_with_Energetics == 1
     %DLUMO = Delta_LUMO(11);
 
     %HTL Energetics
-    par.Phi_left = -5.3;
+    par.Phi_left = -5.15;
     par.Phi_IP(1) = par.Phi_IP(3) + DHOMO;
     par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
     par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
@@ -27,7 +30,7 @@ if Fiddle_with_Energetics == 1
     end
     
     %ETL Energetics
-    par.Phi_right = -4.1;
+    par.Phi_right = -4.05;
     par.Phi_EA(5) = par.Phi_EA(3) + DLUMO;
     par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
     par.EF0(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
@@ -42,8 +45,8 @@ end
 
 if Fiddle_with_IonConc == 1
 
-   par.Ncat(:) = 1e18;
-   par.Nani(:) = 1e18;
+   par.Ncat(:) = IonConc;
+   par.Nani(:) = IonConc;
 
    par = refresh_device(par);
 
@@ -52,8 +55,8 @@ end
 eqm_QJV = equilibrate(par);
 
 %%
-CV_sol_ion = doCV(eqm_QJV.ion, 1.1, -0.2, 1.20, -0.2, 1e-4, 1, 281);
-%CV_sol_el = doCV(eqm_QJV.el, 1, -0.2, 1.17, -0.2, 1e-4, 1, 275);
+CV_sol_ion = doCV(eqm_QJV.ion, 1.1, -0.2, 1.25, -0.2, 1e-4, 1, 291);
+%CV_sol_el = doCV(eqm_QJV.el, 1.05, -0.2, 1.20, -0.2, 1e-4, 1, 281);
 
 Plot_Current_Contributions(CV_sol_ion) 
 stats_ion = CVstats(CV_sol_ion)

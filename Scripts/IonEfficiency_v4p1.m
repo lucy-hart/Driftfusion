@@ -8,8 +8,8 @@ tic
 %Rows are the Ion Concentrations
 %Columns are the TL Energetic Offsets
 
-n_values = 11;
-Delta_TL = linspace(-0.2, 0.3, n_values);
+n_values = 10;
+Delta_TL = linspace(-0.15, 0.3, n_values);
 Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
 n_ion_concs = length(Ion_Conc);
 
@@ -29,7 +29,10 @@ solCV = cell(n_ion_concs, n_values);
 results = cell(n_ion_concs, n_values);
 
 %% Do (many) JV sweeps
-par=pc('Input_files/EnergyOffsetSweepParameters_v2.csv');
+%Remeber to update the work function values if you change these parameters
+%between files 
+par=pc('Input_files/EnergyOffsetSweepParameters_v3.csv');
+illumination = 1.1;
 
 %Reset the electrode work functions in each loop to be safe as they are
 %changed for the cases where E_LUMO (E_HOMO) is far below (above) the CB
@@ -43,7 +46,7 @@ for i = 1:n_ion_concs
             disp("No Mobile Ions")
         end
         %HTL Energetics
-        par.Phi_left = -5.3;
+        par.Phi_left = -5.15;
         par.Phi_IP(1) = par.Phi_IP(3) + params{i,j}(2);
         par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
         par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
@@ -53,7 +56,7 @@ for i = 1:n_ion_concs
         end
         %ETL Energetics
         %Need to use opposite sign at ETL to keep energy offsets symmetric
-        par.Phi_right = -4.1;
+        par.Phi_right = -4.05;
         par.Phi_EA(5) = par.Phi_EA(3) - params{i,j}(2);
         par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
         par.EF0(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
@@ -77,7 +80,7 @@ for i = 1:n_ion_concs
             num_points = 281;
             while Voc_max >= 1.05
                 try            
-                    solCV{i, j} = doCV(soleq{i, j}.el, 1, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);           
+                    solCV{i, j} = doCV(soleq{i, j}.el, illumination, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);           
                     error_log(i,j) = 0;
                     results{i,j} = CVstats(solCV{i, j});
                     Voc_max = 0;                
@@ -99,7 +102,7 @@ for i = 1:n_ion_concs
             num_points = 281; 
             while Voc_max >= 1.05
                 try
-                    solCV{i, j} = doCV(soleq{i, j}.ion, 1, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);
+                    solCV{i, j} = doCV(soleq{i, j}.ion, illumination, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);
                     error_log(i,j) = 0;
                     results{i,j} = CVstats(solCV{i, j});
                     Voc_max = 0;
@@ -143,7 +146,7 @@ Colours = parula(n_ion_concs-1);
 num = 3;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "southeast"];
-lims = [[-23 -19]; [0.77 1.17]; [0.1 0.85]; [1 21]];
+lims = [[-23 -19]; [0.77 1.17]; [0.1, 0.85]; [1 21]];
 box on 
 for i = 1:n_ion_concs
     hold on
@@ -156,6 +159,8 @@ end
 set(gca, 'Fontsize', 25)
 xlabel('Transport Layer Energetic Offset (eV)', 'FontSize', 30)
 ylabel(labels(num), 'FontSize', 30)
+xlim([-0.15, 0.3])
+ylim(lims(num,:))
 legend({'No Ions', '1e15', '5e15', '1e16', '5e16', '1e17', '5e17', '1e18'}, 'Location', LegendLoc(num), 'FontSize', 25, 'NumColumns', 2)
 title(legend, 'Ion Concentration (cm^{-3})', 'FontSize', 25)
 
