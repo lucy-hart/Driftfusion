@@ -16,7 +16,7 @@ j_surf_rec = dfana.calcj_surf_rec(CVsol);
 
 %forward sweep
 J_values(:,1) = e*trapz(x, gxt(1,:))';
-J_values(:,2) = 100*e*trapz(x, loss_currents.btb, 2)';
+J_values(:,2) = e*trapz(x, loss_currents.btb, 2)';
 J_values(:,3) = e*trapz(x, loss_currents.srh, 2)';
 J_values(:,4) = e*trapz(x, loss_currents.vsr, 2)';
 J_values(:,5) = e*(j_surf_rec.tot);
@@ -39,6 +39,6 @@ xlim([0, max([V1, V2])])
 xlabel('Voltage (V)')
 ylim([J_values(1,1)*1.1, 0.01])
 ylabel('Current Density (Acm^{-2})')
-legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{surface}', '', 'J_{ext}'}, 'Location', 'bestoutside')
+legend({'J_{gen}', 'J_{rad}', 'J_{SRH}', 'J_{surface}', '', 'J_{ext}'}, 'Location', 'bestoutside')
 
 end
