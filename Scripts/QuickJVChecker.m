@@ -1,12 +1,12 @@
 %par=pc('Input_files/EnergyOffsetSweepParameters_v2.csv');
-par=pc('Input_files/EnergyOffsetSweepParameters_v3.csv');
-%par = pc('Input_files/PTAA_MAPI_NegOffset.csv');
+%par=pc('Input_files/EnergyOffsetSweepParameters_v3.csv');
+par = pc('Input_files/PTAA_MAPI_NegOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
 %par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_PosOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_PCBM_ForPaper.csv');
 
-Fiddle_with_Energetics = 1;
+Fiddle_with_Energetics = 0;
 Fiddle_with_IonConc = 0;
 IonConc = 1e15;
 %%
@@ -55,8 +55,8 @@ end
 eqm_QJV = equilibrate(par);
 
 %%
-CV_sol_ion = doCV(eqm_QJV.ion, 1.1, -0.2, 1.25, -0.2, 1e-4, 1, 291);
-%CV_sol_el = doCV(eqm_QJV.el, 1.05, -0.2, 1.20, -0.2, 1e-4, 1, 281);
+CV_sol_ion = doCV(eqm_QJV.ion, 1.1, -0.2, 1.2, -0.2, 1e-4, 1, 281);
+%CV_sol_el = doCV(eqm_QJV.el, 1.1, -0.2, 1.25, -0.2, 1e-4, 1, 291);
 
 Plot_Current_Contributions(CV_sol_ion) 
 stats_ion = CVstats(CV_sol_ion)

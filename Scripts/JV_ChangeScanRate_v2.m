@@ -106,7 +106,7 @@ end
 %% Plotting 
 figure('Name', 'Scan Rate Dependent JV', 'Position', [50 50 800 900])
 %choose prebias
-num =  3;
+num =  5;
 Colours = parula(length(scan_rates));
 plot_fw = 1;
 plot_bw = 1;

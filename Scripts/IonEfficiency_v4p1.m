@@ -143,10 +143,10 @@ end
 %%
 figure('Name', 'PCE vs Energy Offsets vs Ion Conc', 'Position', [50 50 1000 1200])
 Colours = parula(n_ion_concs-1);
-num = 3;
+num = 1;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "southeast"];
-lims = [[-23 -19]; [0.77 1.17]; [0.1, 0.85]; [1 21]];
+lims = [[-24 -15]; [0.77 1.24]; [0.1, 0.85]; [1 21]];
 box on 
 for i = 1:n_ion_concs
     hold on

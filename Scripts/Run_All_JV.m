@@ -22,7 +22,7 @@ end
 %% Perform JV scans
 JV_solutions_el = cell(1,num_devices);
 JV_solutions_ion = cell(1,num_devices);
-suns = 1;
+suns = 1.1;
 for j = 1:num_devices
     JV_solutions_el{j} = doCV(eqm_solutions_dark{j}.el, suns, -0.3, 1.2, -0.3, 10e-3, 1, 301);
     JV_solutions_ion{j} = doCV(eqm_solutions_dark{j}.ion, suns, -0.3, 1.2, -0.3, 10e-3, 1, 301);

@@ -157,7 +157,7 @@ fig1c = gcf;
 %% Plot carrier populations at SC and OC, with and without mobile ions
 % and the ion population at OC 
 
-num = 2;
+num = 1;
 x_values = JV_solutions_ion{num}.x * 1e7;
 if num ~= 1
     pos_el = [0.68 0.8 0.1 0.05];
@@ -318,13 +318,13 @@ patch('XData',[x_values(1100) x_values(1200) x_values(1200) x_values(1100)], 'YD
 patch('XData',[x_values(1200) x_values(end) x_values(end) x_values(1200)], 'YData',[1e19 1e19 1e9 1e9],  'FaceColor', colors_JV{3},...
     'FaceAlpha', 0.3, 'EdgeColor', 'none')
 
-T = OC_time_ion(num);
+T = OC_time_el(num);
 
 semilogy(x_values, (JV_solutions_ion{num}.u(T,:,4)), 'color', colors_JV{2}, 'LineStyle', '-')
 
 hold off 
 
-ylim([1e8, 1e18])
+ylim([1e8, 3.2e18])
 if num == 1
     xlim([0, x_values(1540)])
 else
@@ -333,7 +333,7 @@ end
 ylabel('Cation Density (cm^{-3})', 'Fontsize', fontsize)
 xlabel('Device depth (nm)', 'Fontsize', fontsize)
 xticks([0 100 200 300 400])
-yticks([2e17 4e17 6e17 8e17 10e17])
+%yticks([2e17 4e17 6e17 8e17 10e17])
 legend('','','','','Open Circuit', 'NumColumns', 1, 'Position', pos_ion, 'Fontsize', fontsize)
 title(legend, 'Ion Distribution', 'Fontsize', fontsize)
 
@@ -341,8 +341,8 @@ fig4 = gcf;
 
 %% Save Images
 %Set details of what you're saving
-fig_num = 1.5;
-ETM_distplot = 2;
+fig_num = 4;
+ETM_distplot = 1;
 ETM_fieldplot = 2;
 
 if save == 1 && fig_num == 1
@@ -361,6 +361,6 @@ elseif save == 1 && fig_num == 3.5
     filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\IonEfficiency\ESAFigures_1Sun\CarrierDistributionsOCion_ETM' num2str(ETM_distplot) '.png'];
     exportgraphics(fig3b, filename, 'Resolution', 300)
 elseif save == 1 && fig_num == 4
-    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\IonEfficiency\ESAFigures_1Sun\CationDistributionsOC_ETM' num2str(ETM_distplot) '.png'];
+    filename = ['C:\Users\ljh3218\OneDrive - Imperial College London\PhD\IonEfficiency\ESAFigures_1Sun\CationDistributionsOCel_ETM' num2str(ETM_distplot) '.png'];
     exportgraphics(fig4, filename, 'Resolution', 300)
 end

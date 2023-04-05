@@ -17,7 +17,7 @@ for i = 1:num_devices
 end
 
 prebias = [[0.45, 0.55, 0.65, 0.75, 0.85, 0.95, 1.05, 1.15];
-            [0.50, 0.60, 0.70, 0.80, 0.90, 1.00, 1.10, 1.15]];
+            [0.49, 0.60, 0.71, 0.80, 0.90, 1.00, 1.10, 1.15]];
 
 scan_rates = [1e-2, 1000];
 
@@ -108,8 +108,8 @@ for k = 1:num_devices
 end
 %% Plotting JV scans
 %choose prebias
-num = 2;
-num_device = 1;
+num = 7;
+num_device = 2;
 
 figure('Name', 'Scan Rate Dependent JV', 'Position', [50 50 800 900])
 Colours = {[0 0.4470 0.7410], [0.4660 0.6740 0.1880], [0.8500 0.3250 0.0980]};
@@ -145,6 +145,7 @@ ylabel('Current Density (Acm^{-2})', 'FontSize', 30)
 %irrespective of prebais
 figure('Name', 'Voc versus Prebias', 'Position', [50 50 800 900])
 
+box on 
 hold on
 for k = 1:num_devices
     plot(prebias(k,:), Voc_fast(k,:), 'Marker', 'x', 'MarkerSize', 15, 'LineStyle', 'none')
