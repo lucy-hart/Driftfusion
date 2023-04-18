@@ -14,7 +14,7 @@ pos_el = [0.62 0.75 0.1 0.05];
 pos_ion = [0.66 0.8 0.1 0.05];
 
 %SC
-T = 31;
+T = 139
 
 figure('Name', 'Carrier Densities SC', 'Position', [100 100 1250 2000])
 set(gca, 'DefaultLineLineWidth', lw, 'FontSize', ticksize)
@@ -46,8 +46,8 @@ xlabel('Device depth (nm)', 'Fontsize', fontsize)
 yticks([10 12 14 16 18 20])
 xticks([0 100 200 300 400])
 legend('','','','','  electrons','  holes', 'NumColumns', 1, 'Position', pos_el, 'Fontsize', fontsize)
-title('ETM Mobility = 10^{-3} cm^{2}/V/s')
-title(legend, 'Short Circuit', 'Fontsize', fontsize)
+%title('ETM Mobility = 10^{-3} cm^{2}/V/s')
+title(legend, 'Open Circuit', 'Fontsize', fontsize)
 
 hold off 
 
