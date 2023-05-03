@@ -147,7 +147,7 @@ figure('Name', 'Voc versus Prebias', 'Position', [50 50 800 900])
 
 box on 
 hold on
-for k = 1:num_devices
+for k = 2%1:num_devices
     plot(prebias(k,:), Voc_fast(k,:), 'Marker', 'x', 'MarkerSize', 15, 'LineStyle', 'none')
 end
 hold off
@@ -157,3 +157,4 @@ xlim([0,1.2])
 ylim([0,1.2])
 xlabel('Prebias Voltage (V)', 'FontSize', 30)
 ylabel('Open Circuit Voltage (V)', 'FontSize', 30)
+%legend({'ETM 1', 'ETM 2'}, 'FontSize', 25, 'Location', 'southeast')
