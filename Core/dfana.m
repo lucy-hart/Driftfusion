@@ -257,6 +257,8 @@ classdef dfana
             % Bulk SRH
             r.srh = srh_zone.*(n.*p - dev.ni.^2)...
                 ./(dev.taun.*(p+dev.pt) + dev.taup.*(n+dev.nt));
+            r.srh2 = dev.use_second_trap.*srh_zone.*(n.*p - dev.ni.^2)...
+                ./(dev.taun2.*(p+dev.pt2) + dev.taup2.*(n+dev.nt2));
             % Volumetric surface SRH
             ns = n.*exp(-alpha_xn.*xprime_n); % Projected electron surface density
             ps = p.*exp(-beta_xp.*xprime_p);  % Projected hole surface density
@@ -266,7 +268,7 @@ classdef dfana
             % currents
             
             % Total
-            r.tot = r.btb + r.srh + r.vsr;
+            r.tot = r.btb + r.srh + r.srh2 + r.vsr;
             
         end
         

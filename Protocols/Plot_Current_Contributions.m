@@ -6,7 +6,11 @@ function Plot_Current_Contributions(CVsol)
 %% Break down contributions to the current
 %Columns in J_values are J_gen, J_rad, J_srh, J_vsr, J_shunt and J_ext
 num_values = length(CVsol.t);
-J_values = zeros(num_values, 6);
+if CVsol.par.two_trap_levels == 0
+    J_values = zeros(num_values, 6);
+elseif CVsol.par.two_trap_levels == 1
+    J_values = zeros(num_values, 7);
+end
 e = -CVsol.par.e;
 loss_currents = dfana.calcr(CVsol,'sub');
 x = CVsol.par.x_sub;
@@ -21,7 +25,9 @@ J_values(:,3) = e*trapz(x, loss_currents.srh, 2)';
 J_values(:,4) = e*trapz(x, loss_currents.vsr, 2)';
 J_values(:,5) = e*(j_surf_rec.tot);
 J_values(:,6) = J.tot(:,1);
-    
+if CVsol.par.two_trap_levels == 1
+    J_values(:,7) = e*trapz(x, loss_currents.srh2, 2)';
+end     
 %% Plot contributons to the current
 figure('Name', 'Current Contributions', 'Position', [50 50 1000 1000])
 line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250], [0.4940 0.1840 0.5560],...
@@ -31,6 +37,9 @@ for n = 1:6
     plot(V(:), J_values(:,n), 'color', line_colour{n})
     hold on
 end
+if CVsol.par.two_trap_levels == 1
+    plot(V(:), J_values(:,7), 'color', 'black')
+end
 plot(V(1:num_values), zeros(1,num_values), 'black', 'LineWidth', 1)
 hold off
 V1 = CVsol.par.V_fun_arg(2);
@@ -39,6 +48,10 @@ xlim([0, max([V1, V2])])
 xlabel('Voltage (V)')
 ylim([J_values(1,1)*1.1, 0.01])
 ylabel('Current Density (Acm^{-2})')
-legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{surface}', '', 'J_{ext}'}, 'Location', 'bestoutside')
+if CVsol.par.two_trap_levels == 0
+    legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{surface}', '', 'J_{ext}'}, 'Location', 'bestoutside')
+elseif CVsol.par.two_trap_levels == 1
+        legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{surface}', '', 'J_{ext}', 'J_{SRH2}'}, 'Location', 'bestoutside')
+end
 
 end

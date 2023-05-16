@@ -97,13 +97,20 @@ epp_factor = par.epp_factor;      % Maximum dielectric constant (for normalisati
 B = device.B;               % Radiative recombination rate coefficient
 ni = device.ni;             % Intrinsic carrier density
 taun = device.taun;         % Electron SRH time constant
-taup = device.taup;         % Electron SRH time constant
+taun2 = device.taun2;       % Electron SRH time contstant for second trap
+taup = device.taup;         % Hole SRH time constant
+taup2 = device.taup2;       % Hole SRH time contstant for second trap
 taun_vsr = device.taun_vsr; % Electron SRH time constant- volumetric interfacial surface recombination scheme
-taup_vsr = device.taup_vsr; % Electron SRH time constant- volumetric interfacial surface recombination scheme
+taup_vsr = device.taup_vsr; % Hole SRH time constant- volumetric interfacial surface recombination scheme
 nt = device.nt;             % SRH electron trap constant
+nt2 = device.nt2;           % SRH electron trap constant for second trap
 pt = device.pt;             % SRH hole trap constant
+pt2 = device.pt2;           % SRH hole trap constant for second trap
 NA = device.NA;             % Acceptor doping density
 ND = device.ND;             % Donor doping density
+
+use_second_trap = device.use_second_trap; %Turn on/off effect of second trap in each layer
+
 % Set up counter ion density arrays
 switch N_ionic_species
     case 0                  % Nani, Ncat, a, and c set to zero for Poisson
@@ -193,7 +200,7 @@ V = 0; n = 0; p = 0; a = 0; c = 0;
 dVdx = 0; dndx = 0; dpdx = 0; dadx = 0; dcdx = 0;
 F_V = 0; F_n = 0; F_p = 0; F_c = 0; F_a = 0;
 S_V = 0; S_n = 0; S_p = 0; S_c = 0; S_a = 0;
-r_rad = 0; r_srh = 0; r_vsr = 0; r_np = 0;
+r_rad = 0; r_srh = 0; r_srh2 = 0; r_vsr = 0; r_np = 0;
 alpha = 0; beta = 0;
 G_n = 1;    % Diffusion enhancement prefactor electrons
 G_p = 1;    % Diffusion enhancement prefactor holes
@@ -293,13 +300,14 @@ end
         r_rad = radset*B(i)*(n*p - ni(i)^2);
         % Bulk SRH
         r_srh = SRHset*srh_zone(i)*((n*p - ni(i)^2)/(taun(i)*(p + pt(i)) + taup(i)*(n + nt(i))));
+        r_srh2 = SRHset*use_second_trap(i)*srh_zone(i)*((n*p - ni(i)^2)/(taun2(i)*(p + pt2(i)) + taup2(i)*(n + nt2(i))));
         % Volumetric surface recombination
         alpha = (sign_xn(i)*q*dVdx/(kB*T)) + alpha0_xn(i);
         beta = (sign_xp(i)*q*-dVdx/(kB*T)) + beta0_xp(i);
         r_vsr = SRHset*vsr_zone(i)*((n*exp(-alpha*xprime_n(i))*p*exp(-beta*xprime_p(i)) - ni(i)^2)...
             /(taun_vsr(i)*(p*exp(-beta*xprime_p(i)) + pt(i)) + taup_vsr(i)*(n*exp(-alpha*xprime_n(i)) + nt(i))));
         % Total electron and hole recombination
-        r_np = r_rad + r_srh + r_vsr;
+        r_np = r_rad + r_srh + r_srh2 + r_vsr;
         
         % Source terms
         S_V = (1/(epp_factor*epp0))*(-n + p - NA(i) + ND(i) + z_a*a + z_c*c - z_a*Nani(i) - z_c*Ncat(i));

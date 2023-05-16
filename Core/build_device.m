@@ -26,6 +26,8 @@ dev.sn = build_property(par.sn, xmesh, par, 'constant', 1);
 dev.sp = build_property(par.sp, xmesh, par, 'constant', 1);
 dev.mu_n = build_property(par.mu_n, xmesh, par, 'constant', 0);
 dev.mu_p = build_property(par.mu_p, xmesh, par, 'constant', 0);
+
+dev.use_second_trap = build_property(par.use_second_trap, xmesh, par, 'constant', 0);
     
 % Linearly graded properties
 dev.Phi_EA = build_property(par.Phi_EA, xmesh, par, 'lin_graded', 0);
@@ -73,26 +75,34 @@ if par.vsr_mode
     dev.Field_switch = dev.bulk_switch;
     
     dev.taun = build_property(par.taun, xmesh, par, 'constant', 0);
+    dev.taun2 = build_property(par.taun2, xmesh, par, 'constant', 0);
     dev.taup = build_property(par.taup, xmesh, par, 'constant', 0);
+    dev.taup2 = build_property(par.taup2, xmesh, par, 'constant', 0);
     dev.NA = build_property(par.NA, xmesh, par, 'zeroed', 0);
     dev.ND = build_property(par.ND, xmesh, par, 'zeroed', 0);
     dev.epp = build_property(par.epp, xmesh, par, 'constant', 0); 
     dev.ni = build_property(par.ni, xmesh, par, 'constant', 0);
     dev.nt = build_property(par.nt, xmesh, par, 'constant', 0);
+    dev.nt2 = build_property(par.nt2, xmesh, par, 'constant', 0);
     dev.pt = build_property(par.pt, xmesh, par, 'constant', 0);
+    dev.pt2 = build_property(par.pt2, xmesh, par, 'constant', 0);
 else 
     dev.vsr_zone = zeros(1, length(xmesh));
     dev.srh_zone = ones(1, length(xmesh));
     dev.Field_switch = ones(1, length(xmesh));
     
     dev.taun = build_property(par.taun, xmesh, par, 'constant', 0);
+    dev.taun2 = build_property(par.taun2, xmesh, par, 'constant', 0);
     dev.taup = build_property(par.taup, xmesh, par, 'constant', 0);
+    dev.taup2 = build_property(par.taup2, xmesh, par, 'constant', 0);
     dev.NA = build_property(par.NA, xmesh, par, 'exp_graded', 0);
     dev.ND = build_property(par.ND, xmesh, par, 'exp_graded', 0);
     dev.epp = build_property(par.epp, xmesh, par, 'lin_graded', 0);
     dev.ni = build_property(par.ni, xmesh, par, 'exp_graded', 0);
     dev.nt = build_property(par.nt, xmesh, par, 'exp_graded', 0);
+    dev.nt2 = build_property(par.nt, xmesh, par, 'exp_graded', 0);
     dev.pt = build_property(par.pt, xmesh, par, 'exp_graded', 0);
+    dev.pt2 = build_property(par.pt, xmesh, par, 'exp_graded', 0);
 end
 
 % Tranlsated co-ordinates

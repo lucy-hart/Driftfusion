@@ -50,8 +50,14 @@ par.xmesh_coeff = import_single_property(par.xmesh_coeff, T, {'xmesh_coeff'}, st
 par.Phi_EA = import_single_property(par.Phi_EA, T, {'Phi_EA', 'EA'}, start_row, end_row);
 % Ionisation potential array
 par.Phi_IP = import_single_property(par.Phi_IP, T, {'Phi_IP', 'IP'}, start_row, end_row);
+%Are there two trap levels?
+par.two_trap_levels = import_single_property(par.two_trap_levels, T, {'two_trap_levels'}, 1, 1);
 % SRH Trap energy
 par.Et = import_single_property(par.Et, T, {'Et', 'Et_bulk'}, start_row, end_row);
+% SRH Trap energy of second trap
+par.Et2 = import_single_property(par.Et2, T, {'Et2'}, start_row, end_row);
+% Use second trap functionality in a given layer
+par.use_second_trap = import_single_property(par.use_second_trap, T, {'use_second_trap'}, start_row, end_row);
 % Equilibrium Fermi energy array
 if strcmp(layer_type{1}, 'electrode')
     EF0 = import_single_property(par.EF0, T, {'EF0', 'E0'}, 1, length(layer_type));
@@ -89,8 +95,12 @@ par.g0 = import_single_property(par.g0, T, {'g0', 'G0'}, start_row, end_row);
 par.B = import_single_property(par.B, T, {'B', 'krad', 'kbtb'}, start_row, end_row);
 % Electron SRH time constant
 par.taun = import_single_property(par.taun, T, {'taun', 'taun_SRH'}, start_row, end_row);
+% Electron SRH time constant for second trap
+par.taun2 = import_single_property(par.taun2, T, {'taun2'}, start_row, end_row);
 % Hole SRH time constant
 par.taup = import_single_property(par.taup, T, {'taup', 'taup_SRH'}, start_row, end_row);
+% Hole SRH time constant for second trap
+par.taup2 = import_single_property(par.taup2, T, {'taup2'}, start_row, end_row);
 % Electron and hole surface recombination velocities
 if strcmp(layer_type{1}, 'electrode')
     sn = import_single_property(par.sn, T, {'sn'}, 1, length(layer_type));

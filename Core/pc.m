@@ -87,6 +87,7 @@ classdef pc
         Fermi_limit = 0.2;                  % Max allowable limit for Fermi levels beyond the bands [eV]
         Fermi_Dn_points = 400;              % No. of points in the Fermi-Dirac look-up table
         intgradfun = 'linear'               % Interface gradient function 'linear' = linear, 'erf' = 'error function'
+        two_trap_levels = 0;                %Possibility of having a second SRH trap levell in some layers
 
         %% Generation
         % optical_model = Optical Model
@@ -127,8 +128,10 @@ classdef pc
         % and define the variables PT and NT in the expression:
         % U = (np-ni^2)/(taun(p+pt) +taup(n+nt))
         Et =[-0.5];
+        use_second_trap = [0]; %Whether or not to use the second trap in a given layer
+        Et2 = [-0.1];   % Second trap level 
         ni_eff = 0;     % Effective intrinsic carrier density used for surface recombination equivalence
-        
+          
         %% Electrode Fermi energies [eV]
         % Fermi energies of the metal electrode. These define the built-in voltage, Vbi
         % and the boundary carrier concentrations n0_l, p0_l, n0_r, and
@@ -176,6 +179,9 @@ classdef pc
         %% SRH time constants for each layer [s]
         taun = [1e6];           % [s] SRH time constant for electrons
         taup = [1e6];           % [s] SRH time constant for holes  
+
+        taun2 = [1e6];          % [s] SRH time constant for electrons (second trap level)
+        taup2 = [1e6];          % [s] SRH time constant for holes (second trap level)
         
         %% Surface recombination and extraction coefficients [cm s-1]
         % Descriptions given in the comments considering that holes are
@@ -259,6 +265,7 @@ classdef pc
         n0_r
         ni
         nt              % Density of CB electrons when Fermi level at trap state energy
+        nt2             % Density of CB electrons when Fermi level at second trap state energy
         nt_inter
         p0
         pcum
@@ -266,6 +273,7 @@ classdef pc
         p0_l
         p0_r
         pt              % Density of VB holes when Fermi level at trap state energy
+        pt2             % Density of VB holes when Fermi level at second trap state energy
         pt_inter
         wn
         wp
@@ -306,6 +314,16 @@ classdef pc
                 if par.Et(i) >= par.Phi_EA(i) || par.Et(i) <= par.Phi_IP(i)
                     msg = 'Trap energies must exist within layer band gap.';
                     error(msg);
+                end
+            end
+
+            % Warn if second trap energies are outside of band gap energies
+            for i = 1:length(par.Et2)
+                if par.two_trap_levels == 1
+                    if par.Et2(i) >= par.Phi_EA(i) || par.Et2(i) <= par.Phi_IP(i)
+                        msg = 'Trap energies must exist within layer band gap.';
+                        error(msg);
+                    end
                 end
             end
 
@@ -393,11 +411,23 @@ classdef pc
             elseif length(par.taun) ~= length(par.d)
                 msg = 'Bulk SRH electron time constants array (taun_bulk) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
+            elseif (length(par.taun2) ~= length(par.d)) && par.two_trap_levels == 1
+                msg = 'Bulk SRH electron time constants array (taun2_bulk) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+                error(msg);
             elseif length(par.taup) ~= length(par.d)
                 msg = 'Bulk SRH hole time constants array (taup_bulk) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
+            elseif (length(par.taup2) ~= length(par.d)) && par.two_trap_levels == 1
+                msg = 'Bulk SRH hole time constants array (taup2_bulk) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+                error(msg);
             elseif length(par.Et) ~= length(par.d)
                 msg = 'Bulk SRH trap energy array (Et) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+                error(msg);
+            elseif (length(par.Et2) ~= length(par.d)) && par.two_trap_levels == 1
+                msg = 'Bulk SRH trap energy array (Et2) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+                error(msg);
+            elseif (length(par.use_second_trap) ~= length(par.d)) && par.two_trap_levels == 1
+                msg = 'use_second_trap does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
             end
 
@@ -512,12 +542,32 @@ classdef pc
             end
         end
 
+        function par = set.taun2(par, value)
+            for i = 1:length(value)
+                if isnan(value(i))
+                    par.taun2(i) = 1e100;
+                else
+                    par.taun2(i) = value(i);
+                end
+            end
+        end
+
         function par = set.taup(par, value)
             for i = 1:length(value)
                 if isnan(value(i))
                     par.taup(i) = 1e100;
                 else
                     par.taup(i) = value(i);
+                end
+            end
+        end
+
+        function par = set.taup2(par, value)
+            for i = 1:length(value)
+                if isnan(value(i))
+                    par.taup2(i) = 1e100;
+                else
+                    par.taup2(i) = value(i);
                 end
             end
         end
@@ -647,9 +697,17 @@ classdef pc
         function value = get.nt(par)
             value = distro_fun.nfun(par.Nc, par.Phi_EA, par.Et, par);
         end
+
+        function value = get.nt2(par)
+            value = distro_fun.nfun(par.Nc, par.Phi_EA, par.Et2, par);
+        end
         
         function value = get.pt(par)
             value = distro_fun.pfun(par.Nv, par.Phi_IP, par.Et, par);
+        end
+
+        function value = get.pt2(par)
+            value = distro_fun.pfun(par.Nv, par.Phi_IP, par.Et2, par);
         end
         
         %% Thickness and point arrays
