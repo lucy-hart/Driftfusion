@@ -1,5 +1,6 @@
-%par = pc('Input_files/PTAA_MAPI_PCBM_v6.csv');
-par = pc('Input_files/PTAA_MAPI_PCBM_HigherLUMO.csv');
+%par = pc('Input_files/PTAA_MAPI_PCBM_v5.csv');
+par = pc('Input_files/PTAA_MAPI_PCBM_LowerLUMO.csv');
+%par = pc('Input_files/PTAA_MAPI_PCBM_DopedETM.csv');
 
 par.light_source1 = 'laser';
 par.laser_lambda1 = 532;

@@ -137,6 +137,27 @@ ylim([-0.03, 0.01])
 ylabel('Current Density (Acm^{-2})')
 legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{interface (left)}', 'J_{interface (right)}', '','J_{ext}'}, 'Location', 'bestoutside')
 
+%% Plot J_nonrad/J_rad
+%J_rad not corrected for EL - see EL_Measurements
+figure('Name', 'J_nonrad/J_rad', 'Position', [100 100 1250 2000])
+energetics_order_devices = [4,1,5];
+V = dfana.calcVapp(CV_solutions_ion{1});
+
+for j = 1:3
+    i = energetics_order_devices(j);
+    semilogy(V(161:end), sum(J_values(161:end,3:6,i), 2)./J_values(161:end,2,i), 'color', colors_JV{j}, 'LineWidth', 3) 
+    hold on 
+    %semilogy(V(161:end), sum(J_values_el(161:end,3:6,i), 2)./J_values_el(161:end,2,i), '--', 'color', colors_JV{j}, 'LineWidth', 3) 
+end
+
+set(gca, 'FontSize', 25)
+xlim([0, 1.2])
+ylim([700, 2e4])
+xlabel('Voltage (V)', 'FontSize', 30)
+ylabel('J_{nonrad}/J_{rad}', 'FontSize', 30)
+legend({'  4.15', '  3.95', '  3.75'}, 'Location', 'northwest', 'FontSize', 30)
+%legend({'  4.15', '', '  3.95', '', '  3.75', ''}, 'Location', 'northwest', 'FontSize', 30)
+title(legend, '|ETM LUMO| (eV)', 'Fontsize', 30)
 %% Losses at SC, ions vs no ions
 num = 3;
 x = categorical({'With Mobile Ions', 'Without Mobile Ions'});
