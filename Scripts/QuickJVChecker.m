@@ -1,18 +1,19 @@
-parC60 = pc('Input_files/HTL_MAPI_C60.csv');
-parPM6Y6 = pc('Input_files/HTL_MAPI_PM6Y6.csv');
+parC60 = pc('Input_files/HTL_MAPI_C60_FrancescoValues.csv');
+parPM6Y6 = pc('Input_files/HTL_MAPI_PM6Y6_FrancescoValues.csv');
 
+%%
 run_C60 = 1;
 
 if run_C60 == 1
     eqm_QJV_C60 = equilibrate(parC60);
-    CV_sol_C60 = doCV(eqm_QJV_C60.ion, 1.0, -0.2, 1.25, -0.2, 1e-4, 1, 291);
+    CV_sol_C60 = doCV(eqm_QJV_C60.ion, 1.0, -0.2, 1.25, -0.2, 25e-3, 1, 291);
     stats_C60 = CVstats(CV_sol_C60);
     J_C60 = dfana.calcJ(CV_sol_C60);
     Plot_Current_Contributions(CV_sol_C60)
 end
 
 eqm_QJV_PM6Y6 = equilibrate(parPM6Y6);
-CV_sol_PM6Y6 = doCV(eqm_QJV_PM6Y6.ion, 1.0, -0.2, 1.25, -0.2, 1e-4, 1, 291);
+CV_sol_PM6Y6 = doCV(eqm_QJV_PM6Y6.ion, 1.0, -0.2, 1.25, -0.2, 25e-3, 1, 291);
 stats_PM6Y6 = CVstats(CV_sol_PM6Y6);
 Plot_Current_Contributions(CV_sol_PM6Y6)
 
