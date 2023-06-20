@@ -1,10 +1,11 @@
 %par = pc('Input_files/PTAA_MAPI_PCBM_v5.csv');
-par = pc('Input_files/PTAA_MAPI_PCBM_LowerLUMO.csv');
-%par = pc('Input_files/PTAA_MAPI_PCBM_DopedETM.csv');
+%par = pc('Input_files/PTAA_MAPI_PCBM_HigherLUMO.csv');
+%par = pc('Input_files/PTAA_MAPI_PCBM_HigherLUMO_HigherVoc.csv');
+par = pc('Input_files/PTAA_MAPI_PCBM_DopedETM.csv');
 
 par.light_source1 = 'laser';
 par.laser_lambda1 = 532;
-par.pulsepow = 63;
+par.pulsepow = 62;
 par.RelTol_vsr = 0.1;
 par.Rs = 1e6;
 par = refresh_device(par);
@@ -23,7 +24,7 @@ CV_sol_ion = doCV(eqm_QJV.ion, 1, -0.2, 1.2, -0.2, 10e-3, 1, 301);
 %CV_sol_el = doCV(eqm_QJV.el, 1, -0.3, 1.2, -0.3, 10e-3, 1, 301);
 
 %%
-Plot_Current_Contributions(CV_sol_ion,1)
+Plot_Current_Contributions(CV_sol_ion,0)
 stats = CVstats(CV_sol_ion)
 
 %%
