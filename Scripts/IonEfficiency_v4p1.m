@@ -13,7 +13,6 @@ Delta_TL = linspace(-0.15, 0.3, n_values);
 Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
 n_ion_concs = length(Ion_Conc);
 
-%+1 for the ion concs to leave space for a run with ion motion switched off
 params = cell(n_ion_concs, n_values);
 
 for i=1:n_ion_concs

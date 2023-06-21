@@ -1,8 +1,8 @@
 %par=pc('Input_files/EnergyOffsetSweepParameters_v2.csv');
-%par=pc('Input_files/EnergyOffsetSweepParameters_v3.csv');
+par=pc('Input_files/EnergyOffsetSweepParameters_v3.csv');
 %par = pc('Input_files/PTAA_MAPI_NegOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
-par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
+%par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_PosOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_PCBM_ForPaper.csv');
 
