@@ -1,10 +1,10 @@
-parC60 = pc('Input_files/HTL_MAPI_C60_FrancescoValues.csv');
-parPM6Y6 = pc('Input_files/HTL_MAPI_PM6Y6_FrancescoValues_v2.csv');
+parC60 = pc('Input_files/HTL_MAPI_C60_DavideValues.csv');
+parPM6Y6 = pc('Input_files/HTL_MAPI_PM6Y6_DavideValues.csv');
 
 devices = {parC60, parPM6Y6};
 num_devices = length(devices);
 wavelengths = [404, 800];
-power = [55, 10];
+power = [10, 10];
 eqm = cell(2,2);
 CV_sols = cell(2,2);
 CV_stats = cell(2,2);
@@ -47,7 +47,7 @@ for k = 1:num_devices
     xlim([-0.15, 1.2])
     if norm == 0
         ylabel('Current Density (mA cm^{-2})', 'FontSize', 30)
-        ylim([-20, 0])
+        ylim([-6, 0])
     elseif norm == 1
         ylabel('J/J_{SC}', 'FontSize', 30)
         ylim([-1.1, 0.2])
@@ -78,7 +78,7 @@ for k = 1:num_devices
     xlim([-0.15, 1.2])
     if norm == 0
         ylabel('Current Density (mA cm^{-2})', 'FontSize', 30)
-        ylim([-20, 0])
+        ylim([-6, 0])
     elseif norm == 1
         ylabel('J/J_{SC}', 'FontSize', 30)
         ylim([-1.1, 0.2])
