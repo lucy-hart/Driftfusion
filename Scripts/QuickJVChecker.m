@@ -1,43 +1,74 @@
 %par=pc('Input_files/EnergyOffsetSweepParameters_v2.csv');
-par=pc('Input_files/EnergyOffsetSweepParameters_v3.csv');
+%par=pc('Input_files/EnergyOffsetSweepParameters_v3.csv');
+par=pc('Input_files/SnO2_MAPI_Spiro.csv');
 %par = pc('Input_files/PTAA_MAPI_NegOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
 %par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_PosOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_PCBM_ForPaper.csv');
 
-Fiddle_with_Energetics = 1;
+doped = 5;
+if doped == 1
+    par=pc('Input_files/EnergyOffsetSweepParameters_v4_doped.csv');
+elseif doped == 0
+    par=pc('Input_files/EnergyOffsetSweepParameters_v4_undoped.csv');
+end
+
+Fiddle_with_Energetics = 0;
 Fiddle_with_IonConc = 0;
-IonConc = 1e15;
+IonConc = 1e19;
 %%
 if Fiddle_with_Energetics == 1
 
     %row
-    DHOMO = 0.15;
+    DHOMO = 0.3;
     %DHOMO = Delta_HOMO(4);
     %column
-    DLUMO = -0.15;
+    DLUMO = -0.3;
     %DLUMO = Delta_LUMO(11);
+        if doped == 0
+            %HTL Energetics
+            par.Phi_left = -5.15;
+            par.Phi_IP(1) = par.Phi_IP(3) + DHOMO;
+            par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
+            par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+            par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+            if par.Phi_left < par.Phi_IP(1) + 0.01
+                par.Phi_left = par.Phi_IP(1) + 0.01;
+            end
 
-    %HTL Energetics
-    par.Phi_left = -5.15;
-    par.Phi_IP(1) = par.Phi_IP(3) + DHOMO;
-    par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
-    par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
-    par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
-    if par.Phi_left < par.Phi_IP(1)
-        par.Phi_left = par.Phi_IP(1);
-    end
-    
-    %ETL Energetics
-    par.Phi_right = -4.05;
-    par.Phi_EA(5) = par.Phi_EA(3) + DLUMO;
-    par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
-    par.EF0(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
-    par.Et(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
-    if par.Phi_right > par.Phi_EA(5)
-        par.Phi_right = par.Phi_EA(5);
-    end
+            %ETL Energetics
+            par.Phi_right = -4.05;
+            par.Phi_EA(5) = par.Phi_EA(3) + DLUMO;
+            par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
+            par.EF0(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
+            par.Et(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
+            if par.Phi_right > par.Phi_EA(5) - 0.01
+                par.Phi_right = par.Phi_EA(5) - 0.01;
+            end
+        
+        elseif doped == 1
+            %HTL Energetics
+            par.Phi_left = -5.15;
+            par.Phi_IP(1) = par.Phi_IP(3) + DHOMO;
+            par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
+            par.EF0(1) = par.Phi_IP(1) + 0.1;
+            par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+            if par.Phi_left < par.Phi_IP(1) + 0.1
+                par.Phi_left = par.Phi_IP(1) + 0.1;
+            end
+            %ETL Energetics
+            %Need to use opposite sign at ETL to keep energy offsets symmetric
+            par.Phi_right = -4.05;
+            par.Phi_EA(5) = par.Phi_EA(3) + DLUMO;
+            par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
+            par.EF0(5) = par.Phi_EA(5) - 0.1;
+            par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+            if par.Phi_right > par.Phi_EA(5) - 0.1
+                par.Phi_right = par.Phi_EA(5) - 0.1;
+            end
+
+        end
 
     par = refresh_device(par);
 
@@ -55,8 +86,20 @@ end
 eqm_QJV = equilibrate(par);
 
 %%
-JV_sol_ion = doCV(eqm_QJV.ion, 1.1, -0.2, 1.2, -0.2, 1e-4, 1, 281);
-JV_sol_el = doCV(eqm_QJV.el, 1.1, -0.2, 1.2, -0.2, 1e-4, 1, 281);
+suns = 1;
+
+illuminated_sol_ion = changeLight(eqm_QJV.ion, suns, 0, 1);
+illuminated_sol_el = changeLight(eqm_QJV.el, suns, 0, 1);
+
+V_bias = 1.5;
+V_max = 1.1;
+V_min = 0;
+
+biased_eqm_ion = genVappStructs(illuminated_sol_ion, V_bias, 1);
+biased_eqm_el = genVappStructs(illuminated_sol_el, V_bias, 1);
+
+JV_sol_ion = doCV(biased_eqm_ion, suns, V_bias, V_max, V_min, 1e-3, 1, 221);
+JV_sol_el = doCV(biased_eqm_el, suns, V_bias, V_max, V_min, 1e-3, 1, 221);
 
 Plot_Current_Contributions(JV_sol_ion) 
 Plot_Current_Contributions(JV_sol_el) 
@@ -77,7 +120,7 @@ j = dfana.calcJ(JV_sol_ion).tot(:,1);
 j_el = dfana.calcJ(JV_sol_el).tot(:,1);
 plot(v(:), j(:)*1000, 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3) 
 hold on
-plot(v_el(1:151), j_el(1:151)*1000, '--', 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3)
+plot(v_el(1:116), j_el(1:116)*1000, '--', 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3)
 hold on
 
 hold off

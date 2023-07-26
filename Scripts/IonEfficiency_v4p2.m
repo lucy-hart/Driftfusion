@@ -1,12 +1,12 @@
 %Use this file to symmetrically sweep HOMO/LUMO offsets vs ion
 %concentration for 'organic' transport materials
 
-%Keep Vbi due to the electrodes constant as much as possible for these
-%parameters
-%Only lower it for the cases when the TL bands edges lie below the work
-%function of the metal 
-%Will mean varying injection/extraction barriers at these interfaces - not
-%sure if this is the optimal choice? Talk to Piers maybe?
+%Want to see how much the electrodes matter - in this file I try and match
+%what happens in the situation with the doped transpot layers and fix it
+%such that the electrodes always lie 0.05 eV below/above the relevant band
+%edge
+%Means that Vbi is always changing - didn't really work, Vbi too large in
+%the cases where there were enegetic barriers to carrier injection
 
 %TURN SAVE OFF TO START OFF WITH (final cell)
 
@@ -51,26 +51,21 @@ for i = 1:n_ion_concs
         elseif i == n_ion_concs 
             disp("No Mobile Ions")
         end
-        %HTL Energetics
-        par.Phi_left = -5.15;
+        %HTL Energetics     
         par.Phi_IP(1) = par.Phi_IP(3) + params{i,j}(2);
         par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
         par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
         par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
-        if par.Phi_left < par.Phi_IP(1) + 0.01
-            par.Phi_left = par.Phi_IP(1) + 0.01;
-        end
+        par.Phi_left = par.Phi_IP(1) + 0.05;
 
         %ETL Energetics
         %Need to use opposite sign at ETL to keep energy offsets symmetric
-        par.Phi_right = -4.05;
         par.Phi_EA(5) = par.Phi_EA(3) - params{i,j}(2);
         par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
         par.EF0(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
         par.Et(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
-        if par.Phi_right > par.Phi_EA(5) - 0.01
-            par.Phi_right = par.Phi_EA(5) - 0.01;
-        end
+        par.Phi_right = par.Phi_EA(5) - 0.05;
+
         %ion conc
         if i ~= n_ion_concs
             par.Ncat(:) = params{i,j}(1);
@@ -150,7 +145,7 @@ end
 %%
 figure('Name', 'PCE vs Energy Offsets vs Ion Conc', 'Position', [50 50 1000 1200])
 Colours = parula(n_ion_concs-1);
-num = 1;
+num = 4;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "southeast"];
 lims = [[-24 -15]; [0.77 1.24]; [0.1, 0.85]; [1 21]];

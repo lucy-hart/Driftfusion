@@ -1,12 +1,11 @@
 %Use this file to symmetrically sweep HOMO/LUMO offsets vs ion
-%concentration for 'organic' transport materials
+%concentration for a device with doped interlayers
 
-%Keep Vbi due to the electrodes constant as much as possible for these
-%parameters
-%Only lower it for the cases when the TL bands edges lie below the work
-%function of the metal 
-%Will mean varying injection/extraction barriers at these interfaces - not
-%sure if this is the optimal choice? Talk to Piers maybe?
+%There have been some choices made here
+%Doping is fixed s.t. Fermi Level offset is alway 0.1 eV from the relevant
+%band edge
+%Work function of the electrodes is handled in the same way as for the
+%undoped case (verion 4p1)
 
 %TURN SAVE OFF TO START OFF WITH (final cell)
 
@@ -37,8 +36,8 @@ results = cell(n_ion_concs, n_values);
 %% Do (many) JV sweeps
 %Remeber to update the work function values if you change these parameters
 %between files 
-par=pc('Input_files/EnergyOffsetSweepParameters_v3.csv');
-illumination = 1.1;
+par=pc('Input_files/EnergyOffsetSweepParameters_v4_doped.csv');
+illumination = 1;
 
 %Reset the electrode work functions in each loop to be safe as they are
 %changed for the cases where E_LUMO (E_HOMO) is far below (above) the CB
@@ -55,21 +54,20 @@ for i = 1:n_ion_concs
         par.Phi_left = -5.15;
         par.Phi_IP(1) = par.Phi_IP(3) + params{i,j}(2);
         par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
-        par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+        par.EF0(1) = par.Phi_IP(1) + 0.1;
         par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
-        if par.Phi_left < par.Phi_IP(1) + 0.01
-            par.Phi_left = par.Phi_IP(1) + 0.01;
+        if par.Phi_left < par.Phi_IP(1) + 0.1
+            par.Phi_left = par.Phi_IP(1) + 0.1;
         end
-
         %ETL Energetics
         %Need to use opposite sign at ETL to keep energy offsets symmetric
         par.Phi_right = -4.05;
         par.Phi_EA(5) = par.Phi_EA(3) - params{i,j}(2);
         par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
-        par.EF0(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
-        par.Et(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
-        if par.Phi_right > par.Phi_EA(5) - 0.01
-            par.Phi_right = par.Phi_EA(5) - 0.01;
+        par.EF0(5) = par.Phi_EA(5) - 0.1;
+        par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+        if par.Phi_right > par.Phi_EA(5) - 0.1
+            par.Phi_right = par.Phi_EA(5) - 0.1;
         end
         %ion conc
         if i ~= n_ion_concs
@@ -83,8 +81,8 @@ for i = 1:n_ion_concs
         
         %electron only scan
         if i == n_ion_concs 
-            Voc_max = 1.2;
-            num_points = 281;
+            Voc_max = 1.3;
+            num_points = 301;
             while Voc_max >= 1.05
                 try            
                     solCV{i, j} = doCV(soleq{i, j}.el, illumination, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);           
@@ -105,8 +103,8 @@ for i = 1:n_ion_concs
             end
         
         else
-            Voc_max = 1.2;
-            num_points = 281; 
+            Voc_max = 1.3;
+            num_points = 301; 
             while Voc_max >= 1.05
                 try
                     solCV{i, j} = doCV(soleq{i, j}.ion, illumination, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);
@@ -150,10 +148,10 @@ end
 %%
 figure('Name', 'PCE vs Energy Offsets vs Ion Conc', 'Position', [50 50 1000 1200])
 Colours = parula(n_ion_concs-1);
-num = 1;
+num = 4;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "southeast"];
-lims = [[-24 -15]; [0.77 1.24]; [0.1, 0.85]; [1 21]];
+lims = [[-24 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
 box on 
 for i = 1:n_ion_concs
     hold on
