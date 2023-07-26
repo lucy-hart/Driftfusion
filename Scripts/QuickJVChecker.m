@@ -1,5 +1,4 @@
-% parC60 = pc('Input_files/HTL_MAPI_C60_DavideValues.csv');
-parC60 = pc('Input_files/HTL_MAPI_C60_DavideValues_dark.csv');
+parC60 = pc('Input_files/HTL_MAPI_C60_DavideValues.csv');
 parPM6 = pc('Input_files/HTL_MAPI_PM6Y6_DavideValues.csv');
 % parPM7 = pc('Input_files/HTL_MAPI_PM7Y6_DavideValues.csv');
 % parPCE12 = pc('Input_files/HTL_MAPI_PCE12Y6_DavideValues.csv');
@@ -7,7 +6,7 @@ parPM6 = pc('Input_files/HTL_MAPI_PM6Y6_DavideValues.csv');
 
 %%
 run_C60 = 1;
-light = 0;
+light = 1;
 noions = 0;
 
 if light == 1
@@ -35,7 +34,7 @@ CV_sol_PM6 = doCV(eqm_QJV_PM6.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
 
 % eqm_QJV_PM7 = equilibrate(parPM7);
 % CV_sol_PM7 = doCV(eqm_QJV_PM7.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
-% 
+
 % eqm_QJV_PCE12 = equilibrate(parPCE12);
 % CV_sol_PCE12 = doCV(eqm_QJV_PCE12.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
 
@@ -62,14 +61,14 @@ if run_C60 == 1 && light == 1
     hold on
     xline(0, 'LineWidth', 2, 'Color', 'black')
     yline(0, 'LineWidth', 2, 'Color', 'black')
-    plot(Vapp, 1e3*J_C60.tot(:,1), 'LineWidth', 4, 'Color', [0 0.4470 0.7410])
-    plot(Vapp, 1e3*J_PM6Y6.tot(:,1), 'LineWidth', 4, 'Color', [0.4660 0.6740 0.1880])
+    plot(Vapp, 1e3*J_C60.tot(:,1), 'LineWidth', 4, 'Color', 'black')
+    plot(Vapp, 1e3*J_PM6Y6.tot(:,1), 'LineWidth', 4, 'Color', 'red')
     if noions == 1
-        plot(Vapp(1:145), 1e3*J_C60_noions.tot(1:145,1), 'LineWidth', 4, 'Color', [0 0.4470 0.7410], 'LineStyle', ':')
-        plot(Vapp(1:145), 1e3*J_PM6Y6_noions.tot(1:145,1), 'LineWidth', 4, 'Color', [0.4660 0.6740 0.1880], 'LineStyle', ':')
+        plot(Vapp(1:145), 1e3*J_C60_noions.tot(1:145,1), 'LineWidth', 4, 'Color', 'black', 'LineStyle', ':')
+        plot(Vapp(1:145), 1e3*J_PM6Y6_noions.tot(1:145,1), 'LineWidth', 4, 'Color', 'red', 'LineStyle', ':')
     end
-    %plot(Vapp, 1e3*J_PM7Y6.tot(:,1), 'LineWidth', 4, 'Color', 'red')
-    %plot(Vapp, 1e3*J_PCE12Y6.tot(:,1), 'LineWidth', 4, 'Color', 'black')
+%     plot(Vapp, 1e3*J_PM7Y6.tot(:,1), 'LineWidth', 4, 'Color', [0 0.4470 0.7410])
+%     plot(Vapp, 1e3*J_PCE12Y6.tot(:,1), 'LineWidth', 4, 'Color', [0.4660 0.6740 0.1880])
     hold off
 
     set(gca, 'FontSize', 25)
@@ -77,7 +76,7 @@ if run_C60 == 1 && light == 1
     ylabel('Current Density (mA cm^{-2})', 'FontSize', 30)
     xlim([-0.15, 1.2])
     ylim([-25, 5])
-    legend({'', '', ' C_{60}', ' C_{60} (no ions)', ' PM6:Y6', 'PM6:Y6 (no ions)'}, 'FontSize', 25, 'Location', 'northwest')
+    legend({'', '', ' C_{60}', ' PM6:Y6'}, 'FontSize', 25, 'Location', 'northwest')
 end 
 
 %%
@@ -128,12 +127,13 @@ run = 0;
 voltage_ar = linspace(-0.5, 0.5, 21);
 if run == 1
     Jdark = doDarkJV(eqm_QJV_PM6.ion, voltage_ar, 1);
+
+    figure('Name', 'Dark JV')
+    plot(voltage_ar, Jdark.Jvalue)
+
+    xlabel('Voltage (V)')
+    xlim([voltage_ar(1), voltage_ar(end)])
+    ylabel('Current Density (mA cm^{-2})')
+y   lim([-1e-10, 1e-10])
 end
 
-figure('Name', 'Dark JV')
-plot(voltage_ar, Jdark.Jvalue)
-
-xlabel('Voltage (V)')
-xlim([voltage_ar(1), voltage_ar(end)])
-ylabel('Current Density (mA cm^{-2})')
-ylim([-1e-10, 1e-10])
