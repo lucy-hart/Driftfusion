@@ -7,7 +7,7 @@ function J_dark = doDarkJV(sol_ini, voltage_ar, dwelltime_ar)
 % sol_ini   	= an initial solution
 % voltage_ar    = voltage points to sample
 % dwelltime_ar  = time to stabilise at each applied voltage
-
+           
 %%
 %Code to deal with case where dwelltime_ar is just an integer i.e. all
 %values have same dwell time
@@ -68,5 +68,8 @@ hold off
 xlabel('Time (s)')
 ylabel('Current Density (mA cm^{-2})')
 legend('Location', 'bestoutside')
+
+
+
 
         
