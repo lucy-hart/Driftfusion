@@ -7,6 +7,7 @@
 %function of the metal 
 %Will mean varying injection/extraction barriers at these interfaces - not
 %sure if this is the optimal choice? Talk to Piers maybe?
+%Use this file to produce v3 of the simulation results 
 
 %TURN SAVE OFF TO START OFF WITH (final cell)
 
@@ -57,8 +58,8 @@ for i = 1:n_ion_concs
         par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
         par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
         par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
-        if par.Phi_left < par.Phi_IP(1) + 0.01
-            par.Phi_left = par.Phi_IP(1) + 0.01;
+        if par.Phi_left < par.Phi_IP(1)
+            par.Phi_left = par.Phi_IP(1);
         end
 
         %ETL Energetics
@@ -68,8 +69,8 @@ for i = 1:n_ion_concs
         par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
         par.EF0(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
         par.Et(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
-        if par.Phi_right > par.Phi_EA(5) - 0.01
-            par.Phi_right = par.Phi_EA(5) - 0.01;
+        if par.Phi_right > par.Phi_EA(5)
+            par.Phi_right = par.Phi_EA(5);
         end
         %ion conc
         if i ~= n_ion_concs

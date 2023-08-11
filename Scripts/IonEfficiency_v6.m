@@ -1,24 +1,35 @@
 %Use this file to symmetrically sweep HOMO/LUMO offsets vs ion
-%concentration for a device with doped interlayers
+%concentration for a device with doped or undoped interlayers
 
 %There have been some choices made here
 %Doping is fixed s.t. Fermi Level offset is alway 0.1 eV from the relevant
 %band edge
-%Work function of the electrodes is handled in the same way as for the
-%undoped case (verion 4p1)
+%Work function of the electrodes is handled as follows
+%Either the Vbi is 1.1 eV, with an equal offset from the ETL and HTL CB/VB,
+%respectively
+%Or, if the offset is so large that a Vbi of 1.1 eV would mean the electode
+%work function lying within 0.1 eV of the CB/VB edge, the work functions
+%are redefined so that they lie 0.1 eV from the CB/VB edge 
+
+%Used this file to produce v4 of the simulation results 
 
 %TURN SAVE OFF TO START OFF WITH (final cell)
 
 tic
 %% Define parameter space
-%Rows are the Ion Concentrations
-%Columns are the TL Energetic Offsets
+%Choose to use doped or undoped TLs
+doped = 1;
 
 n_values = 10;
 Delta_TL = linspace(-0.15, 0.3, n_values);
+%This is a bit of a hack, but if the offfset is exactly 0, the surface
+%recombination error becomes huge for reasons I do not fully understand...
+Delta_TL(4) = 1e-3;
 Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
 n_ion_concs = length(Ion_Conc);
 
+%Rows are the Ion Concentrations
+%Columns are the TL Energetic Offsets
 params = cell(n_ion_concs, n_values);
 
 for i=1:n_ion_concs
@@ -27,16 +38,21 @@ for i=1:n_ion_concs
     end
 end
 
-%%
+%% Set up structures for storing the results
 error_log = zeros(n_ion_concs, n_values);
 soleq = cell(n_ion_concs, n_values);
 solCV = cell(n_ion_concs, n_values);
 results = cell(n_ion_concs, n_values);
 
 %% Do (many) JV sweeps
-%Remeber to update the work function values if you change these parameters
-%between files 
-par=pc('Input_files/EnergyOffsetSweepParameters_v4_doped.csv');
+%Select the correct input file for doped or undoped cases 
+if doped == 1
+    par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
+elseif doped == 0
+    par=pc('Input_files/EnergyOffsetSweepParameters_v4_undoped.csv');
+end 
+
+%Set the illumination for the JV sweeps 
 illumination = 1;
 
 %Reset the electrode work functions in each loop to be safe as they are
@@ -50,38 +66,54 @@ for i = 1:n_ion_concs
         elseif i == n_ion_concs 
             disp("No Mobile Ions")
         end
+
         %HTL Energetics
         par.Phi_left = -5.15;
         par.Phi_IP(1) = par.Phi_IP(3) + params{i,j}(2);
         par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
-        par.EF0(1) = par.Phi_IP(1) + 0.1;
         par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+        if doped == 0
+            par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+        elseif doped == 1
+            par.EF0(1) = par.Phi_IP(1) + 0.1;
+        end
         if par.Phi_left < par.Phi_IP(1) + 0.1
             par.Phi_left = par.Phi_IP(1) + 0.1;
         end
+
         %ETL Energetics
         %Need to use opposite sign at ETL to keep energy offsets symmetric
         par.Phi_right = -4.05;
         par.Phi_EA(5) = par.Phi_EA(3) - params{i,j}(2);
         par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
-        par.EF0(5) = par.Phi_EA(5) - 0.1;
         par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+        if doped == 0
+            par.EF0(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+        elseif doped == 1
+            par.EF0(5) = par.Phi_EA(5) - 0.1;
+        end
         if par.Phi_right > par.Phi_EA(5) - 0.1
             par.Phi_right = par.Phi_EA(5) - 0.1;
         end
+
         %ion conc
         if i ~= n_ion_concs
             par.Ncat(:) = params{i,j}(1);
             par.Nani(:) = params{i,j}(1);
         end 
-
+        
+        %Do this as it seesm to reduce the discrepency between surface
+        %volumetric surace recombination model and the abrupt interface one
+        %But also made solution less satble? Maybe better to tinker with
+        %this on the one which varies surface recombination...
+        %par.frac_vsr_zone = 0.05;
         par = refresh_device(par);
 
         soleq{i,j} = equilibrate(par);
         
         %electron only scan
         if i == n_ion_concs 
-            Voc_max = 1.3;
+            Voc_max = 1.2;
             num_points = 301;
             while Voc_max >= 1.05
                 try            
@@ -103,7 +135,7 @@ for i = 1:n_ion_concs
             end
         
         else
-            Voc_max = 1.3;
+            Voc_max = 1.2;
             num_points = 301; 
             while Voc_max >= 1.05
                 try
@@ -146,12 +178,16 @@ for i = 1:n_ion_concs
 end 
 
 %%
-figure('Name', 'PCE vs Energy Offsets vs Ion Conc', 'Position', [50 50 1000 1200])
+figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 800])
 Colours = parula(n_ion_concs-1);
 num = 4;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
-LegendLoc = ["northeast", "southwest", "southeast", "southeast"];
-lims = [[-24 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
+LegendLoc = ["northeast", "southwest", "southeast", "northeast"];
+if doped == 0
+    lims = [[-23 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
+elseif doped == 1
+    lims = [[-24 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
+end
 box on 
 for i = 1:n_ion_concs
     hold on
@@ -164,7 +200,9 @@ end
 set(gca, 'Fontsize', 25)
 xlabel('Transport Layer Energetic Offset (eV)', 'FontSize', 30)
 ylabel(labels(num), 'FontSize', 30)
-xlim([-0.15, 0.3])
+xlim([0, 0.3])
+xticks([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3])
+xticklabels({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'})
 ylim(lims(num,:))
 legend({'No Ions', '1e15', '5e15', '1e16', '5e16', '1e17', '5e17', '1e18'}, 'Location', LegendLoc(num), 'FontSize', 25, 'NumColumns', 2)
 title(legend, 'Ion Concentration (cm^{-3})', 'FontSize', 25)
@@ -172,6 +210,10 @@ title(legend, 'Ion Concentration (cm^{-3})', 'FontSize', 25)
 %% Save results and solutions
 save_file = 0;
 if save_file == 1
-    filename = 'tld_symmetric_DeltaEHOMO_vs_DeltaELUMO_v2.mat';
-    save(filename, 'el_results', 'results', 'solCV_el', 'solCV')
+    if doped == 0
+        filename = 'DeltaEHOMO_vs_DeltaELUMO_v4_undoped.mat';
+    elseif soped == 1
+        filename = 'DeltaEHOMO_vs_DeltaELUMO_v5_doped.mat';
+    end 
+    save(filename, 'results', 'solCV')
 end

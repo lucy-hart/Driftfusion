@@ -39,6 +39,9 @@ switch fun_type
     case 'tri'
         % COEFF = [OFFSET, V1, V2, periods, tperiod]  tmax is defined by the input
         fun = @(coeff, t) triangle_fun(coeff, t);
+    case 'smoothed_square'
+        % COEFF = [A_start, A_pulse, period, duty_cycle]  
+        fun = @(coeff, t) smoothed_square(coeff, t);
     case 'sweepAndStill'
         % COEFF = [A_start, A_end, sweep_duration]
         % do a sweep from coeff(1) to coeff(2) with the duration of

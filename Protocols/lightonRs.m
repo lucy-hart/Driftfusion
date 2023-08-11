@@ -45,7 +45,7 @@ tau_RC = C*Rs;
 
 par.g1_fun_type = 'constant';
 par.tmesh_type = 1;
-par.tpoints = 20;
+par.tpoints = 200;
 par.tmax = 100*t_diff;
 par.t0 = 0;
 
