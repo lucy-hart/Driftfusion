@@ -1,6 +1,7 @@
 %par=pc('Input_files/EnergyOffsetSweepParameters_v2.csv');
 %par=pc('Input_files/EnergyOffsetSweepParameters_v3.csv');
 %par=pc('Input_files/SnO2_MAPI_Spiro.csv');
+%par=pc('Input_files/SnO2_C60_MAPI_Spiro.csv');
 %par = pc('Input_files/PTAA_MAPI_NegOffset.csv');
 %par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
 %par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
@@ -21,10 +22,10 @@ IonConc = 1e19;
 if Fiddle_with_Energetics == 1
 
     %row
-    DHOMO = 0.25;
+    DHOMO = 0.3;
     %DHOMO = Delta_HOMO(4);
     %column
-    DLUMO = -0.25;
+    DLUMO = -0.3;
     %DLUMO = Delta_LUMO(11);
         if doped == 0
             %HTL Energetics

@@ -14,7 +14,7 @@ tic
 %% Define parameter space
 %Choose to use doped or undoped TLs and which of v_sr or tau_SRH to vary
 doped = 1;
-surface = 0;
+surface = 1;
 
 %Set up the parameters for the ion concentrations
 Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
@@ -247,8 +247,12 @@ for i = 1:n_ion_concs
             semilogx(1e9*tau_SRH, Stats_array(i-1,:,num), 'marker', 'x', 'Color', Colours(i-1,:))
         end
     elseif surface == 1
-        hold on
-        semilogx(v_sr, Stats_array(i,:,num), 'marker', 'x', 'Color', Colours(i,:))
+        if i == 1
+            semilogx(v_sr, Stats_array(n_ion_concs,:,num), 'marker', 'x', 'Color', 'Black')
+        else
+            hold on
+            semilogx(v_sr, Stats_array(i-1,:,num), 'marker', 'x', 'Color', Colours(i-1,:))
+        end
     end
 end
 set(gca, 'Fontsize', 25)
@@ -257,10 +261,11 @@ if surface == 0
     xlim([1, 500])
 elseif surface == 1
     xlabel('Surface Recombination Velocity (cm s^{-1})', 'FontSize', 30)
+    xlim([0.5, 5000])
 end
 ylabel(labels(num), 'FontSize', 30)
 ylim(lims(num,:))
-legend({'No Ions', '1e15', '5e15', '1e16', '5e16', '1e17', '5e17', '1e18'}, 'Location', LegendLoc(num), 'FontSize', 25, 'NumColumns', 2)
+legend({'No Ions', '1e15', '5e15', '1e16', '5e16', '1e17', '5e17', '1e18'}, 'Location', 'southwest', 'FontSize', 25, 'NumColumns', 2)
 title(legend, 'Ion Concentration (cm^{-3})', 'FontSize', 25)
 
 %% Plot JV as a function of recombination parameter for a given ion conc
@@ -270,7 +275,7 @@ Colours = parula(n_recom);
 %Set which ion concentration to plot for
 %Have coppied the array above so you can see which nuber is the right one
 %easily
-num_Ion_Conc = 1;
+num_Ion_Conc = 7;
 
 for j = 1:n_recom
     v = dfana.calcVapp(solCV{num_Ion_Conc, j});
@@ -289,27 +294,27 @@ set(gca, 'FontSize', 25)
 xlim([-0.15, 1.2])
 ylim([-25,5])
 if surface == 0
-    legend({'1', '5', '10', '50', '100', '500'}, 'Location', LegendLoc(num), 'FontSize', 25, 'NumColumns', 2)
+    legend({'1', '5', '10', '50', '100', '500'}, 'Location', 'northwest', 'FontSize', 25, 'NumColumns', 2)
     title(legend, 'SRH Lifetime (ns)', 'FontSize', 25)
 elseif surface == 1
-    legend({'0.5', '5', '50', '500', '5000'}, 'Location', LegendLoc(num), 'FontSize', 25, 'NumColumns', 2)
-    title(legend, 'Surface Recombination Velocity (cm s^{-1})', 'FontSize', 25)
+    legend({'0.5', '5', '50', '500', '5000'}, 'Location', 'northwest', 'FontSize', 25, 'NumColumns', 2)
+    title(legend, 'Surface Recombination\newlineVelocity (cm s^{-1})', 'FontSize', 25)
 end
 xlabel('Voltage(V)', 'FontSize', 30)
 ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
 ax1 = gcf;
 
 %% Save results and solutions
-save_file = 0;
+save_file = 1;
 if save_file == 1
     if doped == 0 && surface == 0
         filename = 'DeltaEHOMO_vs_DeltaELUMO_v4_undoped_tauSRH.mat';
     elseif doped == 0 && surface == 1
         filename = 'DeltaEHOMO_vs_DeltaELUMO_v4_undoped_vsr.mat';
     elseif doped == 1 && surface == 0
-        filename = 'DeltaEHOMO_vs_DeltaELUMO_v4_doped_tauSRH.mat';
+        filename = 'DeltaEHOMO_vs_DeltaELUMO_v5_doped_tauSRH.mat';
     elseif doped == 1 && surface == 1
-        filename = 'DeltaEHOMO_vs_DeltaELUMO_v4_doped_vsr.mat';
+        filename = 'DeltaEHOMO_vs_DeltaELUMO_v5_doped_vsr.mat';
     end 
     save(filename, 'results', 'solCV')
 end

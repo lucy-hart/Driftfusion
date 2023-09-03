@@ -27,7 +27,7 @@ SaPsol = cell(num_bias, num_pulses+1);
 %Funtion assumes you are using the first light source currently 
 sol_ill = changeLight(sol_ini, light_intensity, 0, 1);
 
-%% Genrate solutions after voltage stabilisation period
+%% Generate solutions after voltage stabilisation period
 for i = 1:num_bias
     
     par = sol_ill.par;

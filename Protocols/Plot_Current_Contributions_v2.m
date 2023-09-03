@@ -1,4 +1,4 @@
-function Plot_Current_Contributions(CVsol)
+function Plot_Current_Contributions_v2(CVsol)
 %Script to plot the currents from radiative and non-radiative (split into
 %SRH, surface and VSR) losses, alongside the current measured in a JV sweep and the
 %generation current. 

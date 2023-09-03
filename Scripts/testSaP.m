@@ -1,6 +1,7 @@
 %% File to test that doSaP is doing what I intend
 %par = pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 par=pc('Input_files/SnO2_MAPI_Spiro.csv');
+compare_fixed_ion_JV = 1;
 
 % DHOMO = 0.3;
 % DLUMO = -0.3;
@@ -32,8 +33,8 @@ eqm = equilibrate(par);
 
 %% See what device performance is at illumination used for SaP measurement
 check_JV = 0;
+suns = 0.1;
 if check_JV ==1 
-    suns = 0.1;
     JVsol = doCV(eqm.ion, suns, -0.2, 1.0, -0.2, 1e-3, 1, 261);
     stats = CVstats(JVsol);
     
@@ -59,6 +60,20 @@ tsample = 1e-3;
 tstab = 120;
 
 sol = doSaP_v2(eqm.ion, Vbias, Vpulse, tramp, tsample, tstab, suns);
+
+%% Do JVs with mobseti = 0 to compare the SaP JVs
+fixed_ion_JVs = cell(length(Vbias));
+J_fixed_ion = cell(length(Vbias));
+if compare_fixed_ion_JV == 1
+    for i=1:length(Vbias)
+        sol{i,1}.par.mobseti = 0;
+        fixed_ion_JVs{i} = doCV(sol{i,1}, suns, -0.2, 1.0, -0.2, 1e-3, 1, 261);
+        J_fixed_ion{i} = dfana.calcJ(fixed_ion_JVs{i}).tot(:,1);
+        if i == 1
+            V_fixed_ion = dfana.calcVapp(fixed_ion_JVs{i});
+        end
+    end
+end
 
 %% Look at the voltage stabilisation
 t = sol{1, 1}.t;
@@ -119,6 +134,9 @@ for i = 1:length(Vbias)
         Jpulse(j) = sol{i,j+1}.Jpulse;
     end
     plot(Vpulse(:), 1e3*Jpulse, 'DisplayName', num2str(Vbias(i), '%.1f'), 'color', cmap(i,:))
+    if compare_fixed_ion_JV == 1
+        plot(V_fixed_ion, 1e3*J_fixed_ion{i}, 'HandleVisibility', 'Off', 'color', 'black', 'LineStyle', '--')
+    end
 end
 ylabel('Current Density (mA cm^{-2})')
 ylim([-2.5, 1])

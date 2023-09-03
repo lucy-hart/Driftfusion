@@ -20,11 +20,11 @@ tic
 %Choose to use doped or undoped TLs
 doped = 1;
 
-n_values = 10;
-Delta_TL = linspace(-0.15, 0.3, n_values);
+n_values = 7;
+Delta_TL = linspace(0, 0.3, n_values);
 %This is a bit of a hack, but if the offfset is exactly 0, the surface
 %recombination error becomes huge for reasons I do not fully understand...
-Delta_TL(4) = 1e-3;
+Delta_TL(1) = 1e-3;
 Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
 n_ion_concs = length(Ion_Conc);
 
@@ -55,6 +55,19 @@ end
 %Set the illumination for the JV sweeps 
 illumination = 1;
 
+%Piers version - set this to 1 to ensure that the WFs of the electrodes is
+%always equal to the Fermi level of the contacts - stops there being a
+%Schottky barrier at the TL/metal interface, which negatively affects
+%device performance. 
+%Less similar to the experimental situation maybe, as there the same
+%electrode materials are used for both interlayers
+Piers_version = 1;
+%Only makes sense to do this for the doped case so put this is as a
+%protection in case you forget to change it
+if doped == 0
+    Piers_version = 0;
+end
+
 %Reset the electrode work functions in each loop to be safe as they are
 %changed for the cases where E_LUMO (E_HOMO) is far below (above) the CB
 %(VB)
@@ -77,7 +90,11 @@ for i = 1:n_ion_concs
         elseif doped == 1
             par.EF0(1) = par.Phi_IP(1) + 0.1;
         end
-        if par.Phi_left < par.Phi_IP(1) + 0.1
+        if Piers_version == 0
+            if par.Phi_left < par.Phi_IP(1) + 0.1
+                par.Phi_left = par.Phi_IP(1) + 0.1;
+            end
+        elseif Piers_version == 1
             par.Phi_left = par.Phi_IP(1) + 0.1;
         end
 
@@ -92,7 +109,11 @@ for i = 1:n_ion_concs
         elseif doped == 1
             par.EF0(5) = par.Phi_EA(5) - 0.1;
         end
-        if par.Phi_right > par.Phi_EA(5) - 0.1
+        if Piers_version == 0
+            if par.Phi_right > par.Phi_EA(5) - 0.1
+                par.Phi_right = par.Phi_EA(5) - 0.1;
+            end
+        elseif Piers_version == 1
             par.Phi_right = par.Phi_EA(5) - 0.1;
         end
 
@@ -162,7 +183,12 @@ end
 toc
 
 %% Plot results 
-Stats_array = zeros(n_ion_concs, n_values, 4);
+Stats_array = zeros(n_ion_concs, n_values, 5);
+J_srh_result = cell(2, n_values);
+J_vsr_result = cell(2, n_values);
+V_plot = cell(2, n_values);
+e = solCV{1,1}.par.e;
+
 for i = 1:n_ion_concs
     for j = 1:n_values
         try
@@ -170,6 +196,28 @@ for i = 1:n_ion_concs
             Stats_array(i,j,2) = results{i,j}.Voc_f;
             Stats_array(i,j,3) = results{i,j}.FF_f;
             Stats_array(i,j,4) = results{i,j}.efficiency_f;
+            x = solCV{i,j}.par.x_sub;
+            loss_currents = dfana.calcr(solCV{i,j},'sub');
+            Vapp = dfana.calcVapp(solCV{i,j});
+            end_value = (length(Vapp)-1)/2;
+            J_srh = e*trapz(x, loss_currents.srh, 2)';
+            J_vsr = e*trapz(x, loss_currents.vsr, 2)';
+            if i == 7
+                V_plot{1,j} = Vapp;
+                J_srh_result{1,j} = J_srh;
+                J_vsr_result{1,j} = J_vsr;
+            elseif i == 8
+                V_plot{2,j} = Vapp;
+                J_srh_result{2,j} = J_srh;
+                J_vsr_result{2,j} = J_vsr;
+            end
+            J_srh_OC = interp1(Vapp(1:end_value), J_srh(1:end_value), Stats_array(i,j,2));
+            J_vsr_OC = interp1(Vapp(1:end_value), J_vsr(1:end_value), Stats_array(i,j,2));
+            if J_srh_OC > J_vsr_OC
+                Stats_array(i,j,5) = 0;
+            elseif J_srh_OC < J_vsr_OC
+                Stats_array(i,j,5) = 1;
+            end
         catch
             warning('No Stats')
             Stats_array(i,j,:) = 0;
@@ -180,7 +228,7 @@ end
 %%
 figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 800])
 Colours = parula(n_ion_concs-1);
-num = 4;
+num = 2;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "northeast"];
 if doped == 0
@@ -192,9 +240,13 @@ box on
 for i = 1:n_ion_concs
     hold on
     if i == 1
-        plot(Delta_TL, Stats_array(n_ion_concs,:,num), 'marker', 'x', 'Color', 'black')
+        plot(Delta_TL, Stats_array(n_ion_concs,:,5).*Stats_array(n_ion_concs,:,num), 'marker', 'x', 'Color', 'black', 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+        plot(Delta_TL, (1-Stats_array(n_ion_concs,:,5)).*Stats_array(n_ion_concs,:,num), 'marker', 'o', 'Color', 'black', 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+        plot(Delta_TL, Stats_array(n_ion_concs,:,num), 'marker', 'none', 'Color', 'black')
     else
-        plot(Delta_TL, Stats_array(i-1,:,num), 'marker', 'x', 'Color', Colours(i-1,:))
+        plot(Delta_TL, Stats_array(i-1,:,5).*Stats_array(i-1,:,num), 'marker', 'x', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+        plot(Delta_TL, (1-Stats_array(i-1,:,5)).*Stats_array(i-1,:,num), 'marker', 'o', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+        plot(Delta_TL, Stats_array(i-1,:,num), 'marker', 'none', 'Color', Colours(i-1,:))
     end
 end
 set(gca, 'Fontsize', 25)
@@ -207,13 +259,83 @@ ylim(lims(num,:))
 legend({'No Ions', '1e15', '5e15', '1e16', '5e16', '1e17', '5e17', '1e18'}, 'Location', LegendLoc(num), 'FontSize', 25, 'NumColumns', 2)
 title(legend, 'Ion Concentration (cm^{-3})', 'FontSize', 25)
 
+%% Plot J_srh and _sr for high ions vs no ions as a function of offset
+figure('Name', 'JVPlot', 'Position', [100 100 800 800])
+Colours = parula(n_values);
+
+for j = 1:n_values
+    
+    subplot(1,2,1)
+    
+%     xline(0, 'black', 'HandleVisibility', 'off')
+%     yline(0, 'black', 'HandleVisibility', 'off')
+    if j == 1
+        semilogy(V_plot{1,j}, J_vsr_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
+        hold on
+        semilogy(V_plot{2,j}, J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
+        hold off
+    else
+        hold on
+        semilogy(V_plot{1,j}, J_vsr_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
+        semilogy(V_plot{2,j}, J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
+        hold off
+    end
+        
+    box on
+
+    set(gca, 'FontSize', 25)
+    xlim([-0.15, 1.2])
+    ylim([1e-5, 100])
+    
+    legend({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'}, 'Location', 'southwest', 'FontSize', 25)
+    title(legend, 'Transport Layer Offset (eV)', 'FontSize', 25)
+    
+    xlabel('Voltage(V)', 'FontSize', 30)
+    ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
+
+end
+
+for j = 1:n_values
+    
+    subplot(1,2,2)
+
+    hold on
+    xline(0, 'black', 'HandleVisibility', 'off')
+    yline(0, 'black', 'HandleVisibility', 'off')
+    plot(V_plot{1,j}, -J_srh_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
+    plot(V_plot{2,j}, -J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
+    hold off
+    box on 
+    set(gca, 'FontSize', 25)
+    xlim([-0.15, 1.2])
+    ylim([-25,5])
+    
+    legend({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'}, 'Location', 'southwest', 'FontSize', 25)
+    title(legend, 'Transport Layer Offset (eV)', 'FontSize', 25)
+    
+    xlabel('Voltage(V)', 'FontSize', 30)
+    ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
+
+end
+
+box on 
+set(gca, 'FontSize', 25)
+xlim([-0.15, 1.2])
+ylim([-25,5])
+
+%legend({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'}, 'Location', 'northwest', 'FontSize', 25, 'NumColumns', 2)
+%title(legend, 'Transport Layer Offset (eV)', 'FontSize', 25)
+
+xlabel('Voltage(V)', 'FontSize', 30)
+ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
+
 %% Save results and solutions
 save_file = 0;
 if save_file == 1
     if doped == 0
-        filename = 'DeltaEHOMO_vs_DeltaELUMO_v4_undoped.mat';
-    elseif soped == 1
-        filename = 'DeltaEHOMO_vs_DeltaELUMO_v5_doped.mat';
+        filename = 'DeltaE_v4_undoped.mat';
+    elseif doped == 1
+        filename = 'DeltaE_v5_doped_PiersVersion.mat';
     end 
     save(filename, 'results', 'solCV')
 end
