@@ -3,7 +3,7 @@
 % parPM7 = pc('Input_files/HTL_MAPI_PM7Y6_DavideValues.csv');
 % parPCE12 = pc('Input_files/HTL_MAPI_PCE12Y6_DavideValues.csv');
 parC60 = pc('Input_files/HTL_MAPI_C60_DavideValues.csv');
-parPM6 = pc('Input_files/HTL_MAPI_PM6Y6_DavideValues.csv');
+parPM6 = pc('Input_files/HTL_MAPI_PM6Y6_C60_DavideValues.csv');
 %%
 run_C60 = 1;
 light = 1;
