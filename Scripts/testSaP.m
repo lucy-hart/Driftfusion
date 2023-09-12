@@ -1,6 +1,6 @@
 %% File to test that doSaP is doing what I intend
 %par = pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
-par=pc('Input_files/SnO2_MAPI_Spiro.csv');
+par=pc('Input_files/TiO2_MAPI_Spiro.csv');
 compare_fixed_ion_JV = 1;
 
 % DHOMO = 0.3;
@@ -25,8 +25,8 @@ compare_fixed_ion_JV = 1;
 %     par.Phi_right = par.Phi_EA(5) - 0.1;
 % end
 
-par.frac_vsr_zone = 0.05;
-par.RelTol_vsr = 0.06;
+% par.frac_vsr_zone = 0.05;
+par.RelTol_vsr = 0.1;
 par = refresh_device(par);
 
 eqm = equilibrate(par);

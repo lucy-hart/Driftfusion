@@ -61,7 +61,7 @@ illumination = 1;
 %device performance. 
 %Less similar to the experimental situation maybe, as there the same
 %electrode materials are used for both interlayers
-Piers_version = 1;
+Piers_version = 0;
 %Only makes sense to do this for the doped case so put this is as a
 %protection in case you forget to change it
 if doped == 0
@@ -144,7 +144,7 @@ for i = 1:n_ion_concs
                     Voc_max = 0;                
                 catch
                     if Voc_max > 1.05
-                        warning("Electronic-only JV solution failed, reducing Vmax by 0.05 V")
+                        warning("Electronic-only JV solution failed, reducing Vmax by 0.03 V")
                         Voc_max = Voc_max - 0.03;
                         num_points = num_points - 6;
                     elseif Voc_max == 1.05
@@ -166,7 +166,7 @@ for i = 1:n_ion_concs
                     Voc_max = 0;
                 catch
                     if Voc_max > 1.05
-                        warning("Ionic JV solution failed, reducing Vmax by 0.05 V")
+                        warning("Ionic JV solution failed, reducing Vmax by 0.03 V")
                         Voc_max = Voc_max - 0.03;
                         num_points = num_points - 6;
                     elseif Voc_max == 1.05
@@ -239,14 +239,14 @@ end
 box on 
 for i = 1:n_ion_concs
     hold on
-    if i == 1
+    if i == n_ion_concs
         plot(Delta_TL, Stats_array(n_ion_concs,:,5).*Stats_array(n_ion_concs,:,num), 'marker', 'x', 'Color', 'black', 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
         plot(Delta_TL, (1-Stats_array(n_ion_concs,:,5)).*Stats_array(n_ion_concs,:,num), 'marker', 'o', 'Color', 'black', 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
         plot(Delta_TL, Stats_array(n_ion_concs,:,num), 'marker', 'none', 'Color', 'black')
     else
-        plot(Delta_TL, Stats_array(i-1,:,5).*Stats_array(i-1,:,num), 'marker', 'x', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
-        plot(Delta_TL, (1-Stats_array(i-1,:,5)).*Stats_array(i-1,:,num), 'marker', 'o', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
-        plot(Delta_TL, Stats_array(i-1,:,num), 'marker', 'none', 'Color', Colours(i-1,:))
+%         plot(Delta_TL, Stats_array(i-1,:,5).*Stats_array(i-1,:,num), 'marker', 'x', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+%         plot(Delta_TL, (1-Stats_array(i-1,:,5)).*Stats_array(i-1,:,num), 'marker', 'o', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+        plot(Delta_TL, Stats_array(i,:,num), 'marker', 'none', 'Color', Colours(i,:))
     end
 end
 set(gca, 'Fontsize', 25)
@@ -256,7 +256,7 @@ xlim([0, 0.3])
 xticks([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3])
 xticklabels({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'})
 ylim(lims(num,:))
-legend({'No Ions', '1e15', '5e15', '1e16', '5e16', '1e17', '5e17', '1e18'}, 'Location', LegendLoc(num), 'FontSize', 25, 'NumColumns', 2)
+legend({'1e15', '5e15', '1e16', '5e16', '1e17', '5e17', '1e18', 'No Ions'}, 'Location', LegendLoc(num), 'FontSize', 25, 'NumColumns', 2)
 title(legend, 'Ion Concentration (cm^{-3})', 'FontSize', 25)
 
 %% Plot J_srh and _sr for high ions vs no ions as a function of offset
@@ -267,17 +267,17 @@ for j = 1:n_values
     
     subplot(1,2,1)
     
-%     xline(0, 'black', 'HandleVisibility', 'off')
-%     yline(0, 'black', 'HandleVisibility', 'off')
+     xline(0, 'black', 'HandleVisibility', 'off')
+     yline(0, 'black', 'HandleVisibility', 'off')
     if j == 1
-        semilogy(V_plot{1,j}, J_vsr_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
+        plot(V_plot{1,j}, J_vsr_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
         hold on
-        semilogy(V_plot{2,j}, J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
+        plot(V_plot{2,j}, J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
         hold off
     else
         hold on
-        semilogy(V_plot{1,j}, J_vsr_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
-        semilogy(V_plot{2,j}, J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
+        plot(V_plot{1,j}, J_vsr_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
+        plot(V_plot{2,j}, J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
         hold off
     end
         
@@ -285,7 +285,7 @@ for j = 1:n_values
 
     set(gca, 'FontSize', 25)
     xlim([-0.15, 1.2])
-    ylim([1e-5, 100])
+    ylim([-5, 25])
     
     legend({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'}, 'Location', 'southwest', 'FontSize', 25)
     title(legend, 'Transport Layer Offset (eV)', 'FontSize', 25)
@@ -299,16 +299,25 @@ for j = 1:n_values
     
     subplot(1,2,2)
 
-    hold on
-    xline(0, 'black', 'HandleVisibility', 'off')
-    yline(0, 'black', 'HandleVisibility', 'off')
-    plot(V_plot{1,j}, -J_srh_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
-    plot(V_plot{2,j}, -J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
-    hold off
+     xline(0, 'black', 'HandleVisibility', 'off')
+     yline(0, 'black', 'HandleVisibility', 'off')
+
+    if j == 1
+        plot(V_plot{1,j}, J_srh_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
+        hold on
+        plot(V_plot{2,j}, J_srh_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
+        hold off
+    else
+        hold on
+        plot(V_plot{1,j}, J_srh_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
+        plot(V_plot{2,j}, J_srh_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
+        hold off
+    end
     box on 
+
     set(gca, 'FontSize', 25)
     xlim([-0.15, 1.2])
-    ylim([-25,5])
+    ylim([-5, 25])
     
     legend({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'}, 'Location', 'southwest', 'FontSize', 25)
     title(legend, 'Transport Layer Offset (eV)', 'FontSize', 25)
@@ -318,24 +327,13 @@ for j = 1:n_values
 
 end
 
-box on 
-set(gca, 'FontSize', 25)
-xlim([-0.15, 1.2])
-ylim([-25,5])
-
-%legend({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'}, 'Location', 'northwest', 'FontSize', 25, 'NumColumns', 2)
-%title(legend, 'Transport Layer Offset (eV)', 'FontSize', 25)
-
-xlabel('Voltage(V)', 'FontSize', 30)
-ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
-
 %% Save results and solutions
-save_file = 0;
+save_file = 1;
 if save_file == 1
     if doped == 0
         filename = 'DeltaE_v4_undoped.mat';
     elseif doped == 1
-        filename = 'DeltaE_v5_doped_PiersVersion.mat';
+        filename = 'DeltaE_v5_doped_SmallerRange.mat';
     end 
     save(filename, 'results', 'solCV')
 end

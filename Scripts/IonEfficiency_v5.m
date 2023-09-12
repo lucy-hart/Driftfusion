@@ -14,7 +14,7 @@ tic
 %% Define parameter space
 %Choose to use doped or undoped TLs and which of v_sr or tau_SRH to vary
 doped = 1;
-surface = 1;
+surface = 0;
 
 %Set up the parameters for the ion concentrations
 Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
@@ -32,7 +32,7 @@ if surface == 1
         end
     end
 elseif surface == 0
-    tau_SRH = [1e-9 5e-9 1e-8 5e-8 1e-7 5e-7];
+    tau_SRH = [1e-9 3e-9 1e-8 3e-8 5e-8 1e-7 3e-7 5e-7 1e-6];
     n_recom  = length(tau_SRH);
     %Rows are the ion concentrations    
     %Columns are the SRH lifetimes 
@@ -172,7 +172,7 @@ for i = 1:n_ion_concs
                     Voc_max = 0;                
                 catch
                     if Voc_max > 1.05
-                        warning("Electronic-only JV solution failed, reducing Vmax by 0.05 V")
+                        warning("Electronic-only JV solution failed, reducing Vmax by 0.03 V")
                         Voc_max = Voc_max - 0.03;
                         num_points = num_points - 6;
                     elseif Voc_max == 1.05
@@ -194,7 +194,7 @@ for i = 1:n_ion_concs
                     Voc_max = 0;
                 catch
                     if Voc_max > 1.05
-                        warning("Ionic JV solution failed, reducing Vmax by 0.05 V")
+                        warning("Ionic JV solution failed, reducing Vmax by 0.03 V")
                         Voc_max = Voc_max - 0.03;
                         num_points = num_points - 6;
                     elseif Voc_max == 1.05
@@ -211,7 +211,12 @@ end
 toc
 
 %% Plot results 
-Stats_array = zeros(n_ion_concs, n_recom, 4);
+Stats_array = zeros(n_ion_concs, n_recom, 5);
+J_srh_result = cell(2, n_recom);
+J_vsr_result = cell(2,n_recom);
+V_plot = cell(2, n_recom);
+e = solCV{1,1}.par.e;
+
 for i = 1:n_ion_concs
     for j = 1:n_recom
         try
@@ -219,6 +224,28 @@ for i = 1:n_ion_concs
             Stats_array(i,j,2) = results{i,j}.Voc_f;
             Stats_array(i,j,3) = results{i,j}.FF_f;
             Stats_array(i,j,4) = results{i,j}.efficiency_f;
+            x = solCV{i,j}.par.x_sub;
+            loss_currents = dfana.calcr(solCV{i,j},'sub');
+            Vapp = dfana.calcVapp(solCV{i,j});
+            end_value = (length(Vapp)-1)/2;
+            J_srh = e*trapz(x, loss_currents.srh, 2)';
+            J_vsr = e*trapz(x, loss_currents.vsr, 2)';
+            if i == 7
+                V_plot{1,j} = Vapp;
+                J_srh_result{1,j} = J_srh;
+                J_vsr_result{1,j} = J_vsr;
+            elseif i == 8
+                V_plot{2,j} = Vapp;
+                J_srh_result{2,j} = J_srh;
+                J_vsr_result{2,j} = J_vsr;
+            end
+            J_srh_OC = interp1(Vapp(1:end_value), J_srh(1:end_value), Stats_array(i,j,2));
+            J_vsr_OC = interp1(Vapp(1:end_value), J_vsr(1:end_value), Stats_array(i,j,2));
+            if J_srh_OC > J_vsr_OC
+                Stats_array(i,j,5) = 0;
+            elseif J_srh_OC < J_vsr_OC
+                Stats_array(i,j,5) = 1;
+            end
         catch
             warning('No Stats')
             Stats_array(i,j,:) = 0;
@@ -231,20 +258,24 @@ figure('Name', 'JV Parameter vs Recombination vs Ion Conc', 'Position', [50 50 8
 Colours = parula(n_ion_concs-1);
 num = 2;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
-LegendLoc = ["northeast", "southeast", "southeast", "southeast"];
+LegendLoc = ["northeast", "southwest", "southeast", "southeast"];
 if doped == 0
-    lims = [[-24 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
+    lims = [[-24 -15]; [1 1.2]; [0.5, 0.9]; [10 23]];
 elseif doped == 1
-    lims = [[-24 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
+    lims = [[-24 -15]; [0.8 1.2]; [0.5, 0.9]; [10 23]];
 end
 box on 
 for i = 1:n_ion_concs
-    if surface == 0        
-        if i == 1
-            semilogx(1e9*tau_SRH, Stats_array(n_ion_concs,:,num), 'marker', 'x', 'Color', 'black')
-        else
+    if surface == 0
+        if i == n_ion_concs
+            semilogx(1e9*tau_SRH, Stats_array(n_ion_concs,:,5).*Stats_array(n_ion_concs,:,num), 'marker', 'x', 'Color', 'black', 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+            semilogx(1e9*tau_SRH, (1-Stats_array(n_ion_concs,:,5)).*Stats_array(n_ion_concs,:,num), 'marker', 'o', 'Color', 'black', 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+            semilogx(1e9*tau_SRH, Stats_array(n_ion_concs,:,num), 'marker', 'none', 'Color', 'black')
+        else  
+            %semilogx(1e9*tau_SRH, Stats_array(i-1,:,5).*Stats_array(i-1,:,num), 'marker', 'x', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+            %semilogx(1e9*tau_SRH, (1-Stats_array(i-1,:,5)).*Stats_array(i-1,:,num), 'marker', 'o', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+            semilogx(1e9*tau_SRH, Stats_array(i,:,num), 'marker', 'none', 'Color', Colours(i,:))
             hold on
-            semilogx(1e9*tau_SRH, Stats_array(i-1,:,num), 'marker', 'x', 'Color', Colours(i-1,:))
         end
     elseif surface == 1
         if i == 1
@@ -258,14 +289,14 @@ end
 set(gca, 'Fontsize', 25)
 if surface == 0
     xlabel('Shockley-Read-Hall lifetime (ns)', 'FontSize', 30)
-    xlim([1, 500])
+    xlim([1, 1000])
 elseif surface == 1
     xlabel('Surface Recombination Velocity (cm s^{-1})', 'FontSize', 30)
     xlim([0.5, 5000])
 end
 ylabel(labels(num), 'FontSize', 30)
 ylim(lims(num,:))
-legend({'No Ions', '1e15', '5e15', '1e16', '5e16', '1e17', '5e17', '1e18'}, 'Location', 'southwest', 'FontSize', 25, 'NumColumns', 2)
+legend({' 1e15', ' 5e15', ' 1e16', ' 5e16', ' 1e17', ' 5e17', ' 1e18', ' No Ions'}, 'Location', 'southeast', 'FontSize', 25, 'NumColumns', 2)
 title(legend, 'Ion Concentration (cm^{-3})', 'FontSize', 25)
 
 %% Plot JV as a function of recombination parameter for a given ion conc
@@ -275,7 +306,7 @@ Colours = parula(n_recom);
 %Set which ion concentration to plot for
 %Have coppied the array above so you can see which nuber is the right one
 %easily
-num_Ion_Conc = 7;
+num_Ion_Conc = 8;
 
 for j = 1:n_recom
     v = dfana.calcVapp(solCV{num_Ion_Conc, j});
@@ -294,7 +325,7 @@ set(gca, 'FontSize', 25)
 xlim([-0.15, 1.2])
 ylim([-25,5])
 if surface == 0
-    legend({'1', '5', '10', '50', '100', '500'}, 'Location', 'northwest', 'FontSize', 25, 'NumColumns', 2)
+    legend({'10', '50', '100', '500', '1000'}, 'Location', 'northwest', 'FontSize', 25, 'NumColumns', 2)
     title(legend, 'SRH Lifetime (ns)', 'FontSize', 25)
 elseif surface == 1
     legend({'0.5', '5', '50', '500', '5000'}, 'Location', 'northwest', 'FontSize', 25, 'NumColumns', 2)
@@ -305,7 +336,7 @@ ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
 ax1 = gcf;
 
 %% Save results and solutions
-save_file = 1;
+save_file = 0;
 if save_file == 1
     if doped == 0 && surface == 0
         filename = 'DeltaEHOMO_vs_DeltaELUMO_v4_undoped_tauSRH.mat';

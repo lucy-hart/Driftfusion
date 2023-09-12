@@ -1,12 +1,7 @@
-%par=pc('Input_files/EnergyOffsetSweepParameters_v2.csv');
-%par=pc('Input_files/EnergyOffsetSweepParameters_v3.csv');
 %par=pc('Input_files/SnO2_MAPI_Spiro.csv');
 %par=pc('Input_files/SnO2_C60_MAPI_Spiro.csv');
-%par = pc('Input_files/PTAA_MAPI_NegOffset.csv');
-%par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
-%par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
-%par = pc('Input_files/PTAA_MAPI_PosOffset.csv');
-%par = pc('Input_files/PTAA_MAPI_PCBM_ForPaper.csv');
+%par=pc('Input_files/TiO2_MAPI_Spiro.csv');
+
 
 doped = 1;
 if doped == 1
@@ -16,16 +11,16 @@ elseif doped == 0
 end
 
 Fiddle_with_Energetics = 1;
-Fiddle_with_IonConc = 0;
-IonConc = 1e19;
+Fiddle_with_IonConc = 1;
+IonConc = 1e18;
 %%
 if Fiddle_with_Energetics == 1
 
     %row
-    DHOMO = 0.3;
+    DHOMO = 0.1;
     %DHOMO = Delta_HOMO(4);
     %column
-    DLUMO = -0.3;
+    DLUMO = -0.1;
     %DLUMO = Delta_LUMO(11);
         if doped == 0
             %HTL Energetics
@@ -98,7 +93,7 @@ suns = 1;
 V_bias = -0.2;
 V_max = 1.2;
 V_min = -0.2;
-scan_rate = 1e-4;
+scan_rate = 0.1;
 
 % biased_eqm_ion = genVappStructs(illuminated_sol_ion, V_bias, 1);
 % biased_eqm_el = genVappStructs(illuminated_sol_el, V_bias, 1);
@@ -140,9 +135,9 @@ ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
 ax1 = gcf;
 
 %% Save Plots at 300 dpi
-save = 0;
+save_plot = 0;
 
-if save == 1 
+if save_plot == 1 
     exportgraphics(ax1, ...
     'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\LSR\0p15ev_Symmetric_Offest_JV.png', ...
     'Resolution', 300)
