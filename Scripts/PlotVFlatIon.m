@@ -29,7 +29,7 @@ for i = 1:num_ion_concs
     hold on
     if i == 1
         plot(Delta_TL, Vbi, 'marker', 'x', 'Color', 'black')
-        plot(Delta_TL, TL_offset, 'marker', 'x', 'Color', 'red')
+        plot(Delta_TL, -TL_offset, 'marker', 'x', 'Color', 'red')
     end
     plot(Delta_TL, Vflat(i,:), 'marker', 'o', 'Color', Colours(i,:))
     plot(Delta_TL, Stats_array(i,:,2), 'marker', 'x', 'Color', Colours(i,:), 'HandleVisibility', 'off')

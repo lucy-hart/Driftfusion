@@ -223,20 +223,23 @@ solstruct.t = t;
 solstruct.par = par;
 
 %% Volumetric surface recombination error check
-if par.vsr_mode == 1 && par.vsr_check == 1
-    try 
-        compare_rec_flux(solstruct, par.RelTol_vsr, par.AbsTol_vsr, 0);
-    catch
-        %Put this here so that probgram doesn't stop for partial solutions
-        %but will stop if soution has failed completely (i.e., only
-        %available for t = 0)
-        if length(solstruct.u(:,1,1)) ~= 1
-            warning("Could not estimate recombination flux error as solution is incomplete")
-        else
-            error("Solution failed, only availabe at t = 0")
-        end
-    end
+if par.vsr_mode == 1 && par.vsr_check == 1 
+    compare_rec_flux(solstruct, par.RelTol_vsr, par.AbsTol_vsr, 0);
 end
+% if par.vsr_mode == 1 && par.vsr_check == 1
+%     try 
+%         compare_rec_flux(solstruct, par.RelTol_vsr, par.AbsTol_vsr, 0);
+%     catch
+%         %Put this here so that probgram doesn't stop for partial solutions
+%         %but will stop if soution has failed completely (i.e., only
+%         %available for t = 0)
+%         if length(solstruct.u(:,1,1)) ~= 1
+%             warning("Could not estimate recombination flux error as solution is incomplete")
+%         else
+%             error("Solution failed, only availabe at t = 0")
+%         end
+%     end
+% end
 
 %% Subfunctions
 % Set up partial differential equation (pdepe) (see MATLAB pdepe help for details of C,F,S)

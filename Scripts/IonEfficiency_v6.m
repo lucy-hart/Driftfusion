@@ -18,8 +18,7 @@
 tic
 %% Define parameter space
 %Choose to use doped or undoped TLs
-doped = 1;
-
+doped = 0;
 n_values = 7;
 Delta_TL = linspace(0, 0.3, n_values);
 %This is a bit of a hack, but if the offfset is exactly 0, the surface
@@ -49,7 +48,7 @@ results = cell(n_ion_concs, n_values);
 if doped == 1
     par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 elseif doped == 0
-    par=pc('Input_files/EnergyOffsetSweepParameters_v4_undoped.csv');
+    par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
 end 
 
 %Set the illumination for the JV sweeps 
@@ -134,8 +133,8 @@ for i = 1:n_ion_concs
         
         %electron only scan
         if i == n_ion_concs 
-            Voc_max = 1.2;
-            num_points = 301;
+            Voc_max = 1.45;
+            num_points = (2*100*(Voc_max+0.2))+1;
             while Voc_max >= 1.05
                 try            
                     solCV{i, j} = doCV(soleq{i, j}.el, illumination, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);           
@@ -156,8 +155,8 @@ for i = 1:n_ion_concs
             end
         
         else
-            Voc_max = 1.2;
-            num_points = 301; 
+            Voc_max = 1.45;
+            num_points = (2*100*(Voc_max+0.2))+1; 
             while Voc_max >= 1.05
                 try
                     solCV{i, j} = doCV(soleq{i, j}.ion, illumination, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);
@@ -228,7 +227,7 @@ end
 %%
 figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 800])
 Colours = parula(n_ion_concs-1);
-num = 2;
+num = 4;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "northeast"];
 if doped == 0
@@ -328,7 +327,7 @@ for j = 1:n_values
 end
 
 %% Save results and solutions
-save_file = 1;
+save_file = 0;
 if save_file == 1
     if doped == 0
         filename = 'DeltaE_v4_undoped.mat';
