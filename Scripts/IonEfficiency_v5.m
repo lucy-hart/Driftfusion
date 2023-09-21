@@ -13,15 +13,15 @@
 tic
 %% Define parameter space
 %Choose to use doped or undoped TLs and which of v_sr or tau_SRH to vary
-doped = 1;
-surface = 0;
+doped = 0;
+surface = 1;
 
 %Set up the parameters for the ion concentrations
 Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
 n_ion_concs = length(Ion_Conc);
 
 if surface == 1
-    v_sr = [0.5 5 50 500 5000];
+    v_sr = [0.1 1 10 100 1000 1e4 1e5];
     n_recom  = length(v_sr);
     %Rows are the ion concentrations    
     %Columns are the surface recombination velocities
@@ -32,7 +32,7 @@ if surface == 1
         end
     end
 elseif surface == 0
-    tau_SRH = [1e-9 3e-9 1e-8 3e-8 5e-8 1e-7 3e-7 5e-7 1e-6];
+    tau_SRH = [1e-8 3e-8 5e-8 1e-7 3e-7 5e-7 1e-6];
     n_recom  = length(tau_SRH);
     %Rows are the ion concentrations    
     %Columns are the SRH lifetimes 
@@ -47,7 +47,7 @@ end
 %%
 %Select the correct input file for doped or undoped cases
 if doped == 0
-    par=pc('Input_files/EnergyOffsetSweepParameters_v4_undoped.csv');
+    par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
 elseif doped == 1
     par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 end
@@ -61,8 +61,8 @@ if Fiddle_with_Energetics == 1
     %Choose the offsets for the system
     %Positive offset for DHOMO means TL VB lies above the perovskite VB
     %Negative offset for DLUMO means TL CB lies below the perovskite CB
-    DHOMO = 0.25;
-    DLUMO = -0.25;
+    DHOMO = 0.2;
+    DLUMO = -0.2;
 
     %HTL Energetics
     par.Phi_left = -5.15;
@@ -260,7 +260,7 @@ num = 2;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "southeast"];
 if doped == 0
-    lims = [[-24 -15]; [1 1.2]; [0.5, 0.9]; [10 23]];
+    lims = [[-24 -15]; [0.8 1.2]; [0.5, 0.9]; [10 23]];
 elseif doped == 1
     lims = [[-24 -15]; [0.8 1.2]; [0.5, 0.9]; [10 23]];
 end
@@ -278,11 +278,15 @@ for i = 1:n_ion_concs
             hold on
         end
     elseif surface == 1
-        if i == 1
-            semilogx(v_sr, Stats_array(n_ion_concs,:,num), 'marker', 'x', 'Color', 'Black')
-        else
+        if i == n_ion_concs
+            semilogx(v_sr, Stats_array(n_ion_concs,:,5).*Stats_array(n_ion_concs,:,num), 'marker', 'x', 'Color', 'black', 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+            semilogx(v_sr, (1-Stats_array(n_ion_concs,:,5)).*Stats_array(n_ion_concs,:,num), 'marker', 'o', 'Color', 'black', 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+            semilogx(v_sr, Stats_array(n_ion_concs,:,num), 'marker', 'none', 'Color', 'black')
+        else  
+            %semilogx(v_sr, Stats_array(i-1,:,5).*Stats_array(i-1,:,num), 'marker', 'x', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+            %semilogx(v_sr, (1-Stats_array(i-1,:,5)).*Stats_array(i-1,:,num), 'marker', 'o', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
+            semilogx(v_sr, Stats_array(i,:,num), 'marker', 'none', 'Color', Colours(i,:))
             hold on
-            semilogx(v_sr, Stats_array(i-1,:,num), 'marker', 'x', 'Color', Colours(i-1,:))
         end
     end
 end
@@ -292,7 +296,7 @@ if surface == 0
     xlim([1, 1000])
 elseif surface == 1
     xlabel('Surface Recombination Velocity (cm s^{-1})', 'FontSize', 30)
-    xlim([0.5, 5000])
+    xlim([0.1, 1e5])
 end
 ylabel(labels(num), 'FontSize', 30)
 ylim(lims(num,:))
@@ -325,10 +329,10 @@ set(gca, 'FontSize', 25)
 xlim([-0.15, 1.2])
 ylim([-25,5])
 if surface == 0
-    legend({'10', '50', '100', '500', '1000'}, 'Location', 'northwest', 'FontSize', 25, 'NumColumns', 2)
+    legend({'10', '30', '50', '100', '300', '500', '1000'}, 'Location', 'northwest', 'FontSize', 25, 'NumColumns', 2)
     title(legend, 'SRH Lifetime (ns)', 'FontSize', 25)
 elseif surface == 1
-    legend({'0.5', '5', '50', '500', '5000'}, 'Location', 'northwest', 'FontSize', 25, 'NumColumns', 2)
+    legend({'0.1', '1', '10', '100', '1000', '10000', '100000'}, 'Location', 'eastoutside', 'FontSize', 25, 'NumColumns', 2)
     title(legend, 'Surface Recombination\newlineVelocity (cm s^{-1})', 'FontSize', 25)
 end
 xlabel('Voltage(V)', 'FontSize', 30)
@@ -336,16 +340,16 @@ ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
 ax1 = gcf;
 
 %% Save results and solutions
-save_file = 0;
+save_file = 1;
 if save_file == 1
     if doped == 0 && surface == 0
-        filename = 'DeltaEHOMO_vs_DeltaELUMO_v4_undoped_tauSRH.mat';
+        filename = 'v5_undoped_tauSRH.mat';
     elseif doped == 0 && surface == 1
-        filename = 'DeltaEHOMO_vs_DeltaELUMO_v4_undoped_vsr.mat';
+        filename = 'v5_undoped_vsr.mat';
     elseif doped == 1 && surface == 0
-        filename = 'DeltaEHOMO_vs_DeltaELUMO_v5_doped_tauSRH.mat';
+        filename = 'v5_doped_tauSRH.mat';
     elseif doped == 1 && surface == 1
-        filename = 'DeltaEHOMO_vs_DeltaELUMO_v5_doped_vsr.mat';
+        filename = 'v5_doped_vsr.mat';
     end 
     save(filename, 'results', 'solCV')
 end

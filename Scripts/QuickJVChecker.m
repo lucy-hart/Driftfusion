@@ -11,7 +11,7 @@ elseif doped == 0
 end
 
 Fiddle_with_Energetics = 1;
-Fiddle_with_IonConc = 0;
+Fiddle_with_IonConc = 1;
 IonConc = 1e18;
 %%
 if Fiddle_with_Energetics == 1
@@ -91,7 +91,7 @@ suns = 1;
 % illuminated_sol_el = changeLight(eqm_QJV.el, suns, 0, 1);
 
 V_bias = -0.2;
-V_max = 1.5;
+V_max = 1.2;
 V_min = -0.2;
 scan_rate = 1e-4;
 

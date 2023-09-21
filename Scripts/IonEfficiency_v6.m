@@ -18,9 +18,10 @@
 tic
 %% Define parameter space
 %Choose to use doped or undoped TLs
-doped = 0;
+doped = 1;
 n_values = 7;
 Delta_TL = linspace(0, 0.3, n_values);
+Symmetric_offset = 0;
 %This is a bit of a hack, but if the offfset is exactly 0, the surface
 %recombination error becomes huge for reasons I do not fully understand...
 Delta_TL(1) = 1e-3;
@@ -99,21 +100,33 @@ for i = 1:n_ion_concs
 
         %ETL Energetics
         %Need to use opposite sign at ETL to keep energy offsets symmetric
-        par.Phi_right = -4.05;
-        par.Phi_EA(5) = par.Phi_EA(3) - params{i,j}(2);
-        par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
-        par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
-        if doped == 0
-            par.EF0(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
-        elseif doped == 1
-            par.EF0(5) = par.Phi_EA(5) - 0.1;
-        end
-        if Piers_version == 0
-            if par.Phi_right > par.Phi_EA(5) - 0.1
+        if Symmetric_offset == 1
+            par.Phi_right = -4.05;
+            par.Phi_EA(5) = par.Phi_EA(3) - params{i,j}(2);
+            par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
+            par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+            if doped == 0
+                par.EF0(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+            elseif doped == 1
+                par.EF0(5) = par.Phi_EA(5) - 0.1;
+            end
+            if Piers_version == 0
+                if par.Phi_right > par.Phi_EA(5) - 0.1
+                    par.Phi_right = par.Phi_EA(5) - 0.1;
+                end
+            elseif Piers_version == 1
                 par.Phi_right = par.Phi_EA(5) - 0.1;
             end
-        elseif Piers_version == 1
-            par.Phi_right = par.Phi_EA(5) - 0.1;
+        elseif Symmetric_offset == 0
+            par.Phi_right = -4.05;
+            par.Phi_EA(5) = par.Phi_EA(3) - 1e-3;
+            par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
+            par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+            if doped == 0
+                par.EF0(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+            elseif doped == 1
+                par.EF0(5) = par.Phi_EA(5) - 0.1;
+            end
         end
 
         %ion conc
@@ -227,7 +240,7 @@ end
 %%
 figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 800])
 Colours = parula(n_ion_concs-1);
-num = 4;
+num = 2;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "northeast"];
 if doped == 0

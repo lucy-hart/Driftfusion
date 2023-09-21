@@ -9,11 +9,14 @@ num_offsets = length(solCV(1,:));
 Vbi = zeros(1, num_offsets);
 TL_offset = zeros(1, num_offsets);
 Vflat = zeros(num_ion_concs, num_offsets);
+V_Emin = zeros(1, num_offsets);
+Emin = zeros(1, num_offsets);
 
 for i = 1:num_ion_concs
     for j = 1:num_offsets
         par = solCV{i,j}.par;
         if i == 1
+            [V_Emin(j), Emin(j)] = findEminbulk(solCV{8,j});
             Vbi(1,j) = par.Phi_right - par.Phi_left;
             TL_offset(1,j) = par.EF0(end) - par.EF0(1);
         end
@@ -29,7 +32,8 @@ for i = 1:num_ion_concs
     hold on
     if i == 1
         plot(Delta_TL, Vbi, 'marker', 'x', 'Color', 'black')
-        plot(Delta_TL, -TL_offset, 'marker', 'x', 'Color', 'red')
+        plot(Delta_TL, V_Emin, 'marker', 'x', 'Color', 'red')
+        plot(Delta_TL, TL_offset, 'marker', 'x', 'Color', 'green', 'HandleVisibility', 'off')
     end
     plot(Delta_TL, Vflat(i,:), 'marker', 'o', 'Color', Colours(i,:))
     plot(Delta_TL, Stats_array(i,:,2), 'marker', 'x', 'Color', Colours(i,:), 'HandleVisibility', 'off')
@@ -39,6 +43,7 @@ set(gca, 'Fontsize', 25)
 xlabel('Transport Layer Energetic Offset (eV)', 'FontSize', 30)
 ylabel('Voltage (V)', 'FontSize', 30)
 xlim([0, 0.3])
+ylim([0.6, 1.45])
 xticks([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3])
 xticklabels({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'})
-legend({'V_{BI}', '\DeltaE_{F,TLs}', 'V_{flat ion}'}, 'Location', 'northeast', 'FontSize', 25)
+legend({'V_{BI}', 'V(E_{min,bulk})', 'V_{flat ion}'}, 'Location', 'northeast', 'FontSize', 25)
