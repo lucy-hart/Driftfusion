@@ -7,10 +7,16 @@ tic
 %% Define parameter space
 %Rows are the Ion Concentrations
 %Columns are the TL Energetic Offsets
+bulk = 0;
 
 Donor_HOMO = linspace(-5.5, -5.2, 7);
-k_rec = logspace(-12, -10, 11);
-n_k_rec = length(k_rec);
+if bulk == 1
+    k_rec = logspace(-12, -10, 11);
+    n_k_rec = length(k_rec);
+elseif bulk == 0
+    k_rec = logspace(-12, -10, 11);
+    n_k_rec = length(k_rec);
+end 
 n_HOMOs = length(Donor_HOMO);
 
 %+1 for the ion concs to leave space for a run with ion motion switched off
@@ -31,7 +37,7 @@ results = cell(n_k_rec, n_HOMOs);
 %% Do (many) JV sweeps
 %Remeber to update the work function values if you change these parameters
 %between files 
-par=pc('Input_files/HTL_MAPI_PM6Y6_C60_DavideValues.csv');
+par=pc('Input_files/HTL_MAPI_PM6Y6_DavideValues.csv');
 illumination = 1;
 
 %Reset the electrode work functions in each loop to be safe as they are

@@ -64,6 +64,8 @@ ns = zeros(length(t), length(loc));     % Store time array of each ns in new col
 ps = zeros(length(t), length(loc));     % Store time array of each ps in new column
 R_abrupt = zeros(length(t), length(loc));
 R_vsr = zeros(length(t), length(loc));
+R_abrupt_max = zeros(1,length(loc));
+R_vsr_max = zeros(1,length(loc));
 sigma = zeros(length(t), length(loc));
 legstr_R = cell(2*length(loc) + 1, 1);
 legstr_sigma = cell(length(loc) + 1, 1);
@@ -95,9 +97,10 @@ for i = 1:length(loc)
     end
     
     R_abrupt(:, i) = (ns(:, i).*ps(:, i) - ni^2)./((1/sn).*(ps(:, i) + pt) + (1/sp).*(ns(:, i) + nt));
+
     
     %% Fractional difference
-    sigma(:, i) = ((R_abrupt(:, i) - R_vsr(:, i))./R_abrupt(:, i));
+    sigma(:, i) = ((R_abrupt(:, i) - R_vsr(:, i))./R_abrupt(:, i));    
         
     if plot_switch
         figure(300)
@@ -128,10 +131,15 @@ for i = 1:length(loc)
     end
 end
 
+% R_vsr_max(1,i) = max(R_vsr(:,i));
+% R_abrupt_max(1,i) = max(R_abrupt(:,i));
+% disp([R_abrupt_max R_vsr_max])
+
 R_vsr_sum = sum(R_vsr, 2);
 R_vsr_filter = R_vsr_sum;
 R_vsr_filter(R_vsr_filter < AbsTol_vsr) = NaN;
 R_abrupt_sum = sum(R_abrupt, 2);
+% disp([R_abrupt_sum(end) R_vsr_sum(end)])
 sigma_sum = (1-(R_vsr_sum./R_abrupt_sum));
 sigma_sum_filter = (1-(R_vsr_filter./R_abrupt_sum));
 
