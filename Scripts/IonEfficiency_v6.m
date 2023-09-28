@@ -22,10 +22,17 @@ doped = 1;
 n_values = 7;
 Delta_TL = linspace(0, 0.3, n_values);
 Symmetric_offset = 0;
+%Fix the offset for the ETL or HTL
+Fix_ETL = 0;
+%Energetic offset between the perovskite and TL for the TL with fixed
+%energetics 
+Fixed_offset = 1e-3;
 %This is a bit of a hack, but if the offfset is exactly 0, the surface
 %recombination error becomes huge for reasons I do not fully understand...
+%The saga continues - only seems to matter for the HTL, not the ETL...
 Delta_TL(1) = 1e-3;
-Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
+%Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
+Ion_Conc = [1e18 0];
 n_ion_concs = length(Ion_Conc);
 
 %Rows are the Ion Concentrations
@@ -81,26 +88,38 @@ for i = 1:n_ion_concs
         end
 
         %HTL Energetics
-        par.Phi_left = -5.15;
-        par.Phi_IP(1) = par.Phi_IP(3) + params{i,j}(2);
-        par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
-        par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
-        if doped == 0
-            par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
-        elseif doped == 1
-            par.EF0(1) = par.Phi_IP(1) + 0.1;
-        end
-        if Piers_version == 0
-            if par.Phi_left < par.Phi_IP(1) + 0.1
+        if Symmetric_offset == 1 || (Symmetric_offset == 0 && Fix_ETL == 1)
+            par.Phi_left = -5.15;
+            par.Phi_IP(1) = par.Phi_IP(3) + params{i,j}(2);
+            par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
+            par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+            if doped == 0
+                par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+            elseif doped == 1
+                par.EF0(1) = par.Phi_IP(1) + 0.1;
+            end
+            if Piers_version == 0
+                if par.Phi_left < par.Phi_IP(1) + 0.1
+                    par.Phi_left = par.Phi_IP(1) + 0.1;
+                end
+            elseif Piers_version == 1
                 par.Phi_left = par.Phi_IP(1) + 0.1;
             end
-        elseif Piers_version == 1
-            par.Phi_left = par.Phi_IP(1) + 0.1;
+        elseif Symmetric_offset == 0 && Fix_ETL == 0
+            par.Phi_left = -5.15;
+            par.Phi_IP(1) = par.Phi_IP(3) + Fixed_offset;
+            par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
+            par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+            if doped == 0
+                par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+            elseif doped == 1
+                par.EF0(1) = par.Phi_IP(1) + 0.1;
+            end
         end
 
         %ETL Energetics
         %Need to use opposite sign at ETL to keep energy offsets symmetric
-        if Symmetric_offset == 1
+        if Symmetric_offset == 1 || (Symmetric_offset == 0 && Fix_ETL == 0)
             par.Phi_right = -4.05;
             par.Phi_EA(5) = par.Phi_EA(3) - params{i,j}(2);
             par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
@@ -117,9 +136,9 @@ for i = 1:n_ion_concs
             elseif Piers_version == 1
                 par.Phi_right = par.Phi_EA(5) - 0.1;
             end
-        elseif Symmetric_offset == 0
+        elseif Symmetric_offset == 0 && Fix_ETL == 1
             par.Phi_right = -4.05;
-            par.Phi_EA(5) = par.Phi_EA(3) - 1e-3;
+            par.Phi_EA(5) = par.Phi_EA(3) - Fixed_offset;
             par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
             par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
             if doped == 0
@@ -137,7 +156,7 @@ for i = 1:n_ion_concs
         
         %Do this as it seesm to reduce the discrepency between surface
         %volumetric surace recombination model and the abrupt interface one
-        %But also made solution less satble? Maybe better to tinker with
+        %But also made solution less stable? Maybe better to tinker with
         %this on the one which varies surface recombination...
         %par.frac_vsr_zone = 0.05;
         par = refresh_device(par);
@@ -146,7 +165,12 @@ for i = 1:n_ion_concs
         
         %electron only scan
         if i == n_ion_concs 
-            Voc_max = 1.45;
+            Fermi_offset = par.EF0(5) - par.EF0(1);
+            if Fermi_offset > 1.2
+                Voc_max = Fermi_offset + 0.05;
+            else
+                Voc_max = 1.2;
+            end
             num_points = (2*100*(Voc_max+0.2))+1;
             while Voc_max >= 1.05
                 try            
@@ -168,7 +192,12 @@ for i = 1:n_ion_concs
             end
         
         else
-            Voc_max = 1.45;
+            Fermi_offset = par.EF0(5) - par.EF0(1);
+            if Fermi_offset > 1.2
+                Voc_max = Fermi_offset + 0.05;
+            else
+                Voc_max = 1.2;
+            end
             num_points = (2*100*(Voc_max+0.2))+1; 
             while Voc_max >= 1.05
                 try
@@ -268,75 +297,78 @@ xlim([0, 0.3])
 xticks([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3])
 xticklabels({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'})
 ylim(lims(num,:))
-legend({'1e15', '5e15', '1e16', '5e16', '1e17', '5e17', '1e18', 'No Ions'}, 'Location', LegendLoc(num), 'FontSize', 25, 'NumColumns', 2)
+%legend({'1e15', '5e15', '1e16', '5e16', '1e17', '5e17', '1e18', 'No Ions'}, 'Location', LegendLoc(num), 'FontSize', 25, 'NumColumns', 2)
 title(legend, 'Ion Concentration (cm^{-3})', 'FontSize', 25)
 
 %% Plot J_srh and _sr for high ions vs no ions as a function of offset
-figure('Name', 'JVPlot', 'Position', [100 100 800 800])
-Colours = parula(n_values);
-
-for j = 1:n_values
+Run = 0;
+if Run == 1
+    figure('Name', 'JVPlot', 'Position', [100 100 800 800])
+    Colours = parula(n_values);
     
-    subplot(1,2,1)
-    
-     xline(0, 'black', 'HandleVisibility', 'off')
-     yline(0, 'black', 'HandleVisibility', 'off')
-    if j == 1
-        plot(V_plot{1,j}, J_vsr_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
-        hold on
-        plot(V_plot{2,j}, J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
-        hold off
-    else
-        hold on
-        plot(V_plot{1,j}, J_vsr_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
-        plot(V_plot{2,j}, J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
-        hold off
-    end
+    for j = 1:n_values
         
-    box on
-
-    set(gca, 'FontSize', 25)
-    xlim([-0.15, 1.2])
-    ylim([-5, 25])
+        subplot(1,2,1)
+        
+         xline(0, 'black', 'HandleVisibility', 'off')
+         yline(0, 'black', 'HandleVisibility', 'off')
+        if j == 1
+            plot(V_plot{1,j}, J_vsr_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
+            hold on
+            plot(V_plot{2,j}, J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
+            hold off
+        else
+            hold on
+            plot(V_plot{1,j}, J_vsr_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
+            plot(V_plot{2,j}, J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
+            hold off
+        end
+            
+        box on
     
-    legend({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'}, 'Location', 'southwest', 'FontSize', 25)
-    title(legend, 'Transport Layer Offset (eV)', 'FontSize', 25)
+        set(gca, 'FontSize', 25)
+        xlim([-0.15, 1.2])
+        ylim([-5, 25])
+        
+        legend({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'}, 'Location', 'southwest', 'FontSize', 25)
+        title(legend, 'Transport Layer Offset (eV)', 'FontSize', 25)
+        
+        xlabel('Voltage(V)', 'FontSize', 30)
+        ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
     
-    xlabel('Voltage(V)', 'FontSize', 30)
-    ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
-
-end
-
-for j = 1:n_values
-    
-    subplot(1,2,2)
-
-     xline(0, 'black', 'HandleVisibility', 'off')
-     yline(0, 'black', 'HandleVisibility', 'off')
-
-    if j == 1
-        plot(V_plot{1,j}, J_srh_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
-        hold on
-        plot(V_plot{2,j}, J_srh_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
-        hold off
-    else
-        hold on
-        plot(V_plot{1,j}, J_srh_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
-        plot(V_plot{2,j}, J_srh_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
-        hold off
     end
-    box on 
-
-    set(gca, 'FontSize', 25)
-    xlim([-0.15, 1.2])
-    ylim([-5, 25])
     
-    legend({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'}, 'Location', 'southwest', 'FontSize', 25)
-    title(legend, 'Transport Layer Offset (eV)', 'FontSize', 25)
+    for j = 1:n_values
+        
+        subplot(1,2,2)
     
-    xlabel('Voltage(V)', 'FontSize', 30)
-    ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
-
+         xline(0, 'black', 'HandleVisibility', 'off')
+         yline(0, 'black', 'HandleVisibility', 'off')
+    
+        if j == 1
+            plot(V_plot{1,j}, J_srh_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
+            hold on
+            plot(V_plot{2,j}, J_srh_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
+            hold off
+        else
+            hold on
+            plot(V_plot{1,j}, J_srh_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
+            plot(V_plot{2,j}, J_srh_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
+            hold off
+        end
+        box on 
+    
+        set(gca, 'FontSize', 25)
+        xlim([-0.15, 1.2])
+        ylim([-5, 25])
+        
+        legend({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'}, 'Location', 'southwest', 'FontSize', 25)
+        title(legend, 'Transport Layer Offset (eV)', 'FontSize', 25)
+        
+        xlabel('Voltage(V)', 'FontSize', 30)
+        ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
+    
+    end
 end
 
 %% Save results and solutions
@@ -345,7 +377,7 @@ if save_file == 1
     if doped == 0
         filename = 'DeltaE_v4_undoped.mat';
     elseif doped == 1
-        filename = 'DeltaE_v5_doped_SmallerRange.mat';
+        filename = 'DeltaE_v5_doped_VaryHTL_FixedETL_0p15eV.mat';
     end 
     save(filename, 'results', 'solCV')
 end

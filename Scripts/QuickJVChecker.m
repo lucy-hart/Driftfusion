@@ -3,7 +3,7 @@
 %par=pc('Input_files/TiO2_MAPI_Spiro.csv');
 
 
-doped = 0;
+doped = 1;
 if doped == 1
     par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 elseif doped == 0
@@ -20,7 +20,7 @@ if Fiddle_with_Energetics == 1
     DHOMO = 1e-3;
     %DHOMO = Delta_HOMO(4);
     %column
-    DLUMO = -1e-3;
+    DLUMO = -0.3;
     %DLUMO = Delta_LUMO(11);
         if doped == 0
             %HTL Energetics
@@ -91,7 +91,7 @@ suns = 1;
 % illuminated_sol_el = changeLight(eqm_QJV.el, suns, 0, 1);
 
 V_bias = -0.2;
-V_max = 1.2;
+V_max = 1.35;
 V_min = -0.2;
 scan_rate = 1e-4;
 

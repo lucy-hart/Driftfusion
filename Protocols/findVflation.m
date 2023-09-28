@@ -15,7 +15,7 @@ xstop = sum(par.layer_points(1:3));
 %This is a 1 x num_active_layer_points matrix
 x = par.xx(xstart:xstop) - (par.xx(1)+par.xx(end))/2;
 %This is a num_voltage_values x num_active_layer_points matrix
-ion_conc = JVsol.u(:,xstart:xstop,4) - par.Nani(3);
+ion_conc = JVsol.u(:,xstart:xstop,4) - par.Ncat(3);
 
 ion_dipole_moment = trapz(x, x.*ion_conc, 2);
 

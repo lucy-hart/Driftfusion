@@ -134,6 +134,8 @@ R_vsr_filter(R_vsr_filter < AbsTol_vsr) = NaN;
 R_abrupt_sum = sum(R_abrupt, 2);
 sigma_sum = (1-(R_vsr_sum./R_abrupt_sum));
 sigma_sum_filter = (1-(R_vsr_filter./R_abrupt_sum));
+% [~, argmin] = min(abs(sigma_sum_filter));
+% disp(argmin)
 
 if max(abs(sigma_sum_filter)) > RelTol_vsr
     warning(['The max volumetric surface recombination model fractional error (sigma_max = ', num2str(max(abs(sigma_sum_filter))),') for recombination fluxes above ', num2str(AbsTol_vsr), ' cm-2s-1 exceeded the user-defined tolerance level (tol_vsr = ', ...
