@@ -1,9 +1,9 @@
 parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
 parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
 
-devices = {parC60, parPM6Y6};
+devices = {parC60, parPM6};
 num_devices = length(devices);
-wavelengths = [404, 800];
+wavelengths = [405, 800];
 power = [10, 10];
 eqm = cell(2,2);
 CV_sols = cell(2,2);

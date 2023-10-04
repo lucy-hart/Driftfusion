@@ -9,6 +9,7 @@ num_devices = length(devices);
 eqm = cell(1, num_devices);
 
 wavelength = 405;
+%wavelength = 800;
 
 for i = 1:num_devices
    devices{i}.light_source2 = 'laser';
@@ -22,7 +23,7 @@ pulse_solution = cell(1, num_devices);
 Jt = cell(1, num_devices);
 for i = 1:num_devices
     bias_solution{i} = genVappStructs(eqm{i}.ion, -0.5, 1);
-    pulse_solution{i} = doLightPulse(SC_solution{i},10, 200e-6, 1000, 50, 1, 0);
+    pulse_solution{i} = doLightPulse(bias_solution{i},10, 200e-6, 1000, 50, 10e-6, 1, 0);
     Jt{i} = dfana.calcJ(pulse_solution{i}).tot;
 end
 
@@ -41,4 +42,4 @@ set(gca, 'FontSize', 25)
 xlabel('Time (\mus)', 'FontSize', 30)
 ylabel('Normalised Current (a.u.)', 'FontSize', 30)
 
-legend({'C_{60}', ' PM6:Y6', ' PM7:Y6', ' PCE12:Y6'}, 'FontSize', 25, 'Location', 'northwest')
+legend({'C_{60}', ' PM6:Y6', ' PCE12:Y6', ' PCE12:Y6'}, 'FontSize', 25, 'Location', 'northwest')
