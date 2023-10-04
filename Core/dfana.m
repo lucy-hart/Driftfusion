@@ -270,6 +270,61 @@ classdef dfana
             
         end
         
+        function [r, ns, ps, alpha_xn, beta_xp] = calcabsr(sol, mesh_option)
+            % Calculate the recombination rate on i-half mesh
+            % obtain SOL components for easy referencing
+            % MESH_OPTION = "whole" for input mesh or "sub" for subinetrval
+            % mesh
+            [u,t,x_input,par,~,n,p,a,c,V] = dfana.splitsol(sol);
+
+            switch mesh_option
+                case "whole"
+                    dev = par.dev;
+                    x = x_input;
+                    n = u(:,:,2);
+                    p = u(:,:,3);
+                case "sub"
+                    dev = par.dev_sub;
+                    x = par.x_sub;
+                    n = getvar_sub(u(:,:,2));
+                    p = getvar_sub(u(:,:,3));
+            end
+
+            dVdx = zeros(length(t), length(x));
+            for i=1:length(t)
+                [~, dVdx(i,:)] = pdeval(0, x_input, V(i,:), x);
+            end
+            vsr_zone = repmat(dev.vsr_zone, length(t), 1);
+            srh_zone = repmat(dev.srh_zone, length(t), 1);
+
+            xprime_n = dev.xprime_n;
+            xprime_p = dev.xprime_p;
+            sign_xn = repmat(dev.sign_xn, length(t), 1);    % 1 if xn increasing, -1 if decreasing wrt x
+            sign_xp = repmat(dev.sign_xp, length(t), 1);    % 1 if xp increasing, -1 if decreasing wrt x
+            alpha0_xn = repmat(dev.alpha0_xn, length(t), 1);
+            beta0_xp = repmat(dev.beta0_xp, length(t), 1);
+
+            alpha_xn = (sign_xn.*par.q.*dVdx./(par.kB*par.T)) + alpha0_xn;
+            beta_xp = (sign_xp.*par.q.*-dVdx./(par.kB*par.T)) + beta0_xp;
+
+            % Band-to-band
+            r.btb = dev.B.*(n.*p);
+            % Bulk SRH
+            r.srh = srh_zone.*(n.*p)...
+                ./(dev.taun.*(p+dev.pt) + dev.taup.*(n+dev.nt));
+            % Volumetric surface SRH
+            ns = n.*exp(-alpha_xn.*xprime_n); % Projected electron surface density
+            ps = p.*exp(-beta_xp.*xprime_p);  % Projected hole surface density
+            r.vsr = vsr_zone.*(ns.*ps)...
+                ./(dev.taun_vsr.*(ps + dev.pt) + dev.taup_vsr.*(ns + dev.nt));
+            % System boundary surface recombination i.e. minority carrier
+            % currents
+            
+            % Total
+            r.tot = r.btb + r.srh + r.vsr;
+            
+        end
+
         function j_surf_rec = calcj_surf_rec(sol)
             % Calculates the absolute surface recombination flux for system
             % boundaries.

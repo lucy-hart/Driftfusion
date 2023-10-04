@@ -1,5 +1,5 @@
-parC60 = pc('Input_files/HTL_MAPI_C60_DavideValues.csv');
-parPM6Y6 = pc('Input_files/HTL_MAPI_PM6Y6_DavideValues.csv');
+parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
+parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
 
 devices = {parC60, parPM6Y6};
 num_devices = length(devices);

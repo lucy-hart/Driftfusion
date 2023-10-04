@@ -87,7 +87,7 @@ par.t0 = par.tmax/1e6;
 disp('Solution with mobility switched on')
 sol = df(sol, par);
 
-all_stable = verifyStabilization(sol.u, sol.t, 0.7);
+all_stable = verifyStabilization(sol.u, sol.t, 1e-3);
 
 % loop to check electrons have reached stable config- if not accelerate ions by
 % order of mag
@@ -101,7 +101,7 @@ while any(all_stable) == 0
 
     sol = df(sol, par);
 
-    all_stable = verifyStabilization(sol.u, sol.t, 0.7);
+    all_stable = verifyStabilization(sol.u, sol.t, 1e-3);
 end
 
 soleq.el = sol;
@@ -148,7 +148,7 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
     par.t0 = par.tmax/1e3;
 
     sol = df(sol, par);
-    all_stable = verifyStabilization(sol.u, sol.t, 0.7);
+    all_stable = verifyStabilization(sol.u, sol.t, 1e-3);
 
     % loop to check ions have reached stable config- if not accelerate ions by
     % order of mag
@@ -157,7 +157,7 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
         par.tmax = par.tmax*10;
         par.t0 = par.tmax/1e6;
         sol = df(sol, par);
-        all_stable = verifyStabilization(sol.u, sol.t, 0.7);
+        all_stable = verifyStabilization(sol.u, sol.t, 1e-3);
     end
 
     % write solution
