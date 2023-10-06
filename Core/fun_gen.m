@@ -34,9 +34,9 @@ switch fun_type
     case 'square'
         % Generate intensity array
         fun = @(coeff, t) coeff(1) + (coeff(2)-coeff(1))*lt(mod(t,coeff(3))*1/coeff(3),coeff(4)/100);
-    case 'delayed_square'
-        % Generate intensity array
-        fun = @(coeff, t) coeff(1) + (coeff(2)-coeff(1))*lt(mod(t-coeff(5),coeff(3))*1/coeff(3),coeff(4)/100);
+    case 'smoothed_square'
+        % COEFF = [A_start, A_pulse, period, duty_cycle]  
+        fun = @(coeff, t) smoothed_square(coeff, t);
     case 'sin'
         fun = @(coeff, t) coeff(1) + coeff(2)*(sin(2*pi*coeff(3)*t + coeff(4)));
     case 'tri'

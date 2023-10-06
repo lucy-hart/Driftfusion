@@ -324,7 +324,7 @@ classdef dfplot
             [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
             [u,t,x,par,dev,n,p,a,c,V] = dfana.splitsol(sol);
 
-            figure(13);
+            figure('Name', 'npx');
             dfplot.x2d(sol, x, {n, p}, {'n', 'p'}, {'-','-'},'Carrier density [cm-3]', tarr, xrange, 0, 1)
         end
 
@@ -350,7 +350,7 @@ classdef dfplot
             Nani = repmat(dev.Nani, length(t), 1);
             Ncat = repmat(dev.Ncat, length(t), 1);
 
-            figure(14)
+            figure('Name', 'acx')
             dfplot.x2d(sol, x, {a,c,Ncat,Nani},{'anion','cation','static cation','static anion'}, {'-','-','--','-.'},...
                 'Ionic carrier density [cm-3]', tarr, xrange, 0, 0);
         end
@@ -386,7 +386,7 @@ classdef dfplot
             x_sub = par.x_sub;
             r = dfana.calcr(sol, "sub");
 
-            figure(17)
+            figure('Name', 'rx')
             dfplot.x2d(sol, x_sub, {r.btb, r.srh, r.vsr, r.tot},{'rbtb', 'rsrh', 'rvsr', 'rtot'},...
                 {'-','-','-','-'}, 'Recombination rate [cm-3s-1]', tarr, xrange, 0, 0);
         end

@@ -5,21 +5,11 @@
 
 tic
 %% Define parameter space
-%Rows are the Ion Concentrations
-%Columns are the TL Energetic Offsets
-bulk = 0;
-
-Donor_HOMO = linspace(-5.5, -5.2, 7);
-if bulk == 1
-    k_rec = logspace(-12, -10, 11);
-    n_k_rec = length(k_rec);
-elseif bulk == 0
-    k_rec = logspace(-12, -10, 11);
-    n_k_rec = length(k_rec);
-end 
+Donor_HOMO = linspace(-5.4, -5.1, 7);
+k_rec = logspace(-12, -10, 11);
+n_k_rec = length(k_rec); 
 n_HOMOs = length(Donor_HOMO);
 
-%+1 for the ion concs to leave space for a run with ion motion switched off
 params = cell(n_k_rec, n_HOMOs);
 
 for i=1:n_k_rec
@@ -37,7 +27,6 @@ results = cell(n_k_rec, n_HOMOs);
 %% Do (many) JV sweeps
 %Remeber to update the work function values if you change these parameters
 %between files 
-par=pc('Input_files/HTL_MAPI_PM6Y6_DavideValues.csv');
 illumination = 1;
 
 %Reset the electrode work functions in each loop to be safe as they are
@@ -48,6 +37,8 @@ for i = 1:n_k_rec
         disp(["Donor_HOMO = ", num2str(Donor_HOMO(j)), " eV"])
         disp(["k_rec = ", num2str(k_rec(i)), " cm{^-3}"])
         
+        par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
+
         %Donor HOMO Energetics
         par.Phi_IP(5) = params{i,j}(2);
         par.EF0(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
@@ -102,9 +93,9 @@ for i = 1:n_k_rec
 end 
 
 %% Run JV for C60 device to get the Jsc value 
-parC60 = pc('Input_files/HTL_MAPI_C60_DavideValues.csv');
+parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
 eqm_QJV_C60 = equilibrate(parC60);
-CV_sol_C60 = doCV(eqm_QJV_C60.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
+CV_sol_C60 = doCV(eqm_QJV_C60.ion, illumination, -0.2, 1.2, -0.2, 25e-3, 1, 281);
 stats_C60 = CVstats(CV_sol_C60);
 
 %%
@@ -113,11 +104,12 @@ num = 1;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "southeast"];
 lims = [[-25 -15]; [0.77 1.17]; [0.1, 0.85]; [1 21]];
+colormap(flipud('parula'))
 
 box on 
-contourf(Donor_HOMO+5.6, k_rec, Stats_array(:,:,num), 'LineStyle', 'none')
+contourf(Donor_HOMO+5.5, k_rec(6:end), -Stats_array(6:end,:,num), 'LineStyle', 'none')
 hold on
-contour(Donor_HOMO+5.6, k_rec, Stats_array(:,:,num), [-20.7 -20.7], 'color', 'black', 'LineWidth', 3)
+contour(Donor_HOMO+5.5, k_rec(6:end), -Stats_array(6:end,:,num), [-1e3*stats_C60.Jsc_f -1e3*stats_C60.Jsc_f], 'color', 'black', 'LineWidth', 3)
 hold off
 c = colorbar;
 c.Label.String = labels(num);
@@ -129,11 +121,11 @@ ylabel('BHJ k_{2} (cm^{3} s^{-1})', 'FontSize', 30)
 xticks([0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4])
 xticklabels({'0.10', '0.15', '0.20', '0.25', '0.30', '0.35', '0.40'})
 xlim([0.1, 0.4])
-ylim([1e-12, 1e-10])
+ylim([1e-11, 1e-10])
 
 %% Save results and solutions
-save_file = 0;
+save_file = 1;
 if save_file == 1
-    filename = 'PeroBHJ_QuasiTandem_DonorHOMO_BHJkrec_ParameterSweep.mat';
-    save(filename, 'el_results', 'results', 'solCV_el', 'solCV')
+    filename = 'PeroBHJ_QuasiTandem_DonorHOMO_BHJkrec_ParameterSweep_CsFAMA.mat';
+    save(filename, 'solCV')
 end

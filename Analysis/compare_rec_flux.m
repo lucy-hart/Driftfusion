@@ -82,16 +82,24 @@ for i = 1:length(loc)
     p_R = pcum1(loc(i));
     
     for k = 1:length(t)
-        if alpha(k, p_L) <= 0
-            ns(k, i) = n(k, p_L);
-        elseif alpha(k, p_L) > 0
+        %Put this clause in to deal with the type-1 heterojunctions we
+        %have in the perovskite/BHJ quasi-tandems
+        %Assumes the type-1 heterojuctions is at the pero/ETL interface
+        if i ~=2
+            if alpha(k, p_L) <= 0
+                ns(k, i) = n(k, p_L);
+            elseif alpha(k, p_L) > 0
+                ns(k, i) = n(k, p_R);
+            end
+            
+            if beta(k, p_L) <= 0
+                ps(k, i) = p(k, p_L);
+            elseif beta(k, p_L) > 0
+                ps(k, i) = p(k, p_R);
+            end
+        elseif i == 2
             ns(k, i) = n(k, p_R);
-        end
-        
-        if beta(k, p_L) <= 0
             ps(k, i) = p(k, p_L);
-        elseif beta(k, p_L) > 0
-            ps(k, i) = p(k, p_R);
         end
         R_vsr(k, i) = trapz(x_sub(p_L-1:p_R+1), rx.vsr(k, p_L-1:p_R+1), 2);
     end

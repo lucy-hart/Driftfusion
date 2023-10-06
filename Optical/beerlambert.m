@@ -25,7 +25,7 @@ function Gentot = beerlambert(par, x, source_type, laserlambda, figson)
 h = 6.626e-34;
 c = 2.998e8;
 
-lambda = 300:801;  % wavelength range - currently limited by database MUST BE IN nm
+lambda = 300:800;  % wavelength range - currently limited by database MUST BE IN nm
 
 switch par.side
     case 'left'

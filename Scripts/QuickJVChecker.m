@@ -7,6 +7,8 @@
 % parPM6 = pc('Input_files/SAM_MAPI_PM6Y6.csv');
 parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
 parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
+% parC60 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_NoC60.csv');
+parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PBDBTY6.csv');
 % parPBDBT = pc('Input_files/SAM_MAPI_PBDBTY6.csv');
 %parPM6 = pc('Input_files/HTL_MAPI_PM6Y6_C60_DavideValues.csv');
 %%
@@ -42,8 +44,8 @@ Plot_Current_Contributions(CV_sol_PM6)
 % eqm_QJV_PM7 = equilibrate(parPM7);
 % CV_sol_PM7 = doCV(eqm_QJV_PM7.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
 
-% eqm_QJV_PBDBT = equilibrate(parPBDBT);
-% CV_sol_PBDBT = doCV(eqm_QJV_PBDBT.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
+eqm_QJV_PBDBT = equilibrate(parPBDBT);
+CV_sol_PBDBT = doCV(eqm_QJV_PBDBT.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
 
 if noions == 1
     if run_C60 == 1
@@ -57,7 +59,7 @@ end
 Vapp = dfana.calcVapp(CV_sol_PM6);
 J_PM6Y6 = dfana.calcJ(CV_sol_PM6);
 % J_PM7Y6 = dfana.calcJ(CV_sol_PM7);
-% J_PBDBTY6 = dfana.calcJ(CV_sol_PBDBT);
+J_PBDBTY6 = dfana.calcJ(CV_sol_PBDBT);
 
 %%
 if run_C60 == 1 && light == 1
@@ -74,7 +76,7 @@ if run_C60 == 1 && light == 1
         plot(Vapp(1:145), 1e3*J_PM6Y6_noions.tot(1:145,1), 'LineWidth', 4, 'Color', 'red', 'LineStyle', ':')
     end
 %     plot(Vapp, 1e3*J_PM7Y6.tot(:,1), 'LineWidth', 4, 'Color', [0 0.4470 0.7410])
-%     plot(Vapp(1:145), 1e3*J_PBDBTY6.tot(1:145,1), 'LineWidth', 4, 'Color', [0.4660 0.6740 0.1880])
+    plot(Vapp(1:145), 1e3*J_PBDBTY6.tot(1:145,1), 'LineWidth', 4, 'Color', [0.4660 0.6740 0.1880])
     hold off
 
     set(gca, 'FontSize', 25)
@@ -82,7 +84,7 @@ if run_C60 == 1 && light == 1
     ylabel('Current Density (mA cm^{-2})', 'FontSize', 30)
     xlim([-0.15, 1.2])
     ylim([-25, 5])
-    legend({'', '', ' C_{60}', ' PM6:Y6', ' PBDB-T:Y6'}, 'FontSize', 25, 'Location', 'northwest')
+    legend({'', '', ' C_{60}', ' PM6:Y6'}, 'FontSize', 25, 'Location', 'northwest')
 end 
 
 %%
@@ -122,7 +124,7 @@ if run_C60 == 1 && light == 0
     xlabel('Voltage (V)', 'FontSize', 30)
     ylabel('Current Density (mA cm^{-2})', 'FontSize', 30)
 
-    legend({'C_{60}', '', ' PM6:Y6', ' PM7:Y6', ' PCE12:Y6'}, 'FontSize', 25, 'Location', 'northwest')
+    legend({'C_{60}', '', ' PM6:Y6'}, 'FontSize', 25, 'Location', 'northwest')
 end 
 
 %% 

@@ -1,4 +1,4 @@
-function [sol_pulse] = doLightPulse(sol_ini, pulse_int, tmax, tpoints, duty, delay, mobseti, log_timemesh)
+function [sol_pulse] = doLightPulse(sol_ini, pulse_int, tmax, tpoints, duty, mobseti, log_timemesh)
 % Uses square wave light generator for light source 2 and peforms a single
 % pulse
 %
@@ -35,13 +35,12 @@ end
 par.mobseti = mobseti;
 
 %% Setup square wave function generator
-par.g2_fun_type = 'delayed_square';
+par.g2_fun_type = 'smoothed_square';
 par.tpoints = tpoints;
 par.g2_fun_arg(1) = 0;                      % Lower intensity
 par.g2_fun_arg(2) = pulse_int;              % Higher intensity
 par.g2_fun_arg(3) = tmax+(1e-3*tmax);       % Capture length
 par.g2_fun_arg(4) = duty;                   % Duty cycle [%]
-par.g2_fun_arg(5) = delay;
 
 sol_pulse = df(sol_ini, par);
 
