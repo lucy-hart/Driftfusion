@@ -1,6 +1,9 @@
 %% File to test that doSaP is doing what I intend
 %par = pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
-par=pc('Input_files/TiO2_MAPI_Spiro.csv');
+par=pc('Input_files/SnO2_MAPI_Spiro_TestSaP.csv');
+% par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP.csv');
+% par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
+
 compare_fixed_ion_JV = 1;
 
 % DHOMO = 0.3;
@@ -33,7 +36,7 @@ eqm = equilibrate(par);
 
 %% See what device performance is at illumination used for SaP measurement
 check_JV = 0;
-suns = 0.1;
+suns = 1;
 if check_JV ==1 
     JVsol = doCV(eqm.ion, suns, -0.2, 1.0, -0.2, 1e-3, 1, 261);
     stats = CVstats(JVsol);
@@ -53,8 +56,8 @@ if check_JV ==1
     ylabel('Voltage (V)')
 end
 %% Do the SaP measurement
-Vbias = linspace(0,1,11);
-Vpulse = linspace(0, 1, 21);
+Vbias = linspace(0,1.2,13);
+Vpulse = linspace(0,1.2,25);
 tramp = 8e-4;
 tsample = 1e-3;
 tstab = 120;
@@ -66,8 +69,9 @@ fixed_ion_JVs = cell(length(Vbias));
 J_fixed_ion = cell(length(Vbias));
 if compare_fixed_ion_JV == 1
     for i=1:length(Vbias)
+        disp(['Doing JV for Vstab = ' num2str(Vbias(i)) ' V'])
         sol{i,1}.par.mobseti = 0;
-        fixed_ion_JVs{i} = doCV(sol{i,1}, suns, -0.2, 1.0, -0.2, 1e-3, 1, 261);
+        fixed_ion_JVs{i} = doCV(sol{i,1}, suns, -0.2, 1.2, -0.2, 1e-3, 1, 281);
         J_fixed_ion{i} = dfana.calcJ(fixed_ion_JVs{i}).tot(:,1);
         if i == 1
             V_fixed_ion = dfana.calcVapp(fixed_ion_JVs{i});
@@ -139,8 +143,8 @@ for i = 1:length(Vbias)
     end
 end
 ylabel('Current Density (mA cm^{-2})')
-ylim([-2.5, 1])
+ylim([-25, 10])
 xlabel('Voltage (V)')
-xlim([Vpulse(1), Vpulse(end)])
+xlim([Vpulse(1), 1.2])
 legend()
 title(legend, 'V_{bias} (V)')

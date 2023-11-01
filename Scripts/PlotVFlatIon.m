@@ -38,14 +38,14 @@ end
 
 %%
 figure('Name', 'Vflat and Vbi vs DeltaE', 'Position', [50 50 800 800])
-Colours = parula(n_ion_concs-1);
+Colours = parula(num_ion_concs);
 box on 
 for i = 1:num_ion_concs
     hold on
     if i == 1
         plot(Delta_TL, Vbi, 'marker', 'x', 'Color', 'black')
         plot(Delta_TL, V_Emin, 'marker', 'x', 'Color', 'magenta')
-        plot(Delta_TL, TL_offset, 'marker', 'x', 'Color', 'green')
+        %plot(Delta_TL, TL_offset, 'marker', 'x', 'Color', 'green')
         if Symmetric == 0
             plot(Delta_TL, V_ETL(1,:), 'marker', 'o', 'Color', 'blue', 'LineStyle', 'None', 'MarkerSize', 10)
             plot(Delta_TL, V_HTL(1,:), 'marker', 's', 'Color', 'red', 'LineStyle', 'None', 'MarkerSize', 10)
@@ -68,7 +68,7 @@ legend({'V_{BI}', 'V(E_{min,bulk})', '\DeltaE_{F,TL}', 'V_{invert,ETL}', 'V_{inv
 
 %%
 Run = 0;
-    if run == 1
+    if Run == 1
     figure('Name', 'Vflat and Vbi vs DeltaE', 'Position', [50 50 1600 800])
     Colours = parula(n_ion_concs-1);
     offset = 7;

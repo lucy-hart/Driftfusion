@@ -18,12 +18,12 @@
 tic
 %% Define parameter space
 %Choose to use doped or undoped TLs
-doped = 1;
+doped = 0;
 n_values = 7;
 Delta_TL = linspace(0, 0.3, n_values);
-Symmetric_offset = 0;
+Symmetric_offset = 1;
 %Fix the offset for the ETL or HTL
-Fix_ETL = 0;
+Fix_ETL = 1;
 %Energetic offset between the perovskite and TL for the TL with fixed
 %energetics 
 Fixed_offset = 1e-3;
@@ -31,8 +31,8 @@ Fixed_offset = 1e-3;
 %recombination error becomes huge for reasons I do not fully understand...
 %The saga continues - only seems to matter for the HTL, not the ETL...
 Delta_TL(1) = 1e-3;
-%Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
-Ion_Conc = [1e18 0];
+Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
+%Ion_Conc = [1e15 1e18 0];
 n_ion_concs = length(Ion_Conc);
 
 %Rows are the Ion Concentrations
@@ -115,6 +115,13 @@ for i = 1:n_ion_concs
             elseif doped == 1
                 par.EF0(1) = par.Phi_IP(1) + 0.1;
             end
+            if Piers_version == 0
+                if par.Phi_left < par.Phi_IP(1) + 0.1
+                    par.Phi_left = par.Phi_IP(1) + 0.1;
+                end
+            elseif Piers_version == 1
+                par.Phi_left = par.Phi_IP(1) + 0.1;
+            end
         end
 
         %ETL Energetics
@@ -145,6 +152,13 @@ for i = 1:n_ion_concs
                 par.EF0(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
             elseif doped == 1
                 par.EF0(5) = par.Phi_EA(5) - 0.1;
+            end
+            if Piers_version == 0
+                if par.Phi_right > par.Phi_EA(5) - 0.1
+                    par.Phi_right = par.Phi_EA(5) - 0.1;
+                end
+            elseif Piers_version == 1
+                par.Phi_right = par.Phi_EA(5) - 0.1;
             end
         end
 
@@ -224,10 +238,13 @@ end
 toc
 
 %% Plot results 
+plot_JVs = 0;
 Stats_array = zeros(n_ion_concs, n_values, 5);
-J_srh_result = cell(2, n_values);
-J_vsr_result = cell(2, n_values);
-V_plot = cell(2, n_values);
+if plot_JVs == 1
+    J_srh_result = cell(2, n_values);
+    J_vsr_result = cell(2, n_values);
+    V_plot = cell(2, n_values);
+end
 e = solCV{1,1}.par.e;
 
 for i = 1:n_ion_concs
@@ -240,24 +257,26 @@ for i = 1:n_ion_concs
             x = solCV{i,j}.par.x_sub;
             loss_currents = dfana.calcr(solCV{i,j},'sub');
             Vapp = dfana.calcVapp(solCV{i,j});
-            end_value = (length(Vapp)-1)/2;
+            end_value = cast((length(Vapp)-1)/2, 'int32');
             J_srh = e*trapz(x, loss_currents.srh, 2)';
             J_vsr = e*trapz(x, loss_currents.vsr, 2)';
-            if i == 7
-                V_plot{1,j} = Vapp;
-                J_srh_result{1,j} = J_srh;
-                J_vsr_result{1,j} = J_vsr;
-            elseif i == 8
-                V_plot{2,j} = Vapp;
-                J_srh_result{2,j} = J_srh;
-                J_vsr_result{2,j} = J_vsr;
-            end
             J_srh_OC = interp1(Vapp(1:end_value), J_srh(1:end_value), Stats_array(i,j,2));
             J_vsr_OC = interp1(Vapp(1:end_value), J_vsr(1:end_value), Stats_array(i,j,2));
             if J_srh_OC > J_vsr_OC
                 Stats_array(i,j,5) = 0;
             elseif J_srh_OC < J_vsr_OC
                 Stats_array(i,j,5) = 1;
+            end
+            if plot_JVs == 1
+                if i == 7
+                    V_plot{1,j} = Vapp;
+                    J_srh_result{1,j} = J_srh;
+                    J_vsr_result{1,j} = J_vsr;
+                elseif i == 8
+                    V_plot{2,j} = Vapp;
+                    J_srh_result{2,j} = J_srh;
+                    J_vsr_result{2,j} = J_vsr;
+                end
             end
         catch
             warning('No Stats')
@@ -269,7 +288,7 @@ end
 %%
 figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 800])
 Colours = parula(n_ion_concs-1);
-num = 2;
+num = 4;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "northeast"];
 if doped == 0
@@ -301,8 +320,8 @@ ylim(lims(num,:))
 title(legend, 'Ion Concentration (cm^{-3})', 'FontSize', 25)
 
 %% Plot J_srh and _sr for high ions vs no ions as a function of offset
-Run = 0;
-if Run == 1
+plot_JVs = 0;
+if plot_JVs == 1
     figure('Name', 'JVPlot', 'Position', [100 100 800 800])
     Colours = parula(n_values);
     
@@ -375,7 +394,7 @@ end
 save_file = 0;
 if save_file == 1
     if doped == 0
-        filename = 'DeltaE_v4_undoped.mat';
+        filename = 'DeltaE_v5_undoped.mat';
     elseif doped == 1
         filename = 'DeltaE_v5_doped_VaryHTL_FixedETL_0p15eV.mat';
     end 

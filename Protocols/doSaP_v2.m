@@ -150,31 +150,48 @@ for i = 1:num_bias
             par.V_fun_arg(1) = Vbias(i);
             par.V_fun_arg(2) = Vpulse(j);
             par.V_fun_arg(3) = tramp;
+
+            try
+                sol = df(SaPsol{i,1}, par);
+            catch
+                warning(['Could not ramp to voltage for Vpulse = ' num2str(Vpulse(j)) ' V'])
+                sol = 0;
+            end
+            
+            if not(isa(sol, 'struct'))
+                SaPsol{i,j+1}.Jpulse = 0;
+            elseif isa(sol, 'struct')
         
-            sol = df(SaPsol{i,1}, par);
-        
-            par = sol.par;
-        
-            %turn off ion motion for the duration of the pulse
-            %assuming that this is a valid assumption
-            par.mobseti = 0;
-        
-            %Hold device at Vpulse for tsample 
-            %On paper they say this is 1e-3 seconds after the pulse applied 
-            par.tmesh_type = 1;
-            par.t0 = 0;
-            par.tmax = tsample;
-            par.tpoints = 100;
-        
-            par.V_fun_type = 'constant';
-            par.V_fun_arg(1) = Vpulse(j);
-        
-            disp(['Vpulse = ' num2str(Vpulse(j)) ' V'])
-            SaPsol{i,j+1} = df(sol, par);
-        
-            SaPsol{i,j+1}.Jpulse = dfana.calcJ(SaPsol{i,j+1}).tot(end,1);
+                par = sol.par;
+            
+                %turn off ion motion for the duration of the pulse
+                %assuming that this is a valid assumption
+                par.mobseti = 0;
+            
+                %Hold device at Vpulse for tsample 
+                %On paper they say this is 1e-3 seconds after the pulse applied 
+                par.tmesh_type = 1;
+                par.t0 = 0;
+                par.tmax = tsample;
+                par.tpoints = 100;
+            
+                par.V_fun_type = 'constant';
+                par.V_fun_arg(1) = Vpulse(j);
+            
+                disp(['Vpulse = ' num2str(Vpulse(j)) ' V'])
+                try
+                    SaPsol{i,j+1} = df(sol, par);
+                    SaPsol{i,j+1}.Jpulse = dfana.calcJ(SaPsol{i,j+1}).tot(end,1);
+                catch
+                    warning(['Could not solve Vpulse = ' num2str(Vpulse(j)) ' V'])
+                    SaPsol{i,j+1}.Jpulse = 0;
+                end 
+            end
+            
         end 
     else
-        SaPsol{i,1:end}.Jpulse = 0;
+        for j = 1:num_pulses
+            SaPsol{i,j}.Jpulse = 0;
+        end
     end
 end
