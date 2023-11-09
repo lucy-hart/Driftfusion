@@ -21,7 +21,7 @@ tic
 doped = 0;
 n_values = 7;
 Delta_TL = linspace(0, 0.3, n_values);
-Symmetric_offset = 1;
+Symmetric_offset = 0;
 %Fix the offset for the ETL or HTL
 Fix_ETL = 1;
 %Energetic offset between the perovskite and TL for the TL with fixed
@@ -31,8 +31,8 @@ Fixed_offset = 1e-3;
 %recombination error becomes huge for reasons I do not fully understand...
 %The saga continues - only seems to matter for the HTL, not the ETL...
 Delta_TL(1) = 1e-3;
-Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
-%Ion_Conc = [1e15 1e18 0];
+% Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
+Ion_Conc = [1e15 1e18 0];
 n_ion_concs = length(Ion_Conc);
 
 %Rows are the Ion Concentrations
@@ -288,7 +288,7 @@ end
 %%
 figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 800])
 Colours = parula(n_ion_concs-1);
-num = 4;
+num = 2;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "northeast"];
 if doped == 0

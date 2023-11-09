@@ -13,7 +13,7 @@
 tic
 %% Define parameter space
 %Choose to use doped or undoped TLs and which of v_sr or tau_SRH to vary
-doped = 0;
+doped = 1;
 surface = 1;
 
 %Set up the parameters for the ion concentrations
@@ -340,7 +340,7 @@ ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
 ax1 = gcf;
 
 %% Save results and solutions
-save_file = 1;
+save_file = 0;
 if save_file == 1
     if doped == 0 && surface == 0
         filename = 'v5_undoped_tauSRH.mat';

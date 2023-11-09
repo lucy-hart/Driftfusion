@@ -315,7 +315,7 @@ classdef dfplot
 
             F = dfana.calcF(sol, "whole");
 
-            figure(12);
+            figure('Name', 'Fx');
             dfplot.x2d(sol, x, {F},{'F'},{'-'},'Electric field [Vcm-1]', tarr, xrange, 0, 0);
         end
 

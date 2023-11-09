@@ -1,32 +1,32 @@
 %% File to test that doSaP is doing what I intend
-%par = pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
-par=pc('Input_files/SnO2_MAPI_Spiro_TestSaP.csv');
+par = pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
+% par=pc('Input_files/SnO2_MAPI_Spiro_TestSaP.csv');
 % par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP.csv');
 % par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
 
 compare_fixed_ion_JV = 1;
 
-% DHOMO = 0.3;
-% DLUMO = -0.3;
-%            
-% %HTL Energetics
-% par.Phi_left = -5.15;
-% par.Phi_IP(1) = par.Phi_IP(3) + DHOMO;
-% par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
-% par.EF0(1) = par.Phi_IP(1) + 0.1;
-% par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
-% if par.Phi_left < par.Phi_IP(1) + 0.1
-%     par.Phi_left = par.Phi_IP(1) + 0.1;
-% end
-% %ETL Energetics
-% par.Phi_right = -4.05;
-% par.Phi_EA(5) = par.Phi_EA(3) + DLUMO;
-% par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
-% par.EF0(5) = par.Phi_EA(5) - 0.1;
-% par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
-% if par.Phi_right > par.Phi_EA(5) - 0.1
-%     par.Phi_right = par.Phi_EA(5) - 0.1;
-% end
+DHOMO = 0.3;
+DLUMO = -0.05;
+           
+%HTL Energetics
+par.Phi_left = -5.15;
+par.Phi_IP(1) = par.Phi_IP(3) + DHOMO;
+par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
+par.EF0(1) = par.Phi_IP(1) + 0.1;
+par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+if par.Phi_left < par.Phi_IP(1) + 0.1
+    par.Phi_left = par.Phi_IP(1) + 0.1;
+end
+%ETL Energetics
+par.Phi_right = -4.05;
+par.Phi_EA(5) = par.Phi_EA(3) + DLUMO;
+par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
+par.EF0(5) = par.Phi_EA(5) - 0.1;
+par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+if par.Phi_right > par.Phi_EA(5) - 0.1
+    par.Phi_right = par.Phi_EA(5) - 0.1;
+end
 
 % par.frac_vsr_zone = 0.05;
 par.RelTol_vsr = 0.1;
@@ -35,29 +35,33 @@ par = refresh_device(par);
 eqm = equilibrate(par);
 
 %% See what device performance is at illumination used for SaP measurement
-check_JV = 0;
+check_JV = 1;
 suns = 1;
 if check_JV ==1 
-    JVsol = doCV(eqm.ion, suns, -0.2, 1.0, -0.2, 1e-3, 1, 261);
+    JVsol_el = doCV(eqm.el, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
+    JVsol_ion = doCV(eqm.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
     stats = CVstats(JVsol);
     
     figure('Name', 'JVPlot')
-    v = dfana.calcVapp(JVsol);
-    j = dfana.calcJ(JVsol).tot(:,1);
+    v = dfana.calcVapp(JVsol_el);
+    J_el = dfana.calcJ(JVsol_el).tot(:,1);
+    J_ion = dfana.calcJ(JVsol_ion).tot(:,1);
     box on
     hold on
     xline(0, 'color', 'black', 'LineWidth', 1)
     yline(0, 'color', 'black', 'LineWidth', 1)
-    plot(v(:), j(:)*1000, 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3)
+    plot(v(:), J_el(:)*1000, 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3)
+    plot(v(:), J_ion(:)*1000, 'color', 'black', 'LineWidth', 3)
     hold off
     xlim([-0.2, 1.2])
     xlabel('Current Density (mA cm^{-2})')
-    ylim([-10, 5])
+    ylim([-25, 5])
     ylabel('Voltage (V)')
 end
 %% Do the SaP measurement
 Vbias = linspace(0,1.2,13);
-Vpulse = linspace(0,1.2,25);
+Vpulse = [0.1];
+% Vpulse = linspace(0,1.2,25);
 tramp = 8e-4;
 tsample = 1e-3;
 tstab = 120;
@@ -139,9 +143,10 @@ for i = 1:length(Vbias)
     end
     plot(Vpulse(:), 1e3*Jpulse, 'DisplayName', num2str(Vbias(i), '%.1f'), 'color', cmap(i,:))
     if compare_fixed_ion_JV == 1
-        plot(V_fixed_ion, 1e3*J_fixed_ion{i}, 'HandleVisibility', 'Off', 'color', 'black', 'LineStyle', '--')
+        plot(V_fixed_ion, 1e3*J_fixed_ion{i}, 'HandleVisibility', 'Off', 'color', cmap(i,:), 'LineStyle', '-')
     end
 end
+plot(v(1:141), J_el(1:141)*1000, 'color', 'black', 'LineWidth', 3, 'LineStyle', ':')
 ylabel('Current Density (mA cm^{-2})')
 ylim([-25, 10])
 xlabel('Voltage (V)')
