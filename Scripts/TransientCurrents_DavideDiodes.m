@@ -9,7 +9,7 @@ if read_in_par == 1
     parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PBDBTY6.csv');
 end
 
-vis = 1;
+vis = 0;
 if vis == 1
     wavelength = 405;
 elseif vis == 0
@@ -45,7 +45,7 @@ for i = 1:num_devices
     bias_solution{i}.par.int1 = 0;
     bias_solution{i}.par.int2 = 1;
     bias_solution{i}.par.Rs = 10*0.045;
-    pulse_solution{i} = doLightPulse( bias_solution{i}, power, 200e-6, 1000, 50, 1, 1);
+    pulse_solution{i} = doLightPulse(bias_solution{i}, power, 200e-6, 1000, 50, 1, 1);
     Jt{i} = dfana.calcJ(pulse_solution{i}).tot;
 end
 

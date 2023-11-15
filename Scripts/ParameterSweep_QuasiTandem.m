@@ -5,8 +5,8 @@
 
 tic
 %% Define parameter space
-Donor_HOMO = linspace(-5.4, -5.1, 7);
-k_rec = logspace(-12, -10, 11);
+Donor_HOMO = linspace(-5.4, -5.1, 13);
+k_rec = logspace(-11, -10, 11);
 n_k_rec = length(k_rec); 
 n_HOMOs = length(Donor_HOMO);
 
@@ -100,16 +100,16 @@ stats_C60 = CVstats(CV_sol_C60);
 
 %%
 figure('Name', 'Jsc vs Energy Offsets vs k_rec', 'Position', [50 50 1000 1500])
-num = 1;
+num = 2;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "southeast"];
 lims = [[-25 -15]; [0.77 1.17]; [0.1, 0.85]; [1 21]];
 colormap(flipud('parula'))
 
 box on 
-contourf(Donor_HOMO+5.5, k_rec(6:end), -Stats_array(6:end,:,num), 'LineStyle', 'none')
+contourf(Donor_HOMO+5.5, k_rec, Stats_array(:,:,num), 'LineStyle', 'none')
 hold on
-contour(Donor_HOMO+5.5, k_rec(6:end), -Stats_array(6:end,:,num), [-1e3*stats_C60.Jsc_f -1e3*stats_C60.Jsc_f], 'color', 'black', 'LineWidth', 3)
+contour(Donor_HOMO+5.5, k_rec, Stats_array(:,:,num), [-1e3*stats_C60.Jsc_f -1e3*stats_C60.Jsc_f], 'color', 'black', 'LineWidth', 3)
 hold off
 c = colorbar;
 c.Label.String = labels(num);
@@ -124,8 +124,8 @@ xlim([0.1, 0.4])
 ylim([1e-11, 1e-10])
 
 %% Save results and solutions
-save_file = 1;
+save_file = 0;
 if save_file == 1
-    filename = 'PeroBHJ_QuasiTandem_DonorHOMO_BHJkrec_ParameterSweep_CsFAMA.mat';
+    filename = 'PeroBHJ_QuasiTandem_DonorHOMO_BHJkrec_ParameterSweep_CsFAMA_HigherRes.mat';
     save(filename, 'solCV')
 end
