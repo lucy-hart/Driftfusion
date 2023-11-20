@@ -24,6 +24,8 @@ dev.mu_a = build_property(par.mu_a, xmesh, par, 'constant', 0);
 
 dev.sn = build_property(par.sn, xmesh, par, 'constant', 1);
 dev.sp = build_property(par.sp, xmesh, par, 'constant', 1);
+dev.sn2 = build_property(par.sn2, xmesh, par, 'constant', 1);
+dev.sp2 = build_property(par.sp2, xmesh, par, 'constant', 1);
 dev.mu_n = build_property(par.mu_n, xmesh, par, 'constant', 0);
 dev.mu_p = build_property(par.mu_p, xmesh, par, 'constant', 0);
     
@@ -58,17 +60,22 @@ dev.gradNv = build_property(par.Nv, xmesh, par, 'exp_graded', 1);
 % Surface recombination velocity equivalence schemes
 dev.taun_vsr = build_property(par.taun, xmesh, par, 'taun_vsr', 0);
 dev.taup_vsr = build_property(par.taup, xmesh, par, 'taup_vsr', 0);
+dev.taun_vsr2 = build_property(par.taun, xmesh, par, 'taun_vsr2', 0);
+dev.taup_vsr2 = build_property(par.taup, xmesh, par, 'taup_vsr2', 0);
 dev.alpha0 = build_property(0, xmesh, par, 'alpha0', 1);
 dev.beta0 = build_property(0, xmesh, par, 'beta0', 1);
 dev.alpha0_xn = build_property(0, xmesh, par, 'alpha0_xn', 1);
 dev.beta0_xp = build_property(0, xmesh, par, 'beta0_xp', 1);
+dev.alpha0_xn2 = build_property(0, xmesh, par, 'alpha0_xn2', 1);
+dev.beta0_xp2 = build_property(0, xmesh, par, 'beta0_xp2', 1);
 dev.dint = build_property(0, xmesh, par, 'dint', 1);
 
 % Switches
 dev.int_switch = build_property(0, xmesh, par, 'int_switch', 1);
 dev.bulk_switch = abs(dev.int_switch-1);
-if par.vsr_mode
+if par.vsr_mode == 1
     dev.vsr_zone = build_property(0, xmesh, par, 'vsr_zone', 1);
+    dev.vsr_zone_2 = build_property(0, xmesh, par, 'vsr_zone_2', 1);
     dev.srh_zone = dev.bulk_switch;
     dev.Field_switch = dev.bulk_switch;
     
@@ -80,6 +87,8 @@ if par.vsr_mode
     dev.ni = build_property(par.ni, xmesh, par, 'constant', 0);
     dev.nt = build_property(par.nt, xmesh, par, 'constant', 0);
     dev.pt = build_property(par.pt, xmesh, par, 'constant', 0);
+    dev.nt2 = build_property(par.nt2, xmesh, par, 'constant', 0);
+    dev.pt2 = build_property(par.pt2, xmesh, par, 'constant', 0);
 else 
     dev.vsr_zone = zeros(1, length(xmesh));
     dev.srh_zone = ones(1, length(xmesh));
@@ -101,5 +110,10 @@ dev.xprime_n = build_property(par.xx, xmesh, par, 'xprime_n', 1);
 dev.xprime_p = build_property(par.xx, xmesh, par, 'xprime_p', 1);
 dev.sign_xn = build_property(par.xx, xmesh, par, 'sign_xn', 1);
 dev.sign_xp = build_property(par.xx, xmesh, par, 'sign_xp', 1);
+dev.xprime_n2 = build_property(par.xx, xmesh, par, 'xprime_n2', 1);
+dev.xprime_p2 = build_property(par.xx, xmesh, par, 'xprime_p2', 1);
+dev.sign_xn2 = build_property(par.xx, xmesh, par, 'sign_xn2', 1);
+dev.sign_xp2 = build_property(par.xx, xmesh, par, 'sign_xp2', 1);
+
 
 end

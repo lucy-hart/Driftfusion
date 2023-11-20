@@ -7,14 +7,26 @@
 % parPM6 = pc('Input_files/SAM_MAPI_PM6Y6.csv');
 parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
 parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
+parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6.csv');
 % parC60 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_NoC60.csv');
 parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PBDBTY6.csv');
 % parPBDBT = pc('Input_files/SAM_MAPI_PBDBTY6.csv');
 %parPM6 = pc('Input_files/HTL_MAPI_PM6Y6_C60_DavideValues.csv');
+
+devices = {parC60, parPM6, parPBDBT};
 %%
 run_C60 = 1;
 light = 1;
 noions = 0;
+
+if light == 0
+    for i = 1:3
+        %This did very little except make things taken longer
+        %I think I also need to change RelTol
+        %Lowering this reduced the current at dark eqm by factor of 10
+        devices{i}.par.AbsTol = 1e-12;
+    end
+end
 
 if light == 1
     suns = 1.0;
@@ -32,7 +44,7 @@ if run_C60 == 1
     J_C60 = dfana.calcJ(CV_sol_C60);
     if light == 1
         stats_C60 = CVstats(CV_sol_C60);
-        Plot_Current_Contributions(CV_sol_C60)
+        %Plot_Current_Contributions(CV_sol_C60)
     end
 end
 
@@ -41,11 +53,12 @@ CV_sol_PM6 = doCV(eqm_QJV_PM6.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
 stats_PM6 = CVstats(CV_sol_PM6);
 Plot_Current_Contributions(CV_sol_PM6)
 
-% eqm_QJV_PM7 = equilibrate(parPM7);
-% CV_sol_PM7 = doCV(eqm_QJV_PM7.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
+eqm_QJV_PM7 = equilibrate(parPM7);
+CV_sol_PM7 = doCV(eqm_QJV_PM7.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
 
 eqm_QJV_PBDBT = equilibrate(parPBDBT);
 CV_sol_PBDBT = doCV(eqm_QJV_PBDBT.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
+Plot_Current_Contributions(CV_sol_PBDBT)
 
 if noions == 1
     if run_C60 == 1
@@ -58,7 +71,7 @@ end
 
 Vapp = dfana.calcVapp(CV_sol_PM6);
 J_PM6Y6 = dfana.calcJ(CV_sol_PM6);
-% J_PM7Y6 = dfana.calcJ(CV_sol_PM7);
+J_PM7Y6 = dfana.calcJ(CV_sol_PM7);
 J_PBDBTY6 = dfana.calcJ(CV_sol_PBDBT);
 
 %%
@@ -70,13 +83,15 @@ if run_C60 == 1 && light == 1
     xline(0, 'LineWidth', 2, 'Color', 'black')
     yline(0, 'LineWidth', 2, 'Color', 'black')
     plot(Vapp(1:145), 1e3*J_C60.tot(1:145,1), 'LineWidth', 4, 'Color', 'black')
-    plot(Vapp(1:145), 1e3*J_PM6Y6.tot(1:145,1), 'LineWidth', 4, 'Color', 'red')
+    plot(Vapp(1:145), 1e3*J_PBDBTY6.tot(1:145,1), 'LineWidth', 4, 'Color', [0.4660 0.6740 0.1880])
+    plot(Vapp(1:145), 1e3*J_PM7Y6.tot(1:145,1), 'LineWidth', 4, 'Color', 'red')
+    plot(Vapp(1:145), 1e3*J_PM6Y6.tot(1:145,1), 'LineWidth', 4, 'Color', [0 0.4470 0.7410])
     if noions == 1
         plot(Vapp(1:145), 1e3*J_C60_noions.tot(1:145,1), 'LineWidth', 4, 'Color', 'black', 'LineStyle', ':')
         plot(Vapp(1:145), 1e3*J_PM6Y6_noions.tot(1:145,1), 'LineWidth', 4, 'Color', 'red', 'LineStyle', ':')
     end
-%     plot(Vapp, 1e3*J_PM7Y6.tot(:,1), 'LineWidth', 4, 'Color', [0 0.4470 0.7410])
-    plot(Vapp(1:145), 1e3*J_PBDBTY6.tot(1:145,1), 'LineWidth', 4, 'Color', [0.4660 0.6740 0.1880])
+    
+    
     hold off
 
     set(gca, 'FontSize', 25)
@@ -84,7 +99,7 @@ if run_C60 == 1 && light == 1
     ylabel('Current Density (mA cm^{-2})', 'FontSize', 30)
     xlim([-0.15, 1.2])
     ylim([-25, 5])
-    legend({'', '', ' C_{60}', ' PM6:Y6'}, 'FontSize', 25, 'Location', 'northwest')
+    legend({'', '', ' CsFAMA', ' +0.35 eV', ' +0.25 eV', ' +0.15 eV'}, 'FontSize', 25, 'Location', 'northwest')
 end 
 
 %%

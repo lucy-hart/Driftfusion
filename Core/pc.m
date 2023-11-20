@@ -127,6 +127,7 @@ classdef pc
         % and define the variables PT and NT in the expression:
         % U = (np-ni^2)/(taun(p+pt) +taup(n+nt))
         Et =[-0.5];
+        Et2 =[-0.5];
         ni_eff = 0;     % Effective intrinsic carrier density used for surface recombination equivalence
         
         %% Electrode Fermi energies [eV]
@@ -190,6 +191,8 @@ classdef pc
         vsr_check = 1;              % Perform check for self-consitency at the end of DF
         sn = [0];                   % Electron interfacial surface recombination velocity [cm s-1]
         sp = [0];                   % Hole interfacial surface recombination velocities [cm s-1]
+        sn2 = [0];                  % Electron interfacial surface recombination velocity [cm s-1]
+        sp2 = [0];                  % Hole interfacial surface recombination velocities [cm s-1]
         frac_vsr_zone = 0.1;        % recombination zone thickness [fraction of interface thickness]
         vsr_zone_loc = {'auto'};    % recombination zone location either: 'L', 'C', 'R', or 'auto'. IMPORT_PROPERTIES deals with the choice of value.
         AbsTol_vsr = 1e10;          % The integrated interfacial recombination flux above which a warning can be flagged [cm-2 s-1]
@@ -259,6 +262,7 @@ classdef pc
         n0_r
         ni
         nt              % Density of CB electrons when Fermi level at trap state energy
+        nt2
         nt_inter
         p0
         pcum
@@ -266,6 +270,7 @@ classdef pc
         p0_l
         p0_r
         pt              % Density of VB holes when Fermi level at trap state energy
+        pt2
         pt_inter
         wn
         wp
@@ -650,6 +655,14 @@ classdef pc
         
         function value = get.pt(par)
             value = distro_fun.pfun(par.Nv, par.Phi_IP, par.Et, par);
+        end
+
+        function value = get.nt2(par)
+            value = distro_fun.nfun(par.Nc, par.Phi_EA, par.Et2, par);
+        end
+        
+        function value = get.pt2(par)
+            value = distro_fun.pfun(par.Nv, par.Phi_IP, par.Et2, par);
         end
         
         %% Thickness and point arrays

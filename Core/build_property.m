@@ -44,42 +44,58 @@ for i=1:length(par.dcum)                % i is the layer index
                 deff = par.d(i);
                 % Gradient coefficient for surface recombination equivalence
                 if sign(par.Phi_EA(i-1) - par.Phi_EA(i+1)) == sign(par.Phi_IP(i-1) - par.Phi_IP(i+1))
-                alpha0 = ((par.Phi_EA(i-1) - par.Phi_EA(i+1))/(par.kB*par.T) + (log(par.Nc(i+1))-log(par.Nc(i-1))))/deff;
+                    alpha0 = ((par.Phi_EA(i-1) - par.Phi_EA(i+1))/(par.kB*par.T) + (log(par.Nc(i+1))-log(par.Nc(i-1))))/deff;
                     if alpha0 < 0
                         xprime_n = xprime;
                         alpha0_xn = alpha0;     % the sign of alpha0 is referenced to the direction of xprime_n
+                        xprime_n2 = xprime;
+                        alpha0_xn2 = alpha0;     % the sign of alpha0 is referenced to the direction of xprime_n                        
                     else
                         xprime_n = deff-xprime;
                         alpha0_xn = -alpha0;     % the sign of alpha0 is referenced to the direction of xprime_n
+                        xprime_n2 = deff-xprime;
+                        alpha0_xn2 = -alpha0;     % the sign of alpha0 is referenced to the direction of xprime_n                        
                     end
                     % Gradient coefficient for surface recombination equivalence
                     beta0 = ((par.Phi_IP(i+1) - par.Phi_IP(i-1))/(par.kB*par.T) + (log(par.Nv(i+1))-log(par.Nv(i-1))))/deff;
                     if beta0 < 0
                         xprime_p = xprime;
                         beta0_xp = beta0;        % the sign of beta is referenced to the direction of xprime_p
+                        xprime_p2 = xprime;
+                        beta0_xp2 = beta0;        % the sign of beta is referenced to the direction of xprime_p
                     else
                         xprime_p = deff-xprime;  
                         beta0_xp = -beta0;       % the sign of beta is referenced to the direction of xprime_p
+                        xprime_p2 = deff-xprime;  
+                        beta0_xp2 = -beta0;       % the sign of beta is referenced to the direction of xprime_p                        
                     end
-            %Put this clause in to deal with the type-1 heterojunctions we
-            %have in the perovskite/BHJ quasi-tandems
-            elseif sign(par.Phi_EA(i-1) - par.Phi_EA(i+1)) ~= sign(par.Phi_IP(i-1) - par.Phi_IP(i+1))
-                alpha0 = ((par.Phi_EA(i-1) - par.Phi_EA(i+1))/(par.kB*par.T) + (log(par.Nc(i+1))-log(par.Nc(i-1))))/deff;
+                %Put this clause in to deal with the type-1 heterojunctions we
+                %have in the perovskite/BHJ quasi-tandems
+                elseif sign(par.Phi_EA(i-1) - par.Phi_EA(i+1)) ~= sign(par.Phi_IP(i-1) - par.Phi_IP(i+1))
+                    alpha0 = ((par.Phi_EA(i-1) - par.Phi_EA(i+1))/(par.kB*par.T) + (log(par.Nc(i+1))-log(par.Nc(i-1))))/deff;
                     if alpha0 < 0
                         xprime_n = xprime;
                         alpha0_xn = alpha0;     % the sign of alpha0 is referenced to the direction of xprime_n
+                        xprime_n2 = deff-xprime;
+                        alpha0_xn2 = -alpha0;     % the sign of alpha0 is referenced to the direction of xprime_n
                     else
                         xprime_n = deff-xprime;
                         alpha0_xn = -alpha0;     % the sign of alpha0 is referenced to the direction of xprime_n
+                        xprime_n2 = xprime;
+                        alpha0_xn2 = alpha0;      % the sign of alpha0 is referenced to the direction of xprime_n
                     end
                     % Gradient coefficient for surface recombination equivalence
                     beta0 = ((par.Phi_IP(i+1) - par.Phi_IP(i-1))/(par.kB*par.T) + (log(par.Nv(i+1))-log(par.Nv(i-1))))/deff;
                     if beta0 > 0
                         xprime_p = xprime;
                         beta0_xp = beta0;        % the sign of beta is referenced to the direction of xprime_p
+                        xprime_p2 = deff-xprime;
+                        beta0_xp2 = -beta0;       % the sign of beta is referenced to the direction of xprime_p
                     else
                         xprime_p = deff-xprime;  
                         beta0_xp = -beta0;       % the sign of beta is referenced to the direction of xprime_p
+                        xprime_p2 = xprime; 
+                        beta0_xp2 = beta0;       % the sign of beta is referenced to the direction of xprime_p
                     end
                 end
                 
@@ -114,6 +130,18 @@ for i=1:length(par.dcum)                % i is the layer index
                         else
                             devprop(j) = deff*par.frac_vsr_zone/(par.sp(i));
                         end
+                      case 'taun_vsr2'
+                        if par.sn(i) == 0
+                            devprop(j) = 1e100; % Avoid divide by zero error
+                        else
+                            devprop(j) = deff*par.frac_vsr_zone/(par.sn2(i));
+                        end
+                    case 'taup_vsr2'
+                        if par.sp(i) == 0
+                            devprop(j) = 1e100; % Avoid divide by zero error
+                        else
+                            devprop(j) = deff*par.frac_vsr_zone/(par.sp2(i));
+                        end
                     case 'mu_n_vsr'
                         if alpha0 < 0
                             devprop(j) = par.mu_n(i-1)*exp(abs(alpha0)*xprime_n);
@@ -138,18 +166,42 @@ for i=1:length(par.dcum)                % i is the layer index
                         devprop(j) = xprime_n; 
                     case 'xprime_p'
                         devprop(j) = xprime_p;
-                    case 'sign_xn'
+                    case 'xprime_n2'
+                        devprop(j) = xprime_n2; 
+                    case 'xprime_p2'
+                        devprop(j) = xprime_p2;                        
+                    case 'sign_xn'   
                         if alpha0 < 0
                             devprop(j) = 1;
                         else
                             devprop(j) = -1;
                         end
                     case 'sign_xp'
-                        if beta0 < 0
+                        if sign(par.Phi_EA(i-1) - par.Phi_EA(i+1)) == sign(par.Phi_IP(i-1) - par.Phi_IP(i+1))
+                            if beta0 < 0
+                                devprop(j) = 1;
+                            else
+                                devprop(j) = -1;
+                            end
+                        elseif sign(par.Phi_EA(i-1) - par.Phi_EA(i+1)) ~= sign(par.Phi_IP(i-1) - par.Phi_IP(i+1))
+                            if beta0 < 0
+                                devprop(j) = -1;
+                            else
+                                devprop(j) = 1;
+                            end
+                        end
+                     case 'sign_xn2'
+                        if alpha0 < 0
                             devprop(j) = 1;
                         else
                             devprop(j) = -1;
                         end
+                    case 'sign_xp2'
+                        if beta0 < 0
+                            devprop(j) = -1;
+                        else
+                            devprop(j) = 1;
+                        end                       
                     case 'dint'
                         devprop(j) = deff;
                     case 'alpha0'
@@ -160,8 +212,18 @@ for i=1:length(par.dcum)                % i is the layer index
                         devprop(j) = alpha0_xn;
                     case 'beta0_xp'
                         devprop(j) = beta0_xp;
+                    case 'alpha0_xn2'
+                        devprop(j) = alpha0_xn2;
+                    case 'beta0_xp2'
+                        devprop(j) = beta0_xp2;                        
                     case 'vsr_zone'
                         if strcmp(par.vsr_zone_loc(i), "L")
+                            if xprime <= deff*par.frac_vsr_zone
+                                devprop(j) = 1;
+                            else
+                                devprop(j) = 0;
+                            end
+                        elseif strcmp(par.vsr_zone_loc(i), "B")
                             if xprime <= deff*par.frac_vsr_zone
                                 devprop(j) = 1;
                             else
@@ -179,6 +241,16 @@ for i=1:length(par.dcum)                % i is the layer index
                             else
                                 devprop(j) = 0;
                             end
+                        end
+                    case 'vsr_zone_2'
+                        if strcmp(par.vsr_zone_loc(i), "B")
+                            if xprime >= deff*(1 - par.frac_vsr_zone) && xprime <= deff
+                                devprop(j) = 1;
+                            else
+                                devprop(j) = 0;                                                  
+                            end
+                        else
+                            devprop(j) = 0;
                         end
                 end
             end

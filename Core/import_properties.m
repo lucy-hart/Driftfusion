@@ -52,6 +52,8 @@ par.Phi_EA = import_single_property(par.Phi_EA, T, {'Phi_EA', 'EA'}, start_row, 
 par.Phi_IP = import_single_property(par.Phi_IP, T, {'Phi_IP', 'IP'}, start_row, end_row);
 % SRH Trap energy
 par.Et = import_single_property(par.Et, T, {'Et', 'Et_bulk'}, start_row, end_row);
+% SRH Trap energy 2
+par.Et2 = import_single_property(par.Et2, T, {'Et2', 'Et2_bulk'}, start_row, end_row);
 % Equilibrium Fermi energy array
 if strcmp(layer_type{1}, 'electrode')
     EF0 = import_single_property(par.EF0, T, {'EF0', 'E0'}, 1, length(layer_type));
@@ -94,17 +96,23 @@ par.taup = import_single_property(par.taup, T, {'taup', 'taup_SRH'}, start_row, 
 % Electron and hole surface recombination velocities
 if strcmp(layer_type{1}, 'electrode')
     sn = import_single_property(par.sn, T, {'sn'}, 1, length(layer_type));
+    sn2 = import_single_property(par.sn2, T, {'sn2'}, 1, length(layer_type));
     par.sn = sn(start_row:end_row);
+    par.sn2 = sn2(start_row:end_row);
     par.sn_l = sn(1);
     par.sn_r = sn(end);
 
     sp = import_single_property(par.sp, T, {'sp'}, 1, length(layer_type));
+    sp2 = import_single_property(par.sp, T, {'sp2'}, 1, length(layer_type));
     par.sp = sp(start_row:end_row);
+    par.sp2 = sp2(start_row:end_row);
     par.sp_l = sp(1);
     par.sp_r = sp(end);
 else
     par.sn = import_single_property(par.sn, T, {'sn'}, start_row, end_row);
     par.sp = import_single_property(par.sp, T, {'sp'}, start_row, end_row);
+    par.sn2 = import_single_property(par.sn2, T, {'sn2'}, start_row, end_row);
+    par.sp2 = import_single_property(par.sp2, T, {'sp2'}, start_row, end_row);
 end
 
 par.optical_model = import_single_property(par.optical_model, T, {'optical_model', 'OM'}, 1, 1);
@@ -136,7 +144,7 @@ if any(strcmp(par.layer_type, 'interface')) || any(strcmp(par.layer_type, 'junct
         par.vsr_zone_loc = vsr_zone_loc_auto;
     end
         for i = 1:length(par.material)
-            if any(strcmp(vsr_zone_loc_user(i), {'L','C','R'})) == 1
+            if any(strcmp(vsr_zone_loc_user(i), {'L','C','R','B'})) == 1
                 par.vsr_zone_loc(i) = vsr_zone_loc_user(i);
             elseif strcmp(vsr_zone_loc_user(i), {'auto'}) == 1
                 par.vsr_zone_loc(i) = vsr_zone_loc_auto(i);

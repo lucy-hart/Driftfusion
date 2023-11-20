@@ -240,6 +240,7 @@ classdef dfana
                 [~, dVdx(i,:)] = pdeval(0, x_input, V(i,:), x);
             end
             vsr_zone = repmat(dev.vsr_zone, length(t), 1);
+            vsr_zone_2 = repmat(dev.vsr_zone_2, length(t), 1);
             srh_zone = repmat(dev.srh_zone, length(t), 1);
 
             xprime_n = dev.xprime_n;
@@ -252,6 +253,16 @@ classdef dfana
             alpha_xn = (sign_xn.*par.q.*dVdx./(par.kB*par.T)) + alpha0_xn;
             beta_xp = (sign_xp.*par.q.*-dVdx./(par.kB*par.T)) + beta0_xp;
 
+            xprime_n2 = dev.xprime_n2;
+            xprime_p2 = dev.xprime_p2;
+            sign_xn2 = repmat(dev.sign_xn2, length(t), 1);    % 1 if xn increasing, -1 if decreasing wrt x
+            sign_xp2 = repmat(dev.sign_xp2, length(t), 1);    % 1 if xp increasing, -1 if decreasing wrt x
+            alpha0_xn2 = repmat(dev.alpha0_xn2, length(t), 1);
+            beta0_xp2 = repmat(dev.beta0_xp2, length(t), 1);
+
+            alpha_xn2 = (sign_xn2.*par.q.*dVdx./(par.kB*par.T)) + alpha0_xn2;
+            beta_xp2 = (sign_xp2.*par.q.*-dVdx./(par.kB*par.T)) + beta0_xp2;
+
             % Band-to-band
             r.btb = dev.B.*(n.*p - dev.ni.^2);
             % Bulk SRH
@@ -260,13 +271,17 @@ classdef dfana
             % Volumetric surface SRH
             ns = n.*exp(-alpha_xn.*xprime_n); % Projected electron surface density
             ps = p.*exp(-beta_xp.*xprime_p);  % Projected hole surface density
+            ns2 = n.*exp(-alpha_xn2.*xprime_n2); % Projected electron surface density
+            ps2 = p.*exp(-beta_xp2.*xprime_p2);  % Projected hole surface density 
             r.vsr = vsr_zone.*(ns.*ps - dev.ni.^2)...
                 ./(dev.taun_vsr.*(ps + dev.pt) + dev.taup_vsr.*(ns + dev.nt));
+            r.vsr2 = vsr_zone_2.*(ns2.*ps2 - dev.ni.^2)...
+                ./(dev.taun_vsr2.*(ps2 + dev.pt2) + dev.taup_vsr2.*(ns2 + dev.nt2));
             % System boundary surface recombination i.e. minority carrier
             % currents
             
             % Total
-            r.tot = r.btb + r.srh + r.vsr;
+            r.tot = r.btb + r.srh + r.vsr + r.vsr2;
             
         end
         

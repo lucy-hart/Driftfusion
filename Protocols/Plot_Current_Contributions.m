@@ -18,7 +18,7 @@ j_surf_rec = dfana.calcj_surf_rec(CVsol);
 J_values(:,1) = e*trapz(x, gxt(1,:))';
 J_values(:,2) = e*trapz(x, loss_currents.btb, 2)';
 J_values(:,3) = e*trapz(x, loss_currents.srh, 2)';
-J_values(:,4) = e*trapz(x, loss_currents.vsr, 2)';
+J_values(:,4) = e*trapz(x, loss_currents.vsr+loss_currents.vsr2, 2)';
 J_values(:,5) = e*(j_surf_rec.tot);
 J_values(:,6) = J.tot(:,1);
     

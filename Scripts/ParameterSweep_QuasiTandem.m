@@ -1,5 +1,4 @@
-%Use this file to symmetrically sweep HOMO/LUMO offsets vs ion
-%concentration
+%Use this file to symmetrically sweep HOMO offset vs k2
 
 %TURN SAVE OFF TO START OFF WITH (final cell)
 
@@ -99,17 +98,17 @@ CV_sol_C60 = doCV(eqm_QJV_C60.ion, illumination, -0.2, 1.2, -0.2, 25e-3, 1, 281)
 stats_C60 = CVstats(CV_sol_C60);
 
 %%
-figure('Name', 'Jsc vs Energy Offsets vs k_rec', 'Position', [50 50 1000 1500])
-num = 2;
+figure('Name', 'Jsc vs Energy Offsets vs k_rec', 'Position', [50 50 1500 1500])
+num = 1;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "southeast"];
 lims = [[-25 -15]; [0.77 1.17]; [0.1, 0.85]; [1 21]];
 colormap(flipud('parula'))
 
 box on 
-contourf(Donor_HOMO+5.5, k_rec, Stats_array(:,:,num), 'LineStyle', 'none')
+contourf(Donor_HOMO+5.5, k_rec, -Stats_array(:,:,num), 'LineStyle', 'none')
 hold on
-contour(Donor_HOMO+5.5, k_rec, Stats_array(:,:,num), [-1e3*stats_C60.Jsc_f -1e3*stats_C60.Jsc_f], 'color', 'black', 'LineWidth', 3)
+contour(Donor_HOMO+5.5, k_rec, -Stats_array(:,:,num), [-1e3*stats_C60.Jsc_f -1e3*stats_C60.Jsc_f], 'color', 'black', 'LineWidth', 3)
 hold off
 c = colorbar;
 c.Label.String = labels(num);

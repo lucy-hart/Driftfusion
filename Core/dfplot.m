@@ -387,8 +387,8 @@ classdef dfplot
             r = dfana.calcr(sol, "sub");
 
             figure('Name', 'rx')
-            dfplot.x2d(sol, x_sub, {r.btb, r.srh, r.vsr, r.tot},{'rbtb', 'rsrh', 'rvsr', 'rtot'},...
-                {'-','-','-','-'}, 'Recombination rate [cm-3s-1]', tarr, xrange, 0, 0);
+            dfplot.x2d(sol, x_sub, {r.btb, r.srh, r.vsr, r.vsr2, r.tot},{'rbtb', 'rsrh', 'rvsr', 'rvsr2', 'rtot'},...
+                {'-','-','-','-', '-'}, 'Recombination rate [cm-3s-1]', tarr, xrange, 0, 0);
         end
 
         function rsrhx(varargin)

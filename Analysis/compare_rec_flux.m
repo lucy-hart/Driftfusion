@@ -62,10 +62,13 @@ loc = find(int_logical); % interface layer locations
 
 ns = zeros(length(t), length(loc));     % Store time array of each ns in new column
 ps = zeros(length(t), length(loc));     % Store time array of each ps in new column
+ns2 = zeros(length(t), length(loc));     % Store time array of each ns in new column
+ps2 = zeros(length(t), length(loc));     % Store time array of each ps in new column
 R_abrupt = zeros(length(t), length(loc));
+R_abrupt_2 = zeros(length(t), length(loc));
 R_vsr = zeros(length(t), length(loc));
-R_abrupt_max = zeros(1,length(loc));
-R_vsr_max = zeros(1,length(loc));
+R_vsr2 = zeros(length(t), length(loc));
+sigma2 = zeros(length(t), length(loc));
 sigma = zeros(length(t), length(loc));
 legstr_R = cell(2*length(loc) + 1, 1);
 legstr_sigma = cell(length(loc) + 1, 1);
@@ -73,9 +76,13 @@ legstr_sigma = cell(length(loc) + 1, 1);
 for i = 1:length(loc)
     sn = par.sn(loc(i));
     sp = par.sp(loc(i));
+    sn2 = par.sn2(loc(i));
+    sp2 = par.sp2(loc(i));
     ni = par.ni(loc(i));
     nt = par.nt(loc(i));
     pt = par.pt(loc(i));
+    nt2 = par.nt2(loc(i));
+    pt2 = par.pt2(loc(i));
     
     % Check location of interfacial surface carrier densities
     p_L = pcum1(loc(i)-1);
@@ -100,15 +107,19 @@ for i = 1:length(loc)
         elseif i == 2
             ns(k, i) = n(k, p_R);
             ps(k, i) = p(k, p_L);
+            ns2(k, i) = n(k, p_L);
+            ps2(k, i) = p(k, p_R);
         end
         R_vsr(k, i) = trapz(x_sub(p_L-1:p_R+1), rx.vsr(k, p_L-1:p_R+1), 2);
+        R_vsr2(k, i) = trapz(x_sub(p_L-1:p_R+1), rx.vsr2(k, p_L-1:p_R+1), 2);
     end
     
     R_abrupt(:, i) = (ns(:, i).*ps(:, i) - ni^2)./((1/sn).*(ps(:, i) + pt) + (1/sp).*(ns(:, i) + nt));
+    R_abrupt_2(:,i) = (ns2(:, i).*ps2(:, i) - ni^2)./((1/sn2).*(ps2(:, i) + pt2) + (1/sp2).*(ns2(:, i) + nt2));
 
     
     %% Fractional difference
-    sigma(:, i) = ((R_abrupt(:, i) - R_vsr(:, i))./R_abrupt(:, i));    
+    sigma(:, i) = ((R_abrupt(:, i)+R_abrupt_2(:, i) - (R_vsr(:, i)+R_vsr2(:, i))))./(R_abrupt(:, i)+R_abrupt_2(:, i));    
         
     if plot_switch
         figure(300)

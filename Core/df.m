@@ -100,7 +100,11 @@ taun = device.taun;         % Electron SRH time constant
 taup = device.taup;         % Electron SRH time constant
 taun_vsr = device.taun_vsr; % Electron SRH time constant- volumetric interfacial surface recombination scheme
 taup_vsr = device.taup_vsr; % Electron SRH time constant- volumetric interfacial surface recombination scheme
+taun_vsr2 = device.taun_vsr2; % Electron SRH time constant- volumetric interfacial surface recombination scheme
+taup_vsr2 = device.taup_vsr2; % Electron SRH time constant- volumetric interfacial surface recombination scheme
 nt = device.nt;             % SRH electron trap constant
+pt2 = device.pt2;             % SRH hole trap constant
+nt2 = device.nt2;             % SRH electron trap constant
 pt = device.pt;             % SRH hole trap constant
 NA = device.NA;             % Acceptor doping density
 ND = device.ND;             % Donor doping density
@@ -123,6 +127,13 @@ sign_xp = device.sign_xp;           % 1 if xp increasing, -1 if decreasing wrt x
 alpha0_xn = device.alpha0_xn;       % alpha0_xn is alpha for F = 0 reference to xprime_n
 beta0_xp = device.beta0_xp;         % beta0_xp is beta for F = 0 referenced to xprime_p
 
+xprime_n2 = device.xprime_n2;         % Translated x co-ordinates for interfaces
+xprime_p2 = device.xprime_p2;         % Translated x co-ordinates for interfaces
+sign_xn2 = device.sign_xn2;           % 1 if xn increasing, -1 if decreasing wrt x
+sign_xp2 = device.sign_xp2;           % 1 if xp increasing, -1 if decreasing wrt x
+alpha0_xn2 = device.alpha0_xn2;       % alpha0_xn is alpha for F = 0 reference to xprime_n
+beta0_xp2 = device.beta0_xp2;         % beta0_xp is beta for F = 0 referenced to xprime_p
+
 z_c = par.z_c;
 z_a = par.z_a;
 n0_l = par.n0_l;
@@ -144,6 +155,7 @@ K_a = par.K_a;              % Anion transport rate multiplier
 radset = par.radset;        % Radiative recombination switch
 SRHset = par.SRHset;        % SRH recombination switch
 vsr_zone = device.vsr_zone;
+vsr_zone_2 = device.vsr_zone_2;
 srh_zone = device.srh_zone;
 Rs_initial = par.Rs_initial;
 Field_switch = dev.Field_switch;
@@ -193,8 +205,9 @@ V = 0; n = 0; p = 0; a = 0; c = 0;
 dVdx = 0; dndx = 0; dpdx = 0; dadx = 0; dcdx = 0;
 F_V = 0; F_n = 0; F_p = 0; F_c = 0; F_a = 0;
 S_V = 0; S_n = 0; S_p = 0; S_c = 0; S_a = 0;
-r_rad = 0; r_srh = 0; r_vsr = 0; r_np = 0;
+r_rad = 0; r_srh = 0; r_vsr = 0; r_vsr_2 = 0; r_np = 0;
 alpha = 0; beta = 0;
+alpha2 = 0; beta2 = 0;
 G_n = 1;    % Diffusion enhancement prefactor electrons
 G_p = 1;    % Diffusion enhancement prefactor holes
 
@@ -296,10 +309,16 @@ end
         % Volumetric surface recombination
         alpha = (sign_xn(i)*q*dVdx/(kB*T)) + alpha0_xn(i);
         beta = (sign_xp(i)*q*-dVdx/(kB*T)) + beta0_xp(i);
+        alpha2 = (sign_xn2(i)*q*dVdx/(kB*T)) + alpha0_xn2(i);
+        beta2 = (sign_xp2(i)*q*-dVdx/(kB*T)) + beta0_xp2(i);
+        %'Normal' surface recombination of perovskite holes with BHJ e-
         r_vsr = SRHset*vsr_zone(i)*((n*exp(-alpha*xprime_n(i))*p*exp(-beta*xprime_p(i)) - ni(i)^2)...
             /(taun_vsr(i)*(p*exp(-beta*xprime_p(i)) + pt(i)) + taup_vsr(i)*(n*exp(-alpha*xprime_n(i)) + nt(i))));
+        %For BHJ case where also can have perovskite e- with BHJ holes
+        r_vsr_2 = SRHset*vsr_zone_2(i)*((n*exp(-alpha2*xprime_n2(i))*p*exp(-beta2*xprime_p2(i)) - ni(i)^2)...
+            /(taun_vsr2(i)*(p*exp(-beta2*xprime_p2(i)) + pt2(i)) + taup_vsr2(i)*(n*exp(-alpha2*xprime_n2(i)) + nt2(i))));
         % Total electron and hole recombination
-        r_np = r_rad + r_srh + r_vsr;
+        r_np = r_rad + r_srh + r_vsr + r_vsr_2;
         
         % Source terms
         S_V = (1/(epp_factor*epp0))*(-n + p - NA(i) + ND(i) + z_a*a + z_c*c - z_a*Nani(i) - z_c*Ncat(i));
