@@ -78,11 +78,6 @@ for i = 1:length(loc)
     sp = par.sp(loc(i));
     sn2 = par.sn2(loc(i));
     sp2 = par.sp2(loc(i));
-    ni = par.ni(loc(i));
-    nt = par.nt(loc(i));
-    pt = par.pt(loc(i));
-    nt2 = par.nt2(loc(i));
-    pt2 = par.pt2(loc(i));
     
     % Check location of interfacial surface carrier densities
     p_L = pcum1(loc(i)-1);
@@ -113,9 +108,16 @@ for i = 1:length(loc)
         R_vsr(k, i) = trapz(x_sub(p_L-1:p_R+1), rx.vsr(k, p_L-1:p_R+1), 2);
         R_vsr2(k, i) = trapz(x_sub(p_L-1:p_R+1), rx.vsr2(k, p_L-1:p_R+1), 2);
     end
+
+    nipi = par.dev.nipi(cast(par.pcum(i)-1, 'uint32'));
+    nipi2 = par.dev.nipi2(cast(par.pcum(i)-1, 'uint32'));
+    nt1 = par.dev.nt1(cast(par.pcum(i)-1, 'uint32'));
+    pt1 = par.dev.pt1(cast(par.pcum(i)-1, 'uint32'));
+    nt2 = par.dev.nt2(cast(par.pcum(i)-1, 'uint32'));
+    pt2 = par.dev.pt2(cast(par.pcum(i)-1, 'uint32'));
     
-    R_abrupt(:, i) = (ns(:, i).*ps(:, i) - ni^2)./((1/sn).*(ps(:, i) + pt) + (1/sp).*(ns(:, i) + nt));
-    R_abrupt_2(:,i) = (ns2(:, i).*ps2(:, i) - ni^2)./((1/sn2).*(ps2(:, i) + pt2) + (1/sp2).*(ns2(:, i) + nt2));
+    R_abrupt(:, i) = (ns(:, i).*ps(:, i) - nt1*pt1)./((1/sn).*(ps(:, i) + pt1) + (1/sp).*(ns(:, i) + nt1));
+    R_abrupt_2(:,i) = (ns2(:, i).*ps2(:, i) - nt2*pt2)./((1/sn2).*(ps2(:, i) + pt2) + (1/sp2).*(ns2(:, i) + nt2));
 
     
     %% Fractional difference

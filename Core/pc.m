@@ -262,7 +262,7 @@ classdef pc
         n0_r
         ni
         nt              % Density of CB electrons when Fermi level at trap state energy
-        nt2
+%         nt2
         nt_inter
         p0
         pcum
@@ -270,7 +270,7 @@ classdef pc
         p0_l
         p0_r
         pt              % Density of VB holes when Fermi level at trap state energy
-        pt2
+%         pt2
         pt_inter
         wn
         wp
@@ -657,14 +657,14 @@ classdef pc
             value = distro_fun.pfun(par.Nv, par.Phi_IP, par.Et, par);
         end
 
-        function value = get.nt2(par)
-            value = distro_fun.nfun(par.Nc, par.Phi_EA, par.Et2, par);
-        end
-        
-        function value = get.pt2(par)
-            value = distro_fun.pfun(par.Nv, par.Phi_IP, par.Et2, par);
-        end
-        
+%         function value = get.nt2(par)
+%             value = distro_fun.nfun(par.Nc, par.Phi_EA, par.Et2, par);
+%         end
+%         
+%         function value = get.pt2(par)
+%             value = distro_fun.pfun(par.Nv, par.Phi_IP, par.Et2, par);
+%         end
+%         
         %% Thickness and point arrays
         function value = get.dcum(par)
             value = cumsum(par.dcell);

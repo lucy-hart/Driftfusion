@@ -87,8 +87,12 @@ if par.vsr_mode == 1
     dev.ni = build_property(par.ni, xmesh, par, 'constant', 0);
     dev.nt = build_property(par.nt, xmesh, par, 'constant', 0);
     dev.pt = build_property(par.pt, xmesh, par, 'constant', 0);
-    dev.nt2 = build_property(par.nt2, xmesh, par, 'constant', 0);
-    dev.pt2 = build_property(par.pt2, xmesh, par, 'constant', 0);
+    dev.nt1 = build_property(0, xmesh, par, 'nt1', 1);
+    dev.pt1 = build_property(0, xmesh, par, 'pt1', 1);
+    dev.nt2 = build_property(0, xmesh, par, 'nt2', 1);
+    dev.pt2 = build_property(0, xmesh, par, 'pt2', 1);
+    dev.nipi = build_property(0, xmesh, par, 'nipi', 1);
+    dev.nipi2 = build_property(0, xmesh, par, 'nipi2', 1);
 else 
     dev.vsr_zone = zeros(1, length(xmesh));
     dev.srh_zone = ones(1, length(xmesh));

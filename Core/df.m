@@ -96,6 +96,8 @@ epp = device.epp;           % Dielectric constant
 epp_factor = par.epp_factor;      % Maximum dielectric constant (for normalisation)
 B = device.B;               % Radiative recombination rate coefficient
 ni = device.ni;             % Intrinsic carrier density
+nipi = device.nipi;
+nipi2 = device.nipi2;
 taun = device.taun;         % Electron SRH time constant
 taup = device.taup;         % Electron SRH time constant
 taun_vsr = device.taun_vsr; % Electron SRH time constant- volumetric interfacial surface recombination scheme
@@ -103,9 +105,11 @@ taup_vsr = device.taup_vsr; % Electron SRH time constant- volumetric interfacial
 taun_vsr2 = device.taun_vsr2; % Electron SRH time constant- volumetric interfacial surface recombination scheme
 taup_vsr2 = device.taup_vsr2; % Electron SRH time constant- volumetric interfacial surface recombination scheme
 nt = device.nt;             % SRH electron trap constant
-pt2 = device.pt2;             % SRH hole trap constant
+nt1 = device.nt1;             % SRH hole trap constant
 nt2 = device.nt2;             % SRH electron trap constant
 pt = device.pt;             % SRH hole trap constant
+pt1 = device.pt1;             % SRH hole trap constant
+pt2 = device.pt2;             % SRH hole trap constant
 NA = device.NA;             % Acceptor doping density
 ND = device.ND;             % Donor doping density
 % Set up counter ion density arrays
@@ -312,10 +316,10 @@ end
         alpha2 = (sign_xn2(i)*q*dVdx/(kB*T)) + alpha0_xn2(i);
         beta2 = (sign_xp2(i)*q*-dVdx/(kB*T)) + beta0_xp2(i);
         %'Normal' surface recombination of perovskite holes with BHJ e-
-        r_vsr = SRHset*vsr_zone(i)*((n*exp(-alpha*xprime_n(i))*p*exp(-beta*xprime_p(i)) - ni(i)^2)...
-            /(taun_vsr(i)*(p*exp(-beta*xprime_p(i)) + pt(i)) + taup_vsr(i)*(n*exp(-alpha*xprime_n(i)) + nt(i))));
+        r_vsr = SRHset*vsr_zone(i)*((n*exp(-alpha*xprime_n(i))*p*exp(-beta*xprime_p(i)) - nt1(i)*pt1(i))...
+            /(taun_vsr(i)*(p*exp(-beta*xprime_p(i)) + pt1(i)) + taup_vsr(i)*(n*exp(-alpha*xprime_n(i)) + nt1(i))));
         %For BHJ case where also can have perovskite e- with BHJ holes
-        r_vsr_2 = SRHset*vsr_zone_2(i)*((n*exp(-alpha2*xprime_n2(i))*p*exp(-beta2*xprime_p2(i)) - ni(i)^2)...
+        r_vsr_2 = SRHset*vsr_zone_2(i)*((n*exp(-alpha2*xprime_n2(i))*p*exp(-beta2*xprime_p2(i)) - nt2(i)*pt2(i))...
             /(taun_vsr2(i)*(p*exp(-beta2*xprime_p2(i)) + pt2(i)) + taup_vsr2(i)*(n*exp(-alpha2*xprime_n2(i)) + nt2(i))));
         % Total electron and hole recombination
         r_np = r_rad + r_srh + r_vsr + r_vsr_2;

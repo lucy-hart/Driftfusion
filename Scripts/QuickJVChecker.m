@@ -84,8 +84,8 @@ if run_C60 == 1 && light == 1
     yline(0, 'LineWidth', 2, 'Color', 'black')
     plot(Vapp(1:145), 1e3*J_C60.tot(1:145,1), 'LineWidth', 4, 'Color', 'black')
     plot(Vapp(1:145), 1e3*J_PBDBTY6.tot(1:145,1), 'LineWidth', 4, 'Color', [0.4660 0.6740 0.1880])
-    plot(Vapp(1:145), 1e3*J_PM7Y6.tot(1:145,1), 'LineWidth', 4, 'Color', 'red')
-    plot(Vapp(1:145), 1e3*J_PM6Y6.tot(1:145,1), 'LineWidth', 4, 'Color', [0 0.4470 0.7410])
+    plot(Vapp(1:145), 1e3*J_PM6Y6.tot(1:145,1), 'LineWidth', 4, 'Color', 'red')
+    plot(Vapp(1:145), 1e3*J_PM7Y6.tot(1:145,1), 'LineWidth', 4, 'Color', [0 0.4470 0.7410])
     if noions == 1
         plot(Vapp(1:145), 1e3*J_C60_noions.tot(1:145,1), 'LineWidth', 4, 'Color', 'black', 'LineStyle', ':')
         plot(Vapp(1:145), 1e3*J_PM6Y6_noions.tot(1:145,1), 'LineWidth', 4, 'Color', 'red', 'LineStyle', ':')

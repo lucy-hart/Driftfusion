@@ -39,9 +39,9 @@ for i = 1:n_k_rec
         par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
 
         %Donor HOMO Energetics
-        par.Phi_IP(5) = params{i,j}(2);
-        par.EF0(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
-        par.Et(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
+        par.Phi_IP(4:6) = params{i,j}(2);
+        par.EF0(4:6) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
+        par.Et(4:6) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
 
         %BHJ recombination rate
         par.B(5) = params{i,j}(1);

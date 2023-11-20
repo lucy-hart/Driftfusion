@@ -245,6 +245,7 @@ classdef dfana
 
             xprime_n = dev.xprime_n;
             xprime_p = dev.xprime_p;
+            nipi = dev.nipi;
             sign_xn = repmat(dev.sign_xn, length(t), 1);    % 1 if xn increasing, -1 if decreasing wrt x
             sign_xp = repmat(dev.sign_xp, length(t), 1);    % 1 if xp increasing, -1 if decreasing wrt x
             alpha0_xn = repmat(dev.alpha0_xn, length(t), 1);
@@ -255,6 +256,7 @@ classdef dfana
 
             xprime_n2 = dev.xprime_n2;
             xprime_p2 = dev.xprime_p2;
+            nipi2 = dev.nipi2;
             sign_xn2 = repmat(dev.sign_xn2, length(t), 1);    % 1 if xn increasing, -1 if decreasing wrt x
             sign_xp2 = repmat(dev.sign_xp2, length(t), 1);    % 1 if xp increasing, -1 if decreasing wrt x
             alpha0_xn2 = repmat(dev.alpha0_xn2, length(t), 1);
@@ -273,9 +275,9 @@ classdef dfana
             ps = p.*exp(-beta_xp.*xprime_p);  % Projected hole surface density
             ns2 = n.*exp(-alpha_xn2.*xprime_n2); % Projected electron surface density
             ps2 = p.*exp(-beta_xp2.*xprime_p2);  % Projected hole surface density 
-            r.vsr = vsr_zone.*(ns.*ps - dev.ni.^2)...
-                ./(dev.taun_vsr.*(ps + dev.pt) + dev.taup_vsr.*(ns + dev.nt));
-            r.vsr2 = vsr_zone_2.*(ns2.*ps2 - dev.ni.^2)...
+            r.vsr = vsr_zone.*(ns.*ps - dev.nt1.*dev.pt1)...
+                ./(dev.taun_vsr.*(ps + dev.pt1) + dev.taup_vsr.*(ns + dev.nt1));
+            r.vsr2 = vsr_zone_2.*(ns2.*ps2 - dev.nt2.*dev.pt2)...
                 ./(dev.taun_vsr2.*(ps2 + dev.pt2) + dev.taup_vsr2.*(ns2 + dev.nt2));
             % System boundary surface recombination i.e. minority carrier
             % currents

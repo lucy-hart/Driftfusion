@@ -252,6 +252,18 @@ for i=1:length(par.dcum)                % i is the layer index
                         else
                             devprop(j) = 0;
                         end
+                    case 'nipi'
+                        devprop(j) = par.Nc(i+1).*par.Nv(i-1)*exp(-abs(par.Phi_IP(i+1)-par.Phi_EA(i-1))/(par.kB*par.T));
+                    case 'nipi2'
+                        devprop(j) = par.Nc(i-1).*par.Nv(i+1)*exp(-abs(par.Phi_IP(i-1)-par.Phi_EA(i+1))/(par.kB*par.T));
+                    case 'nt1'
+                        devprop(j) = distro_fun.nfun(par.Nc(i+1), par.Phi_EA(i+1), par.Et(i), par);
+                    case 'nt2'
+                        devprop(j) = distro_fun.nfun(par.Nc(i-1), par.Phi_EA(i-1), par.Et2(i), par);
+                    case 'pt1'
+                        devprop(j) = distro_fun.pfun(par.Nv(i-1), par.Phi_IP(i-1), par.Et(i), par);
+                    case 'pt2'
+                        devprop(j) = distro_fun.pfun(par.Nv(i+1), par.Phi_IP(i+1), par.Et2(i), par);                        
                 end
             end
         end
