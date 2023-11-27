@@ -5,8 +5,8 @@ read_in_par = 1;
 
 if read_in_par == 1
     parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
-    parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
-    parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PBDBTY6.csv');
+    parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJ_SRH.csv');
+    parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PCE12Y6_BHJ_SRH.csv');
 end
 
 vis = 0;

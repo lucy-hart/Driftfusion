@@ -5,11 +5,15 @@
 %parC60 = pc('Input_files/HTL_MAPI_C60_DavideValues.csv');
 % parC60 = pc('Input_files/SAM_MAPI_C60.csv');
 % parPM6 = pc('Input_files/SAM_MAPI_PM6Y6.csv');
+% parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
+% parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
+% parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6.csv');
 parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
-parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
-parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6.csv');
+parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJSurf.csv');
+parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6_BHJSurf.csv');
+parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PCE12Y6_BHJSurf.csv');
 % parC60 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_NoC60.csv');
-parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PBDBTY6.csv');
+% parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PBDBTY6.csv');
 % parPBDBT = pc('Input_files/SAM_MAPI_PBDBTY6.csv');
 %parPM6 = pc('Input_files/HTL_MAPI_PM6Y6_C60_DavideValues.csv');
 

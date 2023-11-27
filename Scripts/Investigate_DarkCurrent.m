@@ -1,15 +1,22 @@
 %The _dark file has a finer point sapcing as I wanted to see if this
 %reduced the zero error
 %It did not...
-parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
-parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
-parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6.csv');
-parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PBDBTY6.csv');
+% parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
+% parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
+% parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6.csv');
+% parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PBDBTY6.csv');
+parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60_Dark.csv');
+% parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_ShowInterface.csv');
+% parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6_BHJSurf.csv');
+% parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PCE12Y6_BHJSurf.csv');
 
-eqm_C60 = equilibrate(parC60);
-eqm_PM6 = equilibrate(parPM6);
-eqm_PM7 = equilibrate(parPM7);
-eqm_PBDBT = equilibrate(parPBDBT);
+% eqm_C60 = equilibrate(parC60);
+% parPM6.RelTol = 1e-9;
+% parPM7.RelTol = 1e-9;
+% parPBDBT.RelTol = 1e-9;
+eqm_PM6 = equilibrate(parC60);
+% eqm_PM7 = equilibrate(parPM7);
+% eqm_PBDBT = equilibrate(parPBDBT);
 % parC60.AbsTol = 1e-12;
 % parC60.RelTol = 1e-9;
 %%
@@ -36,12 +43,14 @@ end
 %% 
 %Check if the dark eqm solution has a non-zero current 
 %i.e., calibrate for errors in numerical integration
- 
-voltage_ar = linspace(-0.5, 0.1, 7);
-Jdark = doDarkJV(eqm_C60.ion, voltage_ar, 10);
-Jdark2 = doDarkJV(eqm_PM6.ion, voltage_ar, 10);
-Jdark3 = doDarkJV(eqm_PBDBT.ion, voltage_ar, 10);
-Jdark4 = doDarkJV(eqm_PM7.ion, voltage_ar, 5);
+t_hold = 60;
+
+voltage_ar = [-5 -4 -3 -2 -1 -0.5 0 0.1];
+% voltage_ar = linspace(-0.5, 0.1, 7);
+% Jdark = doDarkJV(eqm_C60.el, voltage_ar, t_hold);
+Jdark2 = doDarkJV(eqm_PM6.ion, voltage_ar, t_hold);
+% Jdark3 = doDarkJV(eqm_PBDBT.ion, voltage_ar, t_hold);
+% Jdark4 = doDarkJV(eqm_PM7.ion, voltage_ar, t_hold);
 
 %%
 sample_point = (length(voltage_ar)-1)/2;
@@ -56,15 +65,17 @@ semilogplot = 1;
 figure('Name', 'Dark JV Raw Data', 'Position', [50 50 1000 1000])
 
 if semilogplot == 1        
-        semilogy(voltage_ar(Jdark.Jvalue>0), abs(Jdark.Jvalue(Jdark2.Jvalue>0)), 'k-')
-        hold on        
-        semilogy(voltage_ar(Jdark.Jvalue<0), abs(Jdark.Jvalue(Jdark.Jvalue<0)), 'k--')
+%         semilogy(voltage_ar(Jdark.Jvalue>0), abs(Jdark.Jvalue(Jdark.Jvalue>0)), 'k-')
+%         hold on        
+%         semilogy(voltage_ar(Jdark.Jvalue<0), abs(Jdark.Jvalue(Jdark.Jvalue<0)), 'k--')
+%         semilogy(voltage_ar(Jdark4.Jvalue>0), abs(Jdark4.Jvalue(Jdark4.Jvalue>0)), 'Color', [0 0.4470 0.7410])
+%         hold on
+%         semilogy(voltage_ar(Jdark4.Jvalue<0), abs(Jdark4.Jvalue(Jdark4.Jvalue<0)), 'Color', [0 0.4470 0.7410], 'LineStyle', '--')
         semilogy(voltage_ar(Jdark2.Jvalue>0), abs(Jdark2.Jvalue(Jdark2.Jvalue>0)), 'r-')
+        hold on 
         semilogy(voltage_ar(Jdark2.Jvalue<0), abs(Jdark2.Jvalue(Jdark2.Jvalue<0)), 'r--')        
-        semilogy(voltage_ar(Jdark3.Jvalue<0), abs(Jdark3.Jvalue(Jdark3.Jvalue<0)), 'Color', [0.4660 0.6740 0.1880], 'LineStyle', '--')
-        semilogy(voltage_ar(Jdark3.Jvalue>0), abs(Jdark3.Jvalue(Jdark3.Jvalue>0)), 'Color', [0.4660 0.6740 0.1880])
-        semilogy(voltage_ar(Jdark4.Jvalue<0), abs(Jdark4.Jvalue(Jdark4.Jvalue<0)), 'Color', [0 0.4470 0.7410], 'LineStyle', '--')
-        semilogy(voltage_ar(Jdark4.Jvalue>0), abs(Jdark4.Jvalue(Jdark4.Jvalue>0)), 'Color', [0 0.4470 0.7410])
+%         semilogy(voltage_ar(Jdark3.Jvalue>0), abs(Jdark3.Jvalue(Jdark3.Jvalue>0)), 'Color', [0.4660 0.6740 0.1880])
+%         semilogy(voltage_ar(Jdark3.Jvalue<0), abs(Jdark3.Jvalue(Jdark3.Jvalue<0)), 'Color', [0.4660 0.6740 0.1880], 'LineStyle', '--')
 elseif semilogplot == 0
         hold on
         plot(voltage_ar, Jdark.Jvalue, 'k-')
@@ -79,10 +90,10 @@ hold off
 
 set(gca, 'FontSize', 25)
 xlabel('Voltage (V)', 'FontSize', 25)
-xlim([-0.5, voltage_ar(end)])
+xlim([-5, voltage_ar(end)])
 ylim([1e-14, 1])
 ylabel('Current Density (A cm^{-2})', 'FontSize', 25)
-legend({' CsFAMA', '', ' +0.35 eV', '', '', ' +0.25 eV', '', ' +0.15 eV'}, 'FontSize', 25, 'Location', 'northwest')
+legend({' CsFAMA', '', ' +0.35 eV', '', ' +0.25 eV', '', ' +0.15 eV', ''}, 'FontSize', 25, 'Location', 'northwest')
 
 % figure('Name', 'Dark JV Corrected Data')
 % 

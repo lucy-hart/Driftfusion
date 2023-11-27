@@ -1,10 +1,15 @@
 %% File to plot dark eqm energy levels for Davide dark currents
 ion = 1;
+eqm = 0;
 
 if ion == 1
-    devices = {eqm_PM6.ion, eqm_PBDBT.ion};
+    if eqm == 1
+        devices = {eqm_PM6.ion, eqm_PBDBT.ion};
+    elseif eqm == 0
+        devices = {Jdark2.sol{1}, Jdark3.sol{1}};
+    end
 elseif ion == 0
-    devices = {eqm_PM6.el, eqm_PBDBT.el};
+     devices = {eqm_PM6.el, eqm_PBDBT.el};
 end
 energies = cell(4, length(devices));
 
@@ -16,11 +21,13 @@ figure('Name', 'Dark Eqm Energy Levels')
 colours = {[0 0 1], [1 0 0], [0 0 0], [0 0 0]};
 
 hold on
-for i = 1:2
+for i = 1:4
     plot(1e7*devices{1}.x, energies{i,1}(end,:), 'Color', colours{i})
     plot(1e7*devices{1}.x, energies{i,2}(end,:), 'Color', colours{i}, 'LineStyle', '--')
 end
-yline(-5.2, 'Color', 'Black', 'LineWidth', 2)
+if eqm == 1
+    yline(-5.2, 'Color', 'Black', 'LineWidth', 2)
+end
 hold off
 
 xlabel('Distance (nm)')
