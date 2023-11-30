@@ -87,7 +87,7 @@ for i = 1:length(loc)
         %Put this clause in to deal with the type-1 heterojunctions we
         %have in the perovskite/BHJ quasi-tandems
         %Assumes the type-1 heterojuctions is at the pero/ETL interface
-        if i ~=2
+        if i ~=100
             if alpha(k, p_L) <= 0
                 ns(k, i) = n(k, p_L);
             elseif alpha(k, p_L) > 0
@@ -99,7 +99,7 @@ for i = 1:length(loc)
             elseif beta(k, p_L) > 0
                 ps(k, i) = p(k, p_R);
             end
-        elseif i == 2
+        elseif i == 100
             ns(k, i) = n(k, p_R);
             ps(k, i) = p(k, p_L);
             ns2(k, i) = n(k, p_L);
@@ -109,8 +109,6 @@ for i = 1:length(loc)
         R_vsr2(k, i) = trapz(x_sub(p_L-1:p_R+1), rx.vsr2(k, p_L-1:p_R+1), 2);
     end
 
-    nipi = par.dev.nipi(cast(par.pcum(i)-1, 'uint32'));
-    nipi2 = par.dev.nipi2(cast(par.pcum(i)-1, 'uint32'));
     nt1 = par.dev.nt1(cast(par.pcum(i)-1, 'uint32'));
     pt1 = par.dev.pt1(cast(par.pcum(i)-1, 'uint32'));
     nt2 = par.dev.nt2(cast(par.pcum(i)-1, 'uint32'));

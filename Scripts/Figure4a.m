@@ -2,7 +2,7 @@
 
 %TURN SAVE OFF TO START OFF WITH (final cell)
 %% Define parameter space
-Donor_HOMO = linspace(-5.3, -5.0, 4);
+Donor_HOMO = linspace(-5.3, -5.0, 7);
 n_HOMOs = length(Donor_HOMO);
 t_hold = 60;
 voltage_ar = [-5 -0.5 0];
@@ -27,10 +27,13 @@ surface = 0;
 %(VB)
 for i = 1:n_HOMOs
     disp(["Donor_HOMO = ", num2str(Donor_HOMO(i)), " eV"])
-    
-    %par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJ_SRH.csv');
-    par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
-%     par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_ShowInterface.csv');
+
+    par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJ_SRH.csv');
+    % par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
+    % par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_ShowInterface.csv');
+    %Set AbsTol lower than normal as measuring dark currents
+    par.AbsTol_vsr = 1e7;
+    par.RelTol_vsr = 1e-5;
 
     %Donor HOMO Energetics
     par.Phi_IP(4:6) = Donor_HOMO(i);
@@ -38,6 +41,8 @@ for i = 1:n_HOMOs
     par.Et(4:6) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
     if surface == 1
         par.Et2(4:6) = par.Phi_IP(5) + 0.05; 
+    elseif surface == 0
+        par.Et2(4:6) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
     end
 
     %par.RelTol = 1e-9;
@@ -46,7 +51,7 @@ for i = 1:n_HOMOs
 
     soleq{i} = equilibrate(par);
 
-    Jdark{i} = doDarkJV(soleq{i}.ion, voltage_ar, t_hold);
+    % Jdark{i} = doDarkJV(soleq{i}.ion, voltage_ar, t_hold);
     
     Voc_max = 1.2;
     num_points = 281; 
@@ -114,15 +119,15 @@ yline(abs(1e3*stats_C60.Jsc_f), 'Color', 'black', 'LineStyle', '--', 'LineWidth'
 txt = 'J_{SC,ref}';
 text(0.21, 21.2, txt, 'FontSize', 30)
 
-yyaxis right
-set(gca, 'Fontsize', 25, 'YScale', 'log')
-ylabel('J_{d} (A cm^{-2})', 'FontSize', 30)
-ylim([9e-10, 1e-4])
-for i = 1:n_HOMOs
-    plot(Donor_HOMO(i)+5.5, abs(Jdark{i}.Jvalue(1)), 'color', 'red', 'LineStyle', 'none', 'Marker', 'square', ...
-        'MarkerSize', 15, 'MarkerFaceColor', 'red')
-    errorbar(Donor_HOMO(i)+5.5, abs(Jdark{i}.Jvalue(1)), abs(Jdark{i}.Jvalue(2)), 'color', 'red')
-end
+% yyaxis right
+% set(gca, 'Fontsize', 25, 'YScale', 'log')
+% ylabel('J_{d} (A cm^{-2})', 'FontSize', 30)
+% ylim([9e-14, 1e-4])
+% for i = 1:n_HOMOs
+%     plot(Donor_HOMO(i)+5.5, abs(Jdark{i}.Jvalue(1)), 'color', 'red', 'LineStyle', 'none', 'Marker', 'square', ...
+%         'MarkerSize', 15, 'MarkerFaceColor', 'red')
+%     errorbar(Donor_HOMO(i)+5.5, abs(Jdark{i}.Jvalue(1)), abs(Jdark{i}.Jvalue(2)), 'color', 'red')
+% end
 hold off
 
 xlabel('Energetic Barrier to Hole Injection (eV)', 'FontSize', 30)
@@ -134,7 +139,7 @@ ax1 = gca;
 save_fig = 0;
 if save_fig == 1
     exportgraphics(ax1, ...
-    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Davide_OrganicPeroHybrid\FigSxa-Minus5VJd.png', ...
+    'C:\Users\ljh3218\OneDrive - Imperial College London\PhD\Davide_OrganicPeroHybrid\FigSxx-JscWithSurf.png', ...
     'Resolution', 300)
 end
 

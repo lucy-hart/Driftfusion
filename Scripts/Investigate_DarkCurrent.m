@@ -5,16 +5,17 @@
 % parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
 % parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6.csv');
 % parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PBDBTY6.csv');
-parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60_Dark.csv');
-% parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_ShowInterface.csv');
+parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
+% parY6 = pc('Input_files/SAM_MAFACsPbIBr_Y6.csv');
+parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_ShowInterface.csv');
 % parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6_BHJSurf.csv');
 % parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PCE12Y6_BHJSurf.csv');
 
-% eqm_C60 = equilibrate(parC60);
+eqm_C60 = equilibrate(parC60);
 % parPM6.RelTol = 1e-9;
 % parPM7.RelTol = 1e-9;
 % parPBDBT.RelTol = 1e-9;
-eqm_PM6 = equilibrate(parC60);
+eqm_PM6 = equilibrate(parPM6);
 % eqm_PM7 = equilibrate(parPM7);
 % eqm_PBDBT = equilibrate(parPBDBT);
 % parC60.AbsTol = 1e-12;
@@ -47,7 +48,7 @@ t_hold = 60;
 
 voltage_ar = [-5 -4 -3 -2 -1 -0.5 0 0.1];
 % voltage_ar = linspace(-0.5, 0.1, 7);
-% Jdark = doDarkJV(eqm_C60.el, voltage_ar, t_hold);
+Jdark = doDarkJV(eqm_C60.el, voltage_ar, t_hold);
 Jdark2 = doDarkJV(eqm_PM6.ion, voltage_ar, t_hold);
 % Jdark3 = doDarkJV(eqm_PBDBT.ion, voltage_ar, t_hold);
 % Jdark4 = doDarkJV(eqm_PM7.ion, voltage_ar, t_hold);
@@ -65,14 +66,14 @@ semilogplot = 1;
 figure('Name', 'Dark JV Raw Data', 'Position', [50 50 1000 1000])
 
 if semilogplot == 1        
-%         semilogy(voltage_ar(Jdark.Jvalue>0), abs(Jdark.Jvalue(Jdark.Jvalue>0)), 'k-')
-%         hold on        
-%         semilogy(voltage_ar(Jdark.Jvalue<0), abs(Jdark.Jvalue(Jdark.Jvalue<0)), 'k--')
+        semilogy(voltage_ar(Jdark.Jvalue>0), abs(Jdark.Jvalue(Jdark.Jvalue>0)), 'k-')
+        hold on        
+        semilogy(voltage_ar(Jdark.Jvalue<0), abs(Jdark.Jvalue(Jdark.Jvalue<0)), 'k--')
 %         semilogy(voltage_ar(Jdark4.Jvalue>0), abs(Jdark4.Jvalue(Jdark4.Jvalue>0)), 'Color', [0 0.4470 0.7410])
 %         hold on
 %         semilogy(voltage_ar(Jdark4.Jvalue<0), abs(Jdark4.Jvalue(Jdark4.Jvalue<0)), 'Color', [0 0.4470 0.7410], 'LineStyle', '--')
         semilogy(voltage_ar(Jdark2.Jvalue>0), abs(Jdark2.Jvalue(Jdark2.Jvalue>0)), 'r-')
-        hold on 
+        % hold on 
         semilogy(voltage_ar(Jdark2.Jvalue<0), abs(Jdark2.Jvalue(Jdark2.Jvalue<0)), 'r--')        
 %         semilogy(voltage_ar(Jdark3.Jvalue>0), abs(Jdark3.Jvalue(Jdark3.Jvalue>0)), 'Color', [0.4660 0.6740 0.1880])
 %         semilogy(voltage_ar(Jdark3.Jvalue<0), abs(Jdark3.Jvalue(Jdark3.Jvalue<0)), 'Color', [0.4660 0.6740 0.1880], 'LineStyle', '--')
