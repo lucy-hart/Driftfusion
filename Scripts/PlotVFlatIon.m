@@ -30,8 +30,8 @@ for i = 1:num_ion_concs
         if Symmetric == 1
             Vflat(i,j) = findVflation(solCV{i,j});
         elseif Symmetric == 0
-            V_ETL(i,j) = findVinvert(solCV{i,j}).ETL;
-            V_HTL(i,j) = findVinvert(solCV{i,j}).HTL;
+            V_ETL(i,j) = findVinvert_v2(solCV{i,j}).ETL;
+            V_HTL(i,j) = findVinvert_v2(solCV{i,j}).HTL;
         end
     end
 end
@@ -45,10 +45,10 @@ for i = 1:num_ion_concs
     if i == 1
         plot(Delta_TL, Vbi, 'marker', 'x', 'Color', 'black')
         plot(Delta_TL, V_Emin, 'marker', 'x', 'Color', 'magenta')
-        %plot(Delta_TL, TL_offset, 'marker', 'x', 'Color', 'green')
+        plot(Delta_TL, TL_offset, 'marker', 'x', 'Color', 'green')
         if Symmetric == 0
-            plot(Delta_TL, V_ETL(1,:), 'marker', 'o', 'Color', 'blue', 'LineStyle', 'None', 'MarkerSize', 10)
-            plot(Delta_TL, V_HTL(1,:), 'marker', 's', 'Color', 'red', 'LineStyle', 'None', 'MarkerSize', 10)
+            plot(Delta_TL, V_ETL(4,:), 'marker', 'o', 'Color', 'blue', 'LineStyle', 'None', 'MarkerSize', 10)
+            plot(Delta_TL, V_HTL(4,:), 'marker', 's', 'Color', 'red', 'LineStyle', 'None', 'MarkerSize', 10)
         end
     end
     if Symmetric == 1
