@@ -7,7 +7,7 @@
 % par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
 doped = 1;
 if doped == 1
-    par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
+    par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped_asymmetric.csv');
 elseif doped == 0
     par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
 end
@@ -19,7 +19,7 @@ IonConc = 1e18;
 if Fiddle_with_Energetics == 1
 
     %row
-    DHOMO = 0.15;
+    DHOMO = 0.3;
     %DHOMO = Delta_HOMO(4);
     %column
     DLUMO = -0.15;
@@ -55,6 +55,7 @@ if Fiddle_with_Energetics == 1
             if par.Phi_left < par.Phi_IP(1) + 0.1
                 par.Phi_left = par.Phi_IP(1) + 0.1;
             end
+
             %ETL Energetics
             %Need to use opposite sign at ETL to keep energy offsets symmetric
             par.Phi_right = -4.05;
@@ -106,11 +107,11 @@ suns = 1;
 % 
 % JV_sol_el = VappFunction(illuminated_sol_el, 'sweep', [V_max, V_min, tmax], tmax, 200*(V_max-V_min)+1, 0);
 
-JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.35, -0.2, 1e-3, 1, 311);
-JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.35, -0.2, 1e-3, 1, 311);
+JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.2, -0.2, 1e-3, 1, 281);
+JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.2, -0.2, 1e-3, 1, 281);
 % JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.2, -0.2, 1e-3, 1, 281);
 
-Plot_Current_Contributions(JV_sol_ion) 
+Plot_Current_Contributions_v2(JV_sol_ion) 
 Plot_Current_Contributions_v2(JV_sol_el) 
 stats_ion = CVstats(JV_sol_ion)
 stats_el = CVstats(JV_sol_el)
