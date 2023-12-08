@@ -2,10 +2,10 @@
 
 %TURN SAVE OFF TO START OFF WITH (final cell)
 %% Define parameter space
-Donor_HOMO = linspace(-5.3, -5.0, 4);
+Donor_HOMO = linspace(-5.3, -5.0, 13);
 n_HOMOs = length(Donor_HOMO);
 t_hold = 60;
-voltage_ar = [-5 -0.5 0];
+voltage_ar = [-0.5 0];
 
 %%
 error_log = zeros(n_HOMOs,1);
@@ -28,8 +28,8 @@ surface = 0;
 for i = 1:n_HOMOs
     disp(["Donor_HOMO = ", num2str(Donor_HOMO(i)), " eV"])
     
-    %par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJ_SRH.csv');
-    par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
+    par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJ_SRH.csv');
+%     par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
 %     par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_ShowInterface.csv');
 
     %Donor HOMO Energetics
@@ -74,12 +74,14 @@ end
 
 %% Plot results 
 Stats_array = zeros(n_HOMOs, 4);
+Jdark_values = zeros(n_HOMOs, 1);
 for i = 1:n_HOMOs
     try
         Stats_array(i,1) = 1e3*results{i}.Jsc_f;
         Stats_array(i,2) = results{i}.Voc_f;
         Stats_array(i,3) = results{i}.FF_f;
         Stats_array(i,4) = results{i}.efficiency_f;
+        Jdark_values(i) = Jdark{i}.Jvalue(1);
     catch
         warning('No Stats')
         Stats_array(i,:) = 0;
