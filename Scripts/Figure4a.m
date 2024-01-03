@@ -2,8 +2,8 @@
 
 %TURN SAVE OFF TO START OFF WITH (final cell)
 %% Define parameter space
-% Donor_HOMO = linspace(-5.3, -5.0, 13);
-Donor_HOMO = [-5.3 -5.2 -5.1];
+Donor_HOMO = linspace(-5.3, -5.0, 13);
+%Donor_HOMO = [-5.3 -5.2 -5.1];
 n_HOMOs = length(Donor_HOMO);
 t_hold = 60;
 voltage_ar = [-0.5 0];
@@ -120,7 +120,7 @@ text(0.21, 21.2, txt, 'FontSize', 30)
 yyaxis right
 set(gca, 'Fontsize', 25, 'YScale', 'log')
 ylabel('J_{d} (A cm^{-2})', 'FontSize', 30)
-ylim([9e-11, 1e-6])
+ylim([9e-15, 1e-10])
 for i = 1:n_HOMOs
     plot(Donor_HOMO(i)+5.5, abs(Jdark{i}.Jvalue(1)), 'color', 'red', 'LineStyle', 'none', 'Marker', 'square', ...
         'MarkerSize', 15, 'MarkerFaceColor', 'red')
