@@ -1,4 +1,4 @@
-function SaPsol = doSaP_v2(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, light_intensity, verbose)
+function SaPsol = doSaP_multi(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, light_intensity, verbose)
 % Performs a simulation of a stabilise and pulse (SaP) measurement
 % Input arguments:
 % SOL_INI = solution containing intitial conditions (dark eqm device)
@@ -8,8 +8,6 @@ function SaPsol = doSaP_v2(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, light_
 % TSAMPLE = time after voltage pulse when current is measured
 % TSTAB = time for which the device is stabilised at Vbias
 % LIGHT_INTENSITY = light intensity at which the measurement is done
-% 
-%
 
 %% Start Code
 disp('Starting SaP')
@@ -28,7 +26,8 @@ SaPsol = cell(num_bias, num_pulses+1);
 sol_ill = changeLight(sol_ini, light_intensity, 0, 1);
 
 %% Generate solutions after voltage stabilisation period
-for i = 1:num_bias
+
+parfor i = 1:num_bias
     
     par = sol_ill.par;
     par.vsr_check = 0;
@@ -144,8 +143,9 @@ for i = 1:num_bias
         if verbose == 1
             disp(['Starting SaP for Vstab = ' num2str(Vbias(i)) ' V'])    
         end
-        for j = 1:num_pulses
-            par = SaPsol{i,1}.par;
+        bias_sol = SaPsol{i,1};
+        parfor j = 1:num_pulses
+            par = bias_sol.par
             par.vsr_check = 0;
         
             %turn off ion motion for the duration of the pulse
@@ -165,7 +165,7 @@ for i = 1:num_bias
             par.V_fun_arg(3) = tramp;
 
             try
-                sol = df(SaPsol{i,1}, par);
+                sol = df(bias_sol, par);
             catch
                 warning(['Could not ramp to voltage for Vpulse = ' num2str(Vpulse(j)) ' V'])
                 sol = 0;
@@ -207,7 +207,7 @@ for i = 1:num_bias
         end 
     else
         for j = 1:num_pulses
-            SaPsol{i,j}.Jpulse = 0;
+            SaPsol{i,j+1}.Jpulse = 0;
         end
     end
 end

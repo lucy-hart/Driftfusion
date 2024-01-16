@@ -57,6 +57,7 @@ par = sol.par;
 par.tmesh_type = 2;
 par.t0 = 1e-10;
 par.tpoints = 30;
+par.vsr_check = 0;
 
 % set an initial time for the simulation
 if tmax

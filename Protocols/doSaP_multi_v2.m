@@ -1,4 +1,4 @@
-function SaPsol = doSaP_v2(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, light_intensity, verbose)
+function J_return = doSaP_multi_v2(sol_ini, tstab, Vbias, Vpulse, light_intensity, verbose)
 % Performs a simulation of a stabilise and pulse (SaP) measurement
 % Input arguments:
 % SOL_INI = solution containing intitial conditions (dark eqm device)
@@ -8,8 +8,6 @@ function SaPsol = doSaP_v2(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, light_
 % TSAMPLE = time after voltage pulse when current is measured
 % TSTAB = time for which the device is stabilised at Vbias
 % LIGHT_INTENSITY = light intensity at which the measurement is done
-% 
-%
 
 %% Start Code
 disp('Starting SaP')
@@ -21,15 +19,15 @@ num_pulses = length(Vpulse);
 %The first column is the solution after being held at the relevant Vbias
 %for time tstab
 %The other columns are the resuls of the pulsed JVs
-SaPsol = cell(num_bias, num_pulses+1);
+J_return = zeros(num_bias, num_pulses);
 
 %% Go to correct light intensity
 %Funtion assumes you are using the first light source currently 
 sol_ill = changeLight(sol_ini, light_intensity, 0, 1);
 
-%% Generate solutions after voltage stabilisation period
-for i = 1:num_bias
-    
+%% 
+for i = 1:num_bias    
+    %Generate solutions after voltage stabilisation period
     par = sol_ill.par;
     par.vsr_check = 0;
     
@@ -62,7 +60,7 @@ for i = 1:num_bias
         if verbose == 1
             disp(['Stabilising solution at ' num2str(Vbias(i)) ' V'])
         end
-        SaPsol{i,1} = df(sol, par);
+        SaPsol = df(sol, par);
     catch 
         try
             %ramp voltage up to the applied voltage 
@@ -93,7 +91,7 @@ for i = 1:num_bias
             if verbose == 1
                 disp(['Stabilising solution at ' num2str(Vbias(i) + 0.01) ' V'])
             end
-            SaPsol{i,1} = df(sol, par);
+            SaPsol = df(sol, par);
     
             Vbias(i) = Vbias(i) + 0.01;
         catch
@@ -126,88 +124,33 @@ for i = 1:num_bias
                 if verbose == 1
                     disp(['Stabilising solution at ' num2str(Vbias(i) - 0.01) ' V'])
                 end
-                SaPsol{i,1} = df(sol, par);
+                SaPsol = df(sol, par);
         
                 Vbias(i) = Vbias(i) - 0.01;
             catch
-            warning(['Could not stabilise device at' num2str(Vbias(i)) ' V'])
+            warning(['Could not stabilise device at ' num2str(Vbias(i)) ' V'])
             Vbias(i) = 100;
             end
         end 
     end
 
-end    
-
-%% Perform the Pulsed JV for each Vbias 
-for i = 1:num_bias
     if Vbias(i) ~= 100
-        if verbose == 1
-            disp(['Starting SaP for Vstab = ' num2str(Vbias(i)) ' V'])    
-        end
-        for j = 1:num_pulses
-            par = SaPsol{i,1}.par;
-            par.vsr_check = 0;
-        
-            %turn off ion motion for the duration of the pulse
-            %assuming that this is a valid assumption
-            par.mobseti = 0;
-        
-            %ramp voltage up to the applied voltage over time tramp 
-            %NB, this is t_ramp, not tramp...
-            par.tmesh_type = 1;
-            par.t0 = 0;
-            par.tmax = tramp;
-            par.tpoints = 100;
-        
-            par.V_fun_type = 'sweep';
-            par.V_fun_arg(1) = Vbias(i);
-            par.V_fun_arg(2) = Vpulse(j);
-            par.V_fun_arg(3) = tramp;
-
-            try
-                sol = df(SaPsol{i,1}, par);
-            catch
-                warning(['Could not ramp to voltage for Vpulse = ' num2str(Vpulse(j)) ' V'])
-                sol = 0;
-            end
-            
-            if not(isa(sol, 'struct'))
-                SaPsol{i,j+1}.Jpulse = 0;
-            elseif isa(sol, 'struct')
-        
-                par = sol.par;
-                par.vsr_check = 0;
-            
-                %turn off ion motion for the duration of the pulse
-                %assuming that this is a valid assumption
-                par.mobseti = 0;
-            
-                %Hold device at Vpulse for tsample 
-                %On paper they say this is 1e-3 seconds after the pulse applied 
-                par.tmesh_type = 1;
-                par.t0 = 0;
-                par.tmax = tsample;
-                par.tpoints = 100;
-            
-                par.V_fun_type = 'constant';
-                par.V_fun_arg(1) = Vpulse(j);
-                
-                if verbose == 1
-                    disp(['Vpulse = ' num2str(Vpulse(j)) ' V'])
-                end
-                try
-                    SaPsol{i,j+1} = df(sol, par);
-                    SaPsol{i,j+1}.Jpulse = dfana.calcJ(SaPsol{i,j+1}).tot(end,1);
-                catch
-                    warning(['Could not solve Vpulse = ' num2str(Vpulse(j)) ' V'])
-                    SaPsol{i,j+1}.Jpulse = 0;
-                end 
-            end
-            
+        SaPsol.par.vsr_check = 0;
+        %turn off ion motion for the duration of the JV
+        %assuming that this is a valid assumption
+        SaPsol.par.mobseti = 0;
+        try 
+            fixed_ion_JV = doCV(SaPsol, light_intensity, -0.2, 1.2, -0.2, 1e-2, 0.5, 146);
+            V_fixed_ion = dfana.calcV(fixed_ion_JV);
+            J_fixed_ion = dfana.calcJ(fixed_ion_JV).tot(:,1);
+            J_return(i,:) = interp1(V_fixed_ion(1:end), J_fixed_ion(1:end), Vpulse);
+        catch 
+            warning(['Could not do JV for Vbias = ' num2str(Vbias(i)) ' V'])
+            J_return(i,:) = 0;
         end 
     else
-        for j = 1:num_pulses
-            SaPsol{i,j}.Jpulse = 0;
-        end
+        J_return(i,:) = 0;
     end
-end
+
+end    
+
