@@ -44,6 +44,6 @@ xlim([0, max([V1, V2])])
 xlabel('Voltage (V)')
 ylim([J_values(1,1)*1.1, 0.01])
 ylabel('Current Density (Acm^{-2})')
-legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', 'J_{surface}', '', 'J_{ext}'}, 'Location', 'bestoutside')
+legend({'J_{gen}', 'J_{rad}x100', 'J_{SRH}', '', 'J_{surface}', 'J_{ext}'}, 'Location', 'bestoutside')
 
 end

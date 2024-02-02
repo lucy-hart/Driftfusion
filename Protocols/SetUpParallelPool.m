@@ -1,5 +1,3 @@
-setenv('PYTHONPATH', '$HOME/anaconda3')
-
 ps = parallel.Settings;
 ps.Pool.AutoCreate = false; %do not autocreate parpool when encountering a |parfor|
 ps.Pool.IdleTimeout = Inf;  %do not shutdown parpool after Inf idle time

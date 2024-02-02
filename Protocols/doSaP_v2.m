@@ -1,4 +1,4 @@
-function SaPsol = doSaP_v2(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, light_intensity, verbose)
+function SaPsol = doSaP_v2(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, light_intensity)
 % Performs a simulation of a stabilise and pulse (SaP) measurement
 % Input arguments:
 % SOL_INI = solution containing intitial conditions (dark eqm device)
@@ -31,7 +31,6 @@ sol_ill = changeLight(sol_ini, light_intensity, 0, 1);
 for i = 1:num_bias
     
     par = sol_ill.par;
-    par.vsr_check = 0;
     
     try
         %ramp voltage up to the applied voltage 
@@ -48,7 +47,6 @@ for i = 1:num_bias
         sol = df(sol_ill, par);
     
         par = sol.par;
-        par.vsr_check = 0;
     
         %Hold device at Vbias for time tstab
         par.tmesh_type = 1;
@@ -59,9 +57,8 @@ for i = 1:num_bias
         par.V_fun_type = 'constant';
         par.V_fun_arg(1) = Vbias(i);
         
-        if verbose == 1
-            disp(['Stabilising solution at ' num2str(Vbias(i)) ' V'])
-        end
+        disp(['Stabilising solution at ' num2str(Vbias(i)) ' V'])
+
         SaPsol{i,1} = df(sol, par);
     catch 
         try
@@ -79,7 +76,6 @@ for i = 1:num_bias
             sol = df(sol_ill, par);
         
             par = sol.par;
-            par.vsr_check = 0;
         
             %Hold device at Vbias for time tstab
             par.tmesh_type = 1;
@@ -90,9 +86,8 @@ for i = 1:num_bias
             par.V_fun_type = 'constant';
             par.V_fun_arg(1) = Vbias(i) + 0.01;
             
-            if verbose == 1
-                disp(['Stabilising solution at ' num2str(Vbias(i) + 0.01) ' V'])
-            end
+            disp(['Stabilising solution at ' num2str(Vbias(i) + 0.01) ' V'])
+
             SaPsol{i,1} = df(sol, par);
     
             Vbias(i) = Vbias(i) + 0.01;
@@ -112,7 +107,6 @@ for i = 1:num_bias
                 sol = df(sol_ill, par);
             
                 par = sol.par;
-                par.vsr_check = 0;
             
                 %Hold device at Vbias for time tstab
                 par.tmesh_type = 1;
@@ -123,9 +117,8 @@ for i = 1:num_bias
                 par.V_fun_type = 'constant';
                 par.V_fun_arg(1) = Vbias(i) - 0.01;
                 
-                if verbose == 1
-                    disp(['Stabilising solution at ' num2str(Vbias(i) - 0.01) ' V'])
-                end
+                disp(['Stabilising solution at ' num2str(Vbias(i) - 0.01) ' V'])
+
                 SaPsol{i,1} = df(sol, par);
         
                 Vbias(i) = Vbias(i) - 0.01;
@@ -141,12 +134,11 @@ end
 %% Perform the Pulsed JV for each Vbias 
 for i = 1:num_bias
     if Vbias(i) ~= 100
-        if verbose == 1
-            disp(['Starting SaP for Vstab = ' num2str(Vbias(i)) ' V'])    
-        end
+
+        disp(['Starting SaP for Vstab = ' num2str(Vbias(i)) ' V'])    
+
         for j = 1:num_pulses
             par = SaPsol{i,1}.par;
-            par.vsr_check = 0;
         
             %turn off ion motion for the duration of the pulse
             %assuming that this is a valid assumption
@@ -176,7 +168,6 @@ for i = 1:num_bias
             elseif isa(sol, 'struct')
         
                 par = sol.par;
-                par.vsr_check = 0;
             
                 %turn off ion motion for the duration of the pulse
                 %assuming that this is a valid assumption
@@ -192,9 +183,8 @@ for i = 1:num_bias
                 par.V_fun_type = 'constant';
                 par.V_fun_arg(1) = Vpulse(j);
                 
-                if verbose == 1
-                    disp(['Vpulse = ' num2str(Vpulse(j)) ' V'])
-                end
+                disp(['Vpulse = ' num2str(Vpulse(j)) ' V'])
+
                 try
                     SaPsol{i,j+1} = df(sol, par);
                     SaPsol{i,j+1}.Jpulse = dfana.calcJ(SaPsol{i,j+1}).tot(end,1);

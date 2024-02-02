@@ -4,7 +4,7 @@ Created on Wed Jan 10 13:55:37 2024
 
 @author: ljh3218
 """
-
+from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 import matlab.engine as matlab
@@ -22,7 +22,7 @@ def run_simulation(eng, inputs):
 
     # Call the master function in MATLAB using the MATLAB engine and calculate outputs
     #Set the bias voltages and pulse voltages here 
-    #NB: remeber that theese need to be lists! Also, all need to be the same data type 
+    #NB: remember that theese need to be lists! Also, all need to be the same data type 
     #so use 0.0, not just 0
     Vbias = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2]
     Vpulse = [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6,
@@ -31,11 +31,13 @@ def run_simulation(eng, inputs):
     sol = eng.SaP_test_params(params_list, Vbias, Vpulse)
     sol = np.asarray(sol)
     sol = sol.flatten()
+    
+    print(sol)
 
     return sol
 
 # Define the Metropolis Hastings algorithm
-def metropolis_hastings(eng, initial_state, num_samples):
+def metropolis_hastings(eng, initial_state, num_samples, t_start, duration):
     # Initialize the current state and likelihood
     current_state = initial_state
     current_log_posterior = log_posterior(eng, current_state)
@@ -46,33 +48,79 @@ def metropolis_hastings(eng, initial_state, num_samples):
     
     # Loop over the desired number of samples
     for i in range(num_samples):
-        # Propose a new state using the proposal distribution
-        proposed_state = proposal_distribution(current_state)
-        while log_prior(proposed_state) == -np.inf:
+        if datetime.now() < t_start + timedelta(hours = duration - 1):
+            # Propose a new state using the proposal distribution
             proposed_state = proposal_distribution(current_state)
-        
-        # Calculate the posterior of the proposed state
-        proposed_log_posterior = log_posterior(eng, proposed_state)
-        
-        # Debugging print
-        # print(f"Proposed state: {proposed_state}")
-        print(f"Posterior: {np.exp(proposed_log_posterior)}")
-
-        # Calculate the acceptance ratio
-        acceptance_ratio = min(1, np.exp(proposed_log_posterior - current_log_posterior))
-        
-        # Accept or reject the proposed state
-        if np.random.uniform() < acceptance_ratio:
-            current_state = proposed_state
-            current_log_posterior = proposed_log_posterior
-            acceptance_rate += 1.0
-        
-        # Add the current state to the samples
-        samples.append(current_state)
-        print(i)
+            while log_prior(proposed_state) == -np.inf:
+                proposed_state = proposal_distribution(current_state)
+            
+            # Calculate the posterior of the proposed state
+            proposed_log_posterior = log_posterior(eng, proposed_state)
+            
+            # Debugging print
+            # print(f"Proposed state: {proposed_state}")
+            print(f"Posterior: {np.exp(proposed_log_posterior)}")
+    
+            # Calculate the acceptance ratio
+            acceptance_ratio = min(1, np.exp(proposed_log_posterior - current_log_posterior))
+            
+            # Accept or reject the proposed state
+            if np.random.uniform() < acceptance_ratio:
+                current_state = proposed_state
+                current_log_posterior = proposed_log_posterior
+                acceptance_rate += 1.0
+            
+            # Add the current state to the samples
+            samples.append(current_state)
+        else:
+            print('Ran out of time, completed {} iterations'.format(i))
+            break
     
     # Return the samples and acceptance rate
     return samples, acceptance_rate / num_samples
+
+# Define the Metropolis Hastings algorithm
+def metropolis_hastings_continue(eng, initial_state, num_samples, acceptance_rate, num_previous_samples, t_start, duration):
+    # Initialize the current state and likelihood
+    print(initial_state)
+    current_state = initial_state
+    current_log_posterior = log_posterior(eng, current_state)
+    
+    # Initialize the samples and acceptance rate
+    samples = [current_state]
+    
+    # Loop over the desired number of samples
+    for i in range(num_samples):
+        if datetime.now() < t_start + timedelta(hours = duration - 1):
+            # Propose a new state using the proposal distribution
+            proposed_state = proposal_distribution(current_state)
+            while log_prior(proposed_state) == -np.inf:
+                proposed_state = proposal_distribution(current_state)
+            
+            # Calculate the posterior of the proposed state
+            proposed_log_posterior = log_posterior(eng, proposed_state)
+            
+            # Debugging print
+            # print(f"Proposed state: {proposed_state}")
+            print(f"Posterior: {np.exp(proposed_log_posterior)}")
+    
+            # Calculate the acceptance ratio
+            acceptance_ratio = min(1, np.exp(proposed_log_posterior - current_log_posterior))
+            
+            # Accept or reject the proposed state
+            if np.random.uniform() < acceptance_ratio:
+                current_state = proposed_state
+                current_log_posterior = proposed_log_posterior
+                acceptance_rate += 1.0
+            
+            # Add the current state to the samples
+            samples.append(current_state)
+        else:
+            print('Ran out of time, completed {} iterations'.format(i))
+            break
+    
+    # Return the samples and acceptance rate
+    return samples, acceptance_rate / (num_samples+num_previous_samples)
 
 # Scale the outputs so they are same order of magnitude
 def scale_outputs(outputs):
@@ -99,9 +147,13 @@ def log_prior(inputs):
 def log_likelihood(eng, inputs):
     outputs = run_simulation(eng, inputs)
     outputs = scale_outputs(outputs)
+    
+    #Put this here as the simulation returns 0 for SaP measuremnts where the solver breaks
+    #This can happen even if the parameters are good ones, so don't want to penalise these too harshly 
+    non_zero_outputs = outputs[outputs != 0]
 
     # Calculate the mean squared error between the logged outputs and experimental logged outputs y
-    mse = np.mean((outputs - np.ones((len(y),)))**2)
+    mse = np.mean((non_zero_outputs - np.ones((len(non_zero_outputs),)))**2)
     # Return the log_likelihood, which is proportional to -0.5 * mse for a normal distribution
     return (-0.5 * mse/0.05)
 
@@ -113,7 +165,7 @@ def log_posterior(eng, inputs):
 def proposal_distribution(current_state):
     return np.random.normal(current_state, jump_dist_sigmas*np.abs(current_state))
 
-def run_single_chain(n_iter):
+def run_single_chain(n_iter, t_start, duration = 100, new_chain = 1):
     ranges = np.asarray([[1e16, 1e19],      # mobile ion vacancy density
                          [0.01, 0.5],       # HTL Energy Offset
                          [0.01, 0.5],       # ETL Energy Offset 
@@ -134,10 +186,23 @@ def run_single_chain(n_iter):
     
     y = get_input_data()
     
-    jump_dist_sigmas = 0.01*np.ones(len(prior_ranges[:,0]))
+    jump_dist_sigmas = np.asarray([0.01,      # mobile ion vacancy density
+                                   0.05,      # HTL Energy Offset
+                                   0.05,      # ETL Energy Offset 
+                                   0.05,      # HTL Fermi Level Offset 
+                                   0.05,      # ETL Fermi Level Offset
+                                   0.01,      # electron bulk lifetime
+                                   0.01,      # hole bulk lifetime
+                                   0.05,      # v_surf at HTL/pero interface
+                                   0.05,      # v_surf at ETL/pero interface 
+                                   0.05,      # e- mobility in perovskite
+                                   0.05,      # h+ mobility in perovskite 
+                                   0.05,      # e- mobility in ETL 
+                                   0.05,      # h+ mobility in HTL
+                                   0.05])     # permittivity of ETL 
     
     np.random.seed()
-    initial_inputs = initial_sample()
+    
     # Start the MATLAB engine
     try:
         eng = matlab.start_matlab("-nosplash -nodisplay")
@@ -145,7 +210,18 @@ def run_single_chain(n_iter):
         eng.SetUpParallelPool(nargout=0)
 
         # Run the Metropolis Hastings algorithm to sample from the likelihood distribution
-        samples, acceptance_rate = metropolis_hastings(eng, initial_inputs, num_samples=n_iter)
+        if new_chain == 1:
+            initial_inputs = initial_sample()
+            samples, acceptance_rate = metropolis_hastings(eng, initial_inputs, num_samples=n_iter,
+                                                           t_start = t_start, duration = duration)
+        elif new_chain == 0:
+            previous_chain = pd.read_csv('ExcludeZeros-f0ff896081ed42768cbd01cb4f813692.csv', header = 0, index_col = 0)
+            acc = 0.74   #Fill this in
+            initial_inputs = previous_chain.iloc[-1].to_numpy()
+            last_idx = previous_chain.index[-1]
+            samples, acceptance_rate = metropolis_hastings_continue(eng, initial_inputs, num_samples=n_iter,
+                                                           acceptance_rate = acc, num_previous_samples = last_idx, 
+                                                           t_start = t_start, duration = duration)
 
         # Print the acceptance rate and the mean and standard deviation of the samples
         print(f"Acceptance rate: {acceptance_rate:.2f}")
@@ -166,7 +242,9 @@ def get_input_data():
     return flat_data_ar
 
 if __name__ == "__main__":
+    t_start = datetime.now()
+    duration = 2 #hours
     n_iter = 100
-    result = run_single_chain(n_iter)   
+    result = run_single_chain(n_iter, t_start, duration, new_chain = 0)   
     df = pd.DataFrame(result)
     df.to_csv('{}.csv'.format(uuid.uuid4().hex))

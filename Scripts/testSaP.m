@@ -4,7 +4,7 @@
 par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP.csv');
 % par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
 
-compare_fixed_ion_JV = 1;
+compare_fixed_ion_JV = 0;
 
 % DHOMO = 0.2;
 % DLUMO = -0.2;
@@ -62,14 +62,13 @@ if check_JV ==1
     ylabel('Voltage (V)')
 end
 %% Do the SaP measurement
-%Vbias = linspace(0,1.2,7);
-Vbias = [0 0.6 1.2];
+Vbias = linspace(0,1.2,13);
 Vpulse = linspace(0,1.2,25);
 tramp = 8e-4;
 tsample = 1e-3;
 tstab = 200;
 
-sol = doSaP_v2(eqm.ion, Vbias, Vpulse, tramp, tsample, tstab, suns, 1);
+sol4 = doSaP_multi(eqm.ion, Vbias, Vpulse, tramp, tsample, tstab, suns);
 
 %% Do JVs with mobseti = 0 to compare the SaP JVs
 fixed_ion_JVs = cell(1, length(Vbias));
@@ -146,11 +145,10 @@ yline(0, 'black', 'HandleVisibility', 'off')
 
 for i = 1:length(Vbias)
     Jpulse = zeros(1, length(Vpulse));
-    Jpulse2 = zeros(1, length(Vpulse));
     for j = 1:length(Vpulse)
-        Jpulse(j) = sol{i,j+1}.Jpulse;
+        Jpulse(j) = sol4{i,j+1}.Jpulse;
     end
-    plot(Vpulse(:), 1e3*Jpulse, 'DisplayName', num2str(Vbias(i), '%.1f'), 'color', cmap(i,:))
+    plot(Vpulse(Jpulse ~= 0), 1e3*Jpulse(Jpulse ~= 0), 'DisplayName', num2str(Vbias(i), '%.1f'), 'color', cmap(i,:))
     if compare_fixed_ion_JV == 1
         plot(V_fixed_ion, 1e3*J_fixed_ion{i}, 'HandleVisibility', 'Off', 'color', 'black', 'LineStyle', ':')
     end
@@ -186,10 +184,61 @@ xlim([0, 1e7*max(fixed_ion_JVs{1}.x)])
 legend()
 title(legend, 'V_{bias} (V)')
 
-%%
-% i = 1;
-% Jpulse = zeros(length(Vpulse),1);
-% for j = 1:length(Vpulse)
-%     Jpulse(j) = sol{i,j+1}.Jpulse;
-% end
+%% Do SaP analysis
+all_data = {sol, sol2, sol3, sol4};
+Jvalues = zeros(length(Vbias), length(Vpulse),length(all_data));
+Voc = zeros(length(all_data), length(Vbias));
+dJdV_Voc = zeros(length(all_data), length(Vbias));
+for k = 1:length(all_data)
+    data = all_data{k};
+    for i = 1:length(Vbias)
+        for j = 1:length(Vpulse)
+            Jvalues(i,j,k) = data{i,j+1}.Jpulse;
+        end
+    end
+end  
+
+colours = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980], [0.4660 0.6740 0.1880], [0.9290 0.6940 0.1250]};
+h = Vbias(2) - Vbias(1);
+for k = 1:length(all_data)
+    for i = 1:length(Vbias)
+        J_temp = Jvalues(i,:,k);
+        Voc(i) = interp1(J_temp(J_temp~=0), Vpulse(J_temp~=0), 0);
+        dJdV = gradient(J_temp(J_temp~=0), Vpulse(J_temp~=0));
+        plot(Vpulse(J_temp~=0), dJdV, color = colours{k})
+        hold on
+        dJdV_Voc(k,i) = interp1(Vpulse(J_temp~=0), dJdV, Voc(i));
+    end
+end
+
+%% Plot SaP analysis
+%NB: Smaller DeltaE_ETL also had vs = 50 cms-1
+figure('Name', 'SaP-Analysis')
+
+subplot(1,2,1)
+hold on
+box on
+xline(0, 'black', 'HandleVisibility', 'off')
+yline(0, 'black', 'HandleVisibility', 'off')
+plot(Vbias, dJdV_Voc(2,:),'DisplayName','v_s = 50 cm s^{-1}', 'Color', [0 0.4470 0.7410])
+plot(Vbias, dJdV_Voc(1,:),'DisplayName','v_s = 1 cm s^{-1}', 'Color', [0.8500 0.3250 0.0980])
+
+xlabel('V_{bias} (V)')
+xlim([Vbias(1), Vbias(end)])
+ylabel('dJ/dV|_{Voc} (\Omega^{-1} cm^{-2})')
+legend('Location', 'northwest')
+
+subplot(1,2,2)
+hold on
+box on
+xline(0, 'black', 'HandleVisibility', 'off')
+yline(0, 'black', 'HandleVisibility', 'off')
+plot(Vbias, dJdV_Voc(2,:),'DisplayName','V_{flat} = 0.6 eV', 'Color', [0 0.4470 0.7410])
+plot(Vbias, dJdV_Voc(3,:),'DisplayName','V_{flat} = 0.8 eV (asymmetric)', 'Color', [0.4660 0.6740 0.1880])
+plot(Vbias, dJdV_Voc(4,:),'DisplayName','V_{flat} = 0.8 eV (symmetric)', 'Color', [0.9290 0.6940 0.1250])
+
+xlabel('V_{bias} (V)')
+xlim([Vbias(1), Vbias(end)])
+ylabel('dJ/dV|_{Voc} (\Omega^{-1} cm^{-2})')
+legend('Location', 'northwest')
 
