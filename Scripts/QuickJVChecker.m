@@ -3,9 +3,9 @@
 %par=pc('Input_files/SnO2_C60_MAPI_Spiro.csv');
 %par=pc('Input_files/TiO2_MAPI_Spiro.csv');
 % par=pc('Input_files/SnO2_MAPI_Spiro_TestSaP.csv');
-%par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP.csv');
+par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP.csv');
 % par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
-par=pc('Input_files/1_layer_test.csv');
+% par=pc('Input_files/1_layer_test.csv');
 % doped = 0;
 % if doped == 1
 %     par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');

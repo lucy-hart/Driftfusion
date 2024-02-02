@@ -260,7 +260,7 @@ classdef dfana
             % Volumetric surface SRH
             ns = n.*exp(-alpha_xn.*xprime_n); % Projected electron surface density
             ps = p.*exp(-beta_xp.*xprime_p);  % Projected hole surface density
-            r.vsr = vsr_zone.*(ns.*ps - dev.ni.^2)...
+            r.vsr = vsr_zone.*(ns.*ps - dev.nt.*dev.pt)...
                 ./(dev.taun_vsr.*(ps + dev.pt) + dev.taup_vsr.*(ns + dev.nt));
             % System boundary surface recombination i.e. minority carrier
             % currents

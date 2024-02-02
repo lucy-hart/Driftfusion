@@ -94,7 +94,7 @@ for i = 1:length(loc)
         R_vsr(k, i) = trapz(x_sub(p_L-1:p_R+1), rx.vsr(k, p_L-1:p_R+1), 2);
     end
     
-    R_abrupt(:, i) = (ns(:, i).*ps(:, i) - ni^2)./((1/sn).*(ps(:, i) + pt) + (1/sp).*(ns(:, i) + nt));
+    R_abrupt(:, i) = (ns(:, i).*ps(:, i) - nt*pt)./((1/sn).*(ps(:, i) + pt) + (1/sp).*(ns(:, i) + nt));
     
     %% Fractional difference
     sigma(:, i) = ((R_abrupt(:, i) - R_vsr(:, i))./R_abrupt(:, i));
