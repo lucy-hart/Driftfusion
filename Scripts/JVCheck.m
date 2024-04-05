@@ -1,6 +1,6 @@
 par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJ_SRH.csv');
-%par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_ShowInterface.csv');
-% par = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
+% par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
+%par = pc('Input_files/SAM_MAFACsPbIBr_C60_Dark.csv');
 eqm = equilibrate(par);
 
 CV_sol_ion = doCV(eqm.ion, 1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
