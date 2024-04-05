@@ -87,7 +87,7 @@ for i = 1:length(loc)
         %Put this clause in to deal with the type-1 heterojunctions we
         %have in the perovskite/BHJ quasi-tandems
         %Assumes the type-1 heterojuctions is at the pero/ETL interface
-        if i ~=100
+        if i ~=4
             if alpha(k, p_L) <= 0
                 ns(k, i) = n(k, p_L);
             elseif alpha(k, p_L) > 0
@@ -99,7 +99,7 @@ for i = 1:length(loc)
             elseif beta(k, p_L) > 0
                 ps(k, i) = p(k, p_R);
             end
-        elseif i == 100
+        elseif i == 4
             ns(k, i) = n(k, p_R);
             ps(k, i) = p(k, p_L);
             ns2(k, i) = n(k, p_L);
@@ -119,6 +119,7 @@ for i = 1:length(loc)
 
     
     %% Fractional difference
+    %sigma(:, i) = ((R_abrupt(:, i) - (R_vsr(:, i))))./(R_abrupt(:, i)); 
     sigma(:, i) = ((R_abrupt(:, i)+R_abrupt_2(:, i) - (R_vsr(:, i)+R_vsr2(:, i))))./(R_abrupt(:, i)+R_abrupt_2(:, i));    
         
     if plot_switch

@@ -6,18 +6,19 @@
 % parC60 = pc('Input_files/SAM_MAPI_C60.csv');
 % parPM6 = pc('Input_files/SAM_MAPI_PM6Y6.csv');
 % parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
-% parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
+parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJ_SRH.csv');
 % parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6.csv');
 parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
-parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJSurf.csv');
-parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6_BHJSurf.csv');
-parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PCE12Y6_BHJSurf.csv');
+%parC60.AbsTol_vsr = 1e10;
+% parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJSurf.csv');
+% parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6_BHJSurf.csv');
+% parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PCE12Y6_BHJSurf.csv');
 % parC60 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_NoC60.csv');
 % parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PBDBTY6.csv');
 % parPBDBT = pc('Input_files/SAM_MAPI_PBDBTY6.csv');
 %parPM6 = pc('Input_files/HTL_MAPI_PM6Y6_C60_DavideValues.csv');
 
-devices = {parC60, parPM6, parPBDBT};
+% devices = {parC60, parPM6, parPBDBT};
 %%
 run_C60 = 1;
 light = 1;
@@ -44,25 +45,25 @@ end
 
 if run_C60 == 1
     eqm_QJV_C60 = equilibrate(parC60);
-    CV_sol_C60 = doCV(eqm_QJV_C60.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
+    CV_sol_C60 = doCV(eqm_QJV_C60.ion, 0, Vmin, 1.25, Vmin, scan_rate, 1, 291);
     J_C60 = dfana.calcJ(CV_sol_C60);
     if light == 1
         stats_C60 = CVstats(CV_sol_C60);
-        %Plot_Current_Contributions(CV_sol_C60)
+        Plot_Current_Contributions(CV_sol_C60)
     end
 end
 
-eqm_QJV_PM6 = equilibrate(parPM6);
-CV_sol_PM6 = doCV(eqm_QJV_PM6.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
+%eqm_QJV_PM6 = equilibrate(parPM6);
+CV_sol_PM6 = doCV(eqm_QJV_C60.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
 stats_PM6 = CVstats(CV_sol_PM6);
 Plot_Current_Contributions(CV_sol_PM6)
-
-eqm_QJV_PM7 = equilibrate(parPM7);
-CV_sol_PM7 = doCV(eqm_QJV_PM7.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
-
-eqm_QJV_PBDBT = equilibrate(parPBDBT);
-CV_sol_PBDBT = doCV(eqm_QJV_PBDBT.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
-Plot_Current_Contributions(CV_sol_PBDBT)
+% 
+% eqm_QJV_PM7 = equilibrate(parPM7);
+% CV_sol_PM7 = doCV(eqm_QJV_PM7.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
+% 
+% eqm_QJV_PBDBT = equilibrate(parPBDBT);
+% CV_sol_PBDBT = doCV(eqm_QJV_PBDBT.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
+% Plot_Current_Contributions(CV_sol_PBDBT)
 
 if noions == 1
     if run_C60 == 1
@@ -75,8 +76,8 @@ end
 
 Vapp = dfana.calcVapp(CV_sol_PM6);
 J_PM6Y6 = dfana.calcJ(CV_sol_PM6);
-J_PM7Y6 = dfana.calcJ(CV_sol_PM7);
-J_PBDBTY6 = dfana.calcJ(CV_sol_PBDBT);
+% J_PM7Y6 = dfana.calcJ(CV_sol_PM7);
+% J_PBDBTY6 = dfana.calcJ(CV_sol_PBDBT);
 
 %%
 if run_C60 == 1 && light == 1
@@ -87,9 +88,9 @@ if run_C60 == 1 && light == 1
     xline(0, 'LineWidth', 2, 'Color', 'black')
     yline(0, 'LineWidth', 2, 'Color', 'black')
     plot(Vapp(1:145), 1e3*J_C60.tot(1:145,1), 'LineWidth', 4, 'Color', 'black')
-    plot(Vapp(1:145), 1e3*J_PBDBTY6.tot(1:145,1), 'LineWidth', 4, 'Color', [0.4660 0.6740 0.1880])
+    %plot(Vapp(1:145), 1e3*J_PBDBTY6.tot(1:145,1), 'LineWidth', 4, 'Color', [0.4660 0.6740 0.1880])
     plot(Vapp(1:145), 1e3*J_PM6Y6.tot(1:145,1), 'LineWidth', 4, 'Color', 'red')
-    plot(Vapp(1:145), 1e3*J_PM7Y6.tot(1:145,1), 'LineWidth', 4, 'Color', [0 0.4470 0.7410])
+    %plot(Vapp(1:145), 1e3*J_PM7Y6.tot(1:145,1), 'LineWidth', 4, 'Color', [0 0.4470 0.7410])
     if noions == 1
         plot(Vapp(1:145), 1e3*J_C60_noions.tot(1:145,1), 'LineWidth', 4, 'Color', 'black', 'LineStyle', ':')
         plot(Vapp(1:145), 1e3*J_PM6Y6_noions.tot(1:145,1), 'LineWidth', 4, 'Color', 'red', 'LineStyle', ':')

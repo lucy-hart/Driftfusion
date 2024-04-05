@@ -9,7 +9,7 @@ if read_in_par == 1
     parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PCE12Y6_BHJ_SRH.csv');
 end
 
-vis = 0;
+vis = 1;
 if vis == 1
     wavelength = 405;
 elseif vis == 0
@@ -44,7 +44,7 @@ for i = 1:num_devices
     bias_solution{i} = genVappStructs(eqm{i}.ion, -0.5, 1);
     bias_solution{i}.par.int1 = 0;
     bias_solution{i}.par.int2 = 1;
-    bias_solution{i}.par.Rs = 10*0.045;
+    bias_solution{i}.par.Rs = 50*0.045;
     pulse_solution{i} = doLightPulse(bias_solution{i}, power, 200e-6, 1000, 50, 1, 1);
     Jt{i} = dfana.calcJ(pulse_solution{i}).tot;
 end
@@ -62,8 +62,8 @@ end
 
 box on
 hold on
-xline(11.3)
-yline(0.9)
+%xline(11.3)
+%yline(0.9)
 plot(1e6*pulse_solution{1}.t, ...
     smoothed_square([0, 10, 200e-6, 50],pulse_solution{1}.t)/max(abs(smoothed_square([0, 10, 200e-6, 50],pulse_solution{1}.t))), ...
     'LineStyle', '-', 'HandleVisibility', 'off')
@@ -80,5 +80,6 @@ ylim([-0.1, 1.5])
 if wavelength == 405
     legend({' C_{60}', ' PM6:Y6', ' PCE12:Y6'}, 'FontSize', 25, 'Location', 'northeast')
 elseif wavelength == 800
-    legend({' PM6:Y6', ' PCE12:Y6'}, 'FontSize', 25, 'Location', 'northeast')
+    legend({' 10^{-4} cm^2V^{-1}s^{-1}', ' 10^{-5} cm^2V^{-1}s^{-1}'}, 'FontSize', 20, 'Location', 'northeast')
 end
+title(legend, 'Hole Mobility', 'FontSize', 20)

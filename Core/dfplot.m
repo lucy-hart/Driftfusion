@@ -617,7 +617,7 @@ classdef dfplot
             [u,t,x,par,dev,n,p,a,c,V] = dfana.splitsol(sol);
             [Ecb, Evb, Efn, Efp] = dfana.calcEnergies(sol);
 
-            figure(22);
+            figure('Name', 'ELx');
             dfplot.x2d(sol, x, {Efn, Efp, Ecb, Evb}, {'E_{fn}', 'E_{fp}', 'E_{CB}', 'E_{VB}'},...
                 {'--', '--', '-', '-'}, 'Energy [eV]', tarr, xrange, 0, 0)
         end

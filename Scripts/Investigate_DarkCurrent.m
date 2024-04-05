@@ -6,6 +6,7 @@
 % parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6.csv');
 % parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PBDBTY6.csv');
 parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
+parC60.AbsTol_vsr = 1e-20;
 % parY6 = pc('Input_files/SAM_MAFACsPbIBr_Y6.csv');
 parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_ShowInterface.csv');
 % parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6_BHJSurf.csv');
@@ -15,7 +16,7 @@ eqm_C60 = equilibrate(parC60);
 % parPM6.RelTol = 1e-9;
 % parPM7.RelTol = 1e-9;
 % parPBDBT.RelTol = 1e-9;
-eqm_PM6 = equilibrate(parPM6);
+%eqm_PM6 = equilibrate(parPM6);
 % eqm_PM7 = equilibrate(parPM7);
 % eqm_PBDBT = equilibrate(parPBDBT);
 % parC60.AbsTol = 1e-12;
@@ -49,7 +50,7 @@ t_hold = 60;
 voltage_ar = [-5 -4 -3 -2 -1 -0.5 0 0.1];
 % voltage_ar = linspace(-0.5, 0.1, 7);
 Jdark = doDarkJV(eqm_C60.el, voltage_ar, t_hold);
-Jdark2 = doDarkJV(eqm_PM6.ion, voltage_ar, t_hold);
+%Jdark2 = doDarkJV(eqm_PM6.ion, voltage_ar, t_hold);
 % Jdark3 = doDarkJV(eqm_PBDBT.ion, voltage_ar, t_hold);
 % Jdark4 = doDarkJV(eqm_PM7.ion, voltage_ar, t_hold);
 
