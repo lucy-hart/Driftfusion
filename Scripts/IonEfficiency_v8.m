@@ -14,7 +14,7 @@
 %TURN SAVE OFF TO START OFF WITH (final cell)
 %% Define parameter space
 %Choose to use doped or undoped TLs
-doped = 1;
+doped = 0;
 n_values = 7;
 Delta_TL = linspace(0, 0.3, n_values);
 %This is a bit of a hack, but if the offfset is exactly 0, the surface
@@ -223,39 +223,24 @@ labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 if doped == 1
     lims = [[-22 -18]; [0.98 1.165]; [0.15, 0.85]; [15 21]];
 else
-    lims = [[-22 -18]; [0.8 1.195]; [0.15, 0.85]; [2 21]];
+    lims = [[-22 -18]; [0.8 1.155]; [0.15, 0.85]; [13 19]];
 end
 
 box on 
 
 %Coutourf has column and row inidices as x and y respectively
-contourf(Delta_TL, Delta_TL, Stats_array_ion(:,:,num), 'LineWidth', 0.1)
-xlabel('\DeltaE_{HTL} (eV)')
-ylabel('\DeltaE_{ETL} (eV)')
+%Data has the form solCV{Delta_HTL, Delta_ETL}
+%For doped, light comes through ETL
+%For undoped "             "  HTL
+contourf(Delta_TL, Delta_TL, Stats_array_el(:,:,num), 'LineWidth', 0.1)
+xlabel('\DeltaE_{ETL} (eV)')
+ylabel('\DeltaE_{HTL} (eV)')
 xlim([0, 0.3])
 ylim([0, 0.3])
 c = colorbar;
 c.Label.String = labels(num);
 clim(lims(num,:))
 
-%%
-figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 800])
-num = 2;
-labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
-LegendLoc = ["northeast", "southwest", "southeast", "northeast"];
-
-box on 
-
-%Coutourf has column and row inidices as x and y respectively
-contourf(Delta_TL, v_sr, Stats_array_el(:,:,num)-Stats_array_el(:,:,num), 'LineWidth', 0.1)
-ylabel('Surface Recombination Velocity (cm s^{-1})')
-set(gca, 'YScale', 'log')
-xlabel('\DeltaE_{TL} (eV)')
-xlim([0, 0.3])
-ylim([0, 1e4])
-c = colorbar;
-c.Label.String = labels(num);
-%clim([-2,2])
 
 %% Save results and solutions
 save_file = 0;
@@ -263,17 +248,8 @@ if save_file == 1
     if doped == 0
         filename = 'DeltaE_v5_undoped.mat';
     elseif doped == 1
-        filename = 'DeltaE_v5_doped_VaryHTL_FixedETL_0p15eV_vsr_100cms-1.mat';
+        filename = 'DeltaETL_BothSides_v5.mat';
     end 
     save(filename, 'results', 'solCV')
 end
 
-%%
-figure('Name', 'FML')
-
-box on 
-hold on 
-plot(1e7*solCV_ion{1,7}.x, solCV_ion{1,7}.u(111,:,1), 'color', 'blue')
-plot(1e7*solCV_ion{7,1}.x, -flip(solCV_ion{7,1}.u(111,:,1)) + solCV_ion{7,1}.u(111,end,1), 'color', 'red')
-
-hold off

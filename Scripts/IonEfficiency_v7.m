@@ -14,7 +14,8 @@
 %TURN SAVE OFF TO START OFF WITH (final cell)
 %% Define parameter space
 %Choose to use doped or undoped TLs
-doped = 0;
+doped = 1;
+high_performance = 1;
 n_values = 7;
 Delta_TL = linspace(0, 0.3, n_values);
 
@@ -24,8 +25,6 @@ Delta_TL = linspace(0, 0.3, n_values);
 Delta_TL(1) = 1e-3;
 v_sr = logspace(0,3,7);
 n_recom  = length(v_sr);
-
-include_ions = 0;
 
 %Rows are the values of v_sr
 %Columns are the TL Energetic Offsets
@@ -50,13 +49,32 @@ results_el = cell(n_values, n_values);
 %% Do (many) JV sweeps
 %Select the correct input file for doped or undoped cases 
 if doped == 1
-    par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
+    if high_performance == 0
+        par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
+    elseif high_performance == 1
+        par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped_higherPCE.csv');
+    end
 elseif doped == 0
-    par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
-end 
+    if high_performance == 0
+        par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
+    elseif high_performance == 1
+        par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_higherPCE.csv');
+    end
+end
 
-%Set the illumination for the JV sweeps 
-illumination = 1;
+%Set the illumination for the JV sweeps and the max voltage to go up to in
+%the JV sweeps
+if high_performance == 0
+    illumination = 1;
+    max_val = 1.2;
+    phi_L = -5.15;
+    phi_R = -4.05;
+elseif high_performance == 1
+    illumination = 1.2;
+    max_val = 1.3;
+    phi_L = -5.2;
+    phi_R = -4.1;
+end
 
 %Piers version - set this to 1 to ensure that the WFs of the electrodes is
 %always equal to the Fermi level of the contacts - stops there being a
@@ -80,7 +98,7 @@ for i = 1:n_recom
         disp(["v_{sr} = ", num2str(v_sr(i)), " cm s^{-1}"])
 
         %HTL Energetics
-        par.Phi_left = -5.15;
+        par.Phi_left = phi_L;
         par.Phi_IP(1) = par.Phi_IP(3) + params{i,j}(2);
         par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
         par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
@@ -100,7 +118,7 @@ for i = 1:n_recom
 
         %ETL Energetics
         %Need to use opposite sign at ETL to keep energy offsets symmetric
-        par.Phi_right = -4.05;
+        par.Phi_right = phi_R;
         par.Phi_EA(5) = par.Phi_EA(3) - params{i,j}(2);
         par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
         par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
@@ -227,13 +245,13 @@ end
 
 %%
 figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 700])
-num = 4;
+num = 2;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 
 if doped == 1
     lims = [[-22 -18]; [0.8 1.195]; [0.15, 0.85]; [7 21]];
 else
-    lims = [[-22 -10]; [0.8 1.195]; [0.15, 0.85]; [2 21]];
+    lims = [[-22 -10]; [0.55 1.16]; [0.15, 0.85]; [5 25.5]];
 end
 
 box on 

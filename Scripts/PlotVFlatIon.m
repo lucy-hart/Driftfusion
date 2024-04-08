@@ -6,7 +6,7 @@
 num_ion_concs = length(solCV(:,1))-1;
 num_offsets = length(solCV(1,:));
 
-Symmetric = 0;
+Symmetric = 1;
 
 Vbi = zeros(1, num_offsets);
 TL_offset = zeros(1, num_offsets);
@@ -30,8 +30,8 @@ for i = 1:num_ion_concs
         if Symmetric == 1
             Vflat(i,j) = findVflation(solCV{i,j});
         elseif Symmetric == 0
-            V_ETL(i,j) = findVinvert_v2(solCV{i,j}).ETL;
-            V_HTL(i,j) = findVinvert_v2(solCV{i,j}).HTL;
+            V_ETL(i,j) = findVinvert_SAM(solCV{i,j}).ETL;
+            V_HTL(i,j) = findVinvert_SAM(solCV{i,j}).HTL;
         end
     end
 end
@@ -44,7 +44,7 @@ for i = 1:num_ion_concs
     hold on
     if i == 1
         plot(Delta_TL, Vbi, 'marker', 'x', 'Color', 'black')
-        plot(Delta_TL, V_Emin, 'marker', 'x', 'Color', 'magenta')
+        %plot(Delta_TL, V_Emin, 'marker', 'x', 'Color', 'magenta')
         plot(Delta_TL, TL_offset, 'marker', 'x', 'Color', 'green')
         if Symmetric == 0
             plot(Delta_TL, V_ETL(4,:), 'marker', 'o', 'Color', 'blue', 'LineStyle', 'None', 'MarkerSize', 10)
@@ -61,10 +61,12 @@ set(gca, 'Fontsize', 25)
 xlabel('Transport Layer Energetic Offset (eV)', 'FontSize', 30)
 ylabel('Voltage (V)', 'FontSize', 30)
 xlim([0, 0.3])
-ylim([0.9, 1.5])
-xticks([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3])
-xticklabels({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'})
-legend({'V_{BI}', 'V(E_{min,bulk})', '\DeltaE_{F,TL}', 'V_{invert,ETL}', 'V_{invert,HTL}'}, 'Location', 'southwest', 'FontSize', 25)
+ylim([0.65, 1.35])
+% xticks([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3])
+% xticklabels({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'})
+xticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])
+xticklabels({'0.00', '0.10', '0.20', '0.30', '0.40', '0.50'})
+%legend({'V_{BI}', 'V(E_{min,bulk})', '\DeltaE_{F,TL}', 'V_{invert,ETL}', 'V_{invert,HTL}'}, 'Location', 'southwest', 'FontSize', 25)
 
 %%
 Run = 0;

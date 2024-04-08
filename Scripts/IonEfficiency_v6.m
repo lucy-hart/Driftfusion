@@ -18,10 +18,11 @@
 tic
 %% Define parameter space
 %Choose to use doped or undoped TLs
-doped = 1;
+doped = 0;
+high_performance = 1;
 n_values = 7;
 Delta_TL = linspace(0, 0.3, n_values);
-Symmetric_offset = 0;
+Symmetric_offset = 1;
 %Fix the offset for the ETL or HTL
 Fix_ETL = 1;
 %Energetic offset between the perovskite and TL for the TL with fixed
@@ -54,13 +55,32 @@ results = cell(n_ion_concs, n_values);
 %% Do (many) JV sweeps
 %Select the correct input file for doped or undoped cases 
 if doped == 1
-    par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
+    if high_performance == 0
+        par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
+    elseif high_performance == 1
+        par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped_higherPCE.csv');
+    end
 elseif doped == 0
-    par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
+    if high_performance == 0
+        par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
+    elseif high_performance == 1
+        par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_higherPCE.csv');
+    end
 end 
 
-%Set the illumination for the JV sweeps 
-illumination = 1;
+%Set the illumination for the JV sweeps and the max voltage to go up to in
+%the JV sweeps
+if high_performance == 0
+    illumination = 1;
+    max_val = 1.2;
+    phi_L = -5.15;
+    phi_R = -4.05;
+elseif high_performance == 1
+    illumination = 1.2;
+    max_val = 1.3;
+    phi_L = -5.2;
+    phi_R = -4.1;
+end
 
 %Piers version - set this to 1 to ensure that the WFs of the electrodes is
 %always equal to the Fermi level of the contacts - stops there being a
@@ -89,7 +109,7 @@ for i = 1:n_ion_concs
 
         %HTL Energetics
         if Symmetric_offset == 1 || (Symmetric_offset == 0 && Fix_ETL == 1)
-            par.Phi_left = -5.15;
+            par.Phi_left = phi_L;
             par.Phi_IP(1) = par.Phi_IP(3) + params{i,j}(2);
             par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
             par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
@@ -106,7 +126,7 @@ for i = 1:n_ion_concs
                 par.Phi_left = par.Phi_IP(1) + 0.1;
             end
         elseif Symmetric_offset == 0 && Fix_ETL == 0
-            par.Phi_left = -5.15;
+            par.Phi_left = phi_L;
             par.Phi_IP(1) = par.Phi_IP(3) + Fixed_offset;
             par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
             par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
@@ -127,7 +147,7 @@ for i = 1:n_ion_concs
         %ETL Energetics
         %Need to use opposite sign at ETL to keep energy offsets symmetric
         if Symmetric_offset == 1 || (Symmetric_offset == 0 && Fix_ETL == 0)
-            par.Phi_right = -4.05;
+            par.Phi_right = phi_R;
             par.Phi_EA(5) = par.Phi_EA(3) - params{i,j}(2);
             par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
             par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
@@ -144,7 +164,7 @@ for i = 1:n_ion_concs
                 par.Phi_right = par.Phi_EA(5) - 0.1;
             end
         elseif Symmetric_offset == 0 && Fix_ETL == 1
-            par.Phi_right = -4.05;
+            par.Phi_right = phi_R;
             par.Phi_EA(5) = par.Phi_EA(3) - Fixed_offset;
             par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
             par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
@@ -180,10 +200,10 @@ for i = 1:n_ion_concs
         %electron only scan
         if i == n_ion_concs 
             Fermi_offset = par.EF0(5) - par.EF0(1);
-            if Fermi_offset > 1.2
+            if Fermi_offset > max_val
                 Voc_max = Fermi_offset + 0.05;
             else
-                Voc_max = 1.2;
+                Voc_max = max_val;
             end
             num_points = (2*100*(Voc_max+0.2))+1;
             while Voc_max >= 1.05
@@ -207,10 +227,10 @@ for i = 1:n_ion_concs
         
         else
             Fermi_offset = par.EF0(5) - par.EF0(1);
-            if Fermi_offset > 1.2
+            if Fermi_offset > max_val
                 Voc_max = Fermi_offset + 0.05;
             else
-                Voc_max = 1.2;
+                Voc_max = max_val;
             end
             num_points = (2*100*(Voc_max+0.2))+1; 
             while Voc_max >= 1.05
@@ -292,9 +312,11 @@ num = 2;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "northeast"];
 if doped == 0
-    lims = [[-23 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
+%     lims = [[-23 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
+    lims = [[-23 -15]; [0.77 1.24]; [0.5, 0.9]; [16 27]];
 elseif doped == 1
-    lims = [[-24 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
+%     lims = [[-24 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
+    lims = [[-24 -15]; [0.77 1.24]; [0.5, 0.9]; [18 27]];
 end
 box on 
 for i = 1:n_ion_concs
@@ -391,12 +413,12 @@ if plot_JVs == 1
 end
 
 %% Save results and solutions
-save_file = 0;
+save_file = 1;
 if save_file == 1
     if doped == 0
-        filename = 'DeltaE_v5_undoped.mat';
+        filename = 'DeltaE_v5_undoped_HigherPerforamnce.mat';
     elseif doped == 1
-        filename = 'DeltaE_v5_doped_VaryHTL_FixedETL_0p15eV_vsr_100cms-1.mat';
+        filename = 'DeltaE_v5_doped_HigherPerforamnce.mat';
     end 
     save(filename, 'results', 'solCV')
 end

@@ -13,15 +13,16 @@
 tic
 %% Define parameter space
 %Choose to use doped or undoped TLs and which of v_sr or tau_SRH to vary
-doped = 1;
+doped = 0.5;
 surface = 1;
 
 %Set up the parameters for the ion concentrations
-Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
+% Ion_Conc = [5e15 1e16 5e16 1e17 5e17 1e18 0];
+Ion_Conc = [1e18 0];
 n_ion_concs = length(Ion_Conc);
 
 if surface == 1
-    v_sr = [0.1 1 10 100 1000 1e4 1e5];
+    v_sr = logspace(-2,3,11);
     n_recom  = length(v_sr);
     %Rows are the ion concentrations    
     %Columns are the surface recombination velocities
@@ -48,21 +49,26 @@ end
 %Select the correct input file for doped or undoped cases
 if doped == 0
     par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
+    Voc_max_lim = 1.05;
 elseif doped == 1
     par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
+    Voc_max_lim = 1.05;
+elseif doped == 0.5
+    par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP.csv');
+    Voc_max_lim = 0.80;
 end
 
 %% Choose the nergetics of the TLs 
 %Default values are FILL THIS IN
 %Will use these values if Fiddle_with_Energetics is 0
-Fiddle_with_Energetics = 1;
+Fiddle_with_Energetics = 0;
 
 if Fiddle_with_Energetics == 1
     %Choose the offsets for the system
     %Positive offset for DHOMO means TL VB lies above the perovskite VB
     %Negative offset for DLUMO means TL CB lies below the perovskite CB
-    DHOMO = 0.2;
-    DLUMO = -0.2;
+    DHOMO = 0.35;
+    DLUMO = -0.35;
 
     %HTL Energetics
     par.Phi_left = -5.15;
@@ -113,9 +119,9 @@ illumination = 1;
 for i = 1:n_ion_concs
     for j = 1:n_recom
         if surface == 0
-            disp(["tau_SRH = ", num2str(tau_SRH(j)), " eV"])
+            disp(["tau_SRH = ", num2str(tau_SRH(j)), " s"])
         elseif surface == 1
-            disp(["v_sr = ", num2str(v_sr(j)), " eV"])
+            disp(["v_sr = ", num2str(v_sr(j)), " cm{^-1}"])
         end 
         if i < n_ion_concs 
             disp(["Ion_Conc = ", num2str(Ion_Conc(i)), " cm{^-3}"])
@@ -140,10 +146,13 @@ for i = 1:n_ion_concs
         %TL and so may not be as important as I think 
         %Could depend on which side of the interface the recombination
         %happens on?
-        elseif surface == 1
+        elseif surface == 1 && doped ~= 0.5
             par.sn(2) = params{i,j}(2);
             par.sn(4) = params{i,j}(2);
             par.sp(2) = params{i,j}(2);
+            par.sp(4) = params{i,j}(2);
+        elseif surface == 1 && doped == 0.5
+            par.sn(4) = params{i,j}(2);
             par.sp(4) = params{i,j}(2);
         end
 
@@ -162,20 +171,20 @@ for i = 1:n_ion_concs
         
         %electron only scan
         if i == n_ion_concs 
-            Voc_max = 1.2;
+            Voc_max = 1.1;
             num_points = 301;
-            while Voc_max >= 1.05
+            while Voc_max >= Voc_max_lim
                 try            
-                    solCV{i, j} = doCV(soleq{i, j}.el, illumination, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);           
+                    solCV{i, j} = doCV(soleq{i, j}.el, illumination, -0.2, Voc_max, -0.2, 1, 1, num_points);           
                     error_log(i,j) = 0;
                     results{i,j} = CVstats(solCV{i, j});
                     Voc_max = 0;                
                 catch
-                    if Voc_max > 1.05
+                    if Voc_max > Voc_max_lim
                         warning("Electronic-only JV solution failed, reducing Vmax by 0.03 V")
                         Voc_max = Voc_max - 0.03;
                         num_points = num_points - 6;
-                    elseif Voc_max == 1.05
+                    elseif Voc_max == Voc_max_lim
                         warning("Electronic-only JV solution failed.")
                         error_log(i,j) = 1;
                         results{i,j} = 0;
@@ -184,20 +193,20 @@ for i = 1:n_ion_concs
             end
         
         else
-            Voc_max = 1.2;
+            Voc_max = 1.1;
             num_points = 301; 
-            while Voc_max >= 1.05
+            while Voc_max >= Voc_max_lim
                 try
                     solCV{i, j} = doCV(soleq{i, j}.ion, illumination, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);
                     error_log(i,j) = 0;
                     results{i,j} = CVstats(solCV{i, j});
                     Voc_max = 0;
                 catch
-                    if Voc_max > 1.05
+                    if Voc_max > Voc_max_lim
                         warning("Ionic JV solution failed, reducing Vmax by 0.03 V")
                         Voc_max = Voc_max - 0.03;
                         num_points = num_points - 6;
-                    elseif Voc_max == 1.05
+                    elseif Voc_max == Voc_max_lim
                         warning("Ionic JV solution failed.")
                         error_log(i,j) = 1;
                         results{i,j} = 0;
@@ -263,6 +272,8 @@ if doped == 0
     lims = [[-24 -15]; [0.8 1.2]; [0.5, 0.9]; [10 23]];
 elseif doped == 1
     lims = [[-24 -15]; [0.8 1.2]; [0.5, 0.9]; [10 23]];
+elseif doped == 0.5
+    lims = [[-24 -15]; [0.85 1.1]; [0.5, 0.9]; [10 23]];
 end
 box on 
 for i = 1:n_ion_concs
@@ -296,11 +307,11 @@ if surface == 0
     xlim([1, 1000])
 elseif surface == 1
     xlabel('Surface Recombination Velocity (cm s^{-1})', 'FontSize', 30)
-    xlim([0.1, 1e5])
+    xlim([1e-1, 1e2])
 end
 ylabel(labels(num), 'FontSize', 30)
 ylim(lims(num,:))
-legend({' 1e15', ' 5e15', ' 1e16', ' 5e16', ' 1e17', ' 5e17', ' 1e18', ' No Ions'}, 'Location', 'southeast', 'FontSize', 25, 'NumColumns', 2)
+legend({' 5e15', ' 1e16', ' 5e16', ' 1e17', ' 5e17', ' 1e18', ' No Ions'}, 'Location', 'southeast', 'FontSize', 25, 'NumColumns', 2)
 title(legend, 'Ion Concentration (cm^{-3})', 'FontSize', 25)
 
 %% Plot JV as a function of recombination parameter for a given ion conc
@@ -310,7 +321,7 @@ Colours = parula(n_recom);
 %Set which ion concentration to plot for
 %Have coppied the array above so you can see which nuber is the right one
 %easily
-num_Ion_Conc = 8;
+num_Ion_Conc = 6;
 
 for j = 1:n_recom
     v = dfana.calcVapp(solCV{num_Ion_Conc, j});
@@ -340,7 +351,7 @@ ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
 ax1 = gcf;
 
 %% Save results and solutions
-save_file = 0;
+save_file = 1;
 if save_file == 1
     if doped == 0 && surface == 0
         filename = 'v5_undoped_tauSRH.mat';
@@ -350,6 +361,8 @@ if save_file == 1
         filename = 'v5_doped_tauSRH.mat';
     elseif doped == 1 && surface == 1
         filename = 'v5_doped_vsr.mat';
+    elseif doped == 0.5 && surface == 1
+        filename = 'SaP_params_vsr.mat';
     end 
     save(filename, 'results', 'solCV')
 end

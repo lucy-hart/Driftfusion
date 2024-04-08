@@ -31,6 +31,10 @@ sol_ill = changeLight(sol_ini, light_intensity, 0, 1);
 for i = 1:num_bias
     
     par = sol_ill.par;
+
+    if Vbias(i) >= 1
+        par.mu_p(1) = par.mu_p(1)/1000;
+    end
     
     try
         %ramp voltage up to the applied voltage 
@@ -123,12 +127,11 @@ for i = 1:num_bias
         
                 Vbias(i) = Vbias(i) - 0.01;
             catch
-            warning(['Could not stabilise device at' num2str(Vbias(i)) ' V'])
+            warning(['Could not stabilise device at ' num2str(Vbias(i)) ' V'])
             Vbias(i) = 100;
             end
         end 
     end
-
 end    
 
 %% Perform the Pulsed JV for each Vbias 
