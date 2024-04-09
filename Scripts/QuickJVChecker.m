@@ -3,8 +3,8 @@
 %par=pc('Input_files/SnO2_C60_MAPI_Spiro.csv');
 %par=pc('Input_files/TiO2_MAPI_Spiro.csv');
 % par=pc('Input_files/SnO2_MAPI_Spiro_TestSaP.csv');
-%par=pc('Input_files/TiO2_MAPI_Spiro.csv');
-par=pc('Input_files/NiO-TripleCat-C60.csv');
+par=pc('Input_files/TiO2_MAPI_Spiro.csv');
+%par=pc('Input_files/NiO-TripleCat-C60.csv');
 % par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 % par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
 % par=pc('Input_files/1_layer_test.csv');
@@ -91,7 +91,7 @@ par = refresh_device(par);
 eqm_QJV = equilibrate(par);
 
 %%
-suns = 0.65;
+suns = 1;
 % V_bias = 1.2;
 % V_max = 1.2;
 % V_min = 0;
@@ -110,14 +110,14 @@ suns = 0.65;
 % 
 % JV_sol_el = VappFunction(illuminated_sol_el, 'sweep', [V_max, V_min, tmax], tmax, 200*(V_max-V_min)+1, 0);
 
-JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.3, -0.2, 1e-4, 1, 301);
-JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.3, -0.2, 1, 1, 301);
+JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.15, -0.2, 1e-3, 1, 301);
+%JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.3, -0.2, 1, 1, 301);
 % JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.2, -0.2, 100e-3, 1, 281);
 
 Plot_Current_Contributions(JV_sol_ion) 
-Plot_Current_Contributions(JV_sol_el) 
+%Plot_Current_Contributions(JV_sol_el) 
 stats_ion = CVstats(JV_sol_ion)
-stats_el = CVstats(JV_sol_el)
+%stats_el = CVstats(JV_sol_el)
 
 % %% Plot JVs
 % figure('Name', 'JVPlot', 'Position', [100 100 1250 1250])
@@ -133,7 +133,7 @@ v = dfana.calcVapp(JV_sol_el)';
 % 
 % % j_fw = dfana.calcJ(JV_sol_ion_fw).tot(:,1);
 % % j_rev = dfana.calcJ(JV_sol_ion_rev).tot(:,1);
-j_el = dfana.calcJ(JV_sol_el).tot(:,1);
+%j_el = dfana.calcJ(JV_sol_el).tot(:,1);
 j_ion = dfana.calcJ(JV_sol_ion).tot(:,1);
 % % plot(v_fw(1:end), j_fw(1:end)*1000, 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3) 
 % plot(v_ion(1:end), j_ion(1:end)*1000, 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3) 

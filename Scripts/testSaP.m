@@ -2,9 +2,9 @@
 % par = pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 %par = pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
 %par=pc('Input_files/SnO2_MAPI_Spiro_TestSaP.csv');
-%par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP.csv');
-par=pc('Input_files/NiO-TripleCat-C60.csv');
-par.RelTol_vsr = 0.1;
+par=pc('Input_files/TiO2_MAPI_Spiro.csv');
+%par=pc('Input_files/NiO-TripleCat-C60.csv');
+%par.RelTol_vsr = 0.1;
 %par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_PaperParams.csv');
 %par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
 
@@ -44,7 +44,7 @@ eqm = equilibrate(par);
 
 %% See what device performance is at illumination used for SaP measurement
 check_JV = 0;
-suns = 0.65;
+suns = 1;
 if check_JV ==1 
     JVsol_el = doCV(eqm.el, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
     JVsol_ion = doCV(eqm.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
@@ -67,9 +67,9 @@ if check_JV ==1
 end
 %% Do the SaP measurement
 %Vbias = linspace(0,1.3,14);
-Vbias = [0];
-%Vpulse = linspace(0,1.3,27);
-Vpulse = [0 0.1];
+Vbias = [0 0.65 1.0];
+Vpulse = linspace(0,1.3,27);
+%Vpulse = [0 0.1];
 tramp = 8e-4;
 tsample = 1e-3;
 tstab = 200;
