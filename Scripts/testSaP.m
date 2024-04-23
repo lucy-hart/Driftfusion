@@ -2,9 +2,9 @@
 % par = pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 %par = pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
 %par=pc('Input_files/SnO2_MAPI_Spiro_TestSaP.csv');
-par=pc('Input_files/TiO2_MAPI_Spiro.csv');
-%par=pc('Input_files/NiO-TripleCat-C60.csv');
-%par.RelTol_vsr = 0.1;
+par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP.csv');
+% par=pc('Input_files/NiO-TripleCat-C60.csv');
+% par.RelTol_vsr = 0.1;
 %par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_PaperParams.csv');
 %par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
 
@@ -67,9 +67,9 @@ if check_JV ==1
 end
 %% Do the SaP measurement
 %Vbias = linspace(0,1.3,14);
-Vbias = [0 0.65 1.0];
-Vpulse = linspace(0,1.3,27);
-%Vpulse = [0 0.1];
+Vbias = [0.0 0.1 0.2];
+%Vpulse = linspace(0,1.3,27);
+Vpulse = [0 0.1];
 tramp = 8e-4;
 tsample = 1e-3;
 tstab = 200;
@@ -83,7 +83,7 @@ if compare_fixed_ion_JV == 1
     for i=1:length(Vbias)
         disp(['Doing JV for Vstab = ' num2str(Vbias(i)) ' V'])
         sol{i,1}.par.mobseti = 0;
-        fixed_ion_JVs{i} = doCV(sol{i,1}, suns, -0.2, 1.3, -0.2, 0.1, 1, 301);
+        fixed_ion_JVs{i} = doCV(sol{i,1}, suns, -0.2, 1.3, -0.1, 0.1, 1, 301);
         J_fixed_ion{i} = dfana.calcJ(fixed_ion_JVs{i}).tot(:,1);
         if i == 1
             V_fixed_ion = dfana.calcVapp(fixed_ion_JVs{i});
