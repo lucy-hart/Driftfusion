@@ -2,18 +2,19 @@
 %par=pc('Input_files/SnO2_C60_MAPI_Spiro.csv');
 %par=pc('Input_files/SnO2_C60_MAPI_Spiro.csv');
 %par=pc('Input_files/TiO2_MAPI_Spiro.csv');
-par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP.csv');
+%par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_PaperParams.csv');
+% par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_4.csv');
 %par=pc('Input_files/TiO2_MAPI_Spiro.csv');
-%par=pc('Input_files/TiO2_MAPI_Spiro.csv');
-%par=pc('Input_files/NiO-TripleCat-C60.csv');
+% par=pc('Input_files/NiO-FACs-Al2O3-C60-Charlie.csv');
 % par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
+par=pc('Input_files/NiO-TripleCat-C60-Fiddled.csv');
 % par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
 % par=pc('Input_files/1_layer_test.csv');
-% doped = 0;
+% doped = 1;
 % if doped == 1
-%     par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped_higherPCE.csv');
+%     par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 % elseif doped == 0
-%     par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_higherPCE.csv');
+%     par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
 % end
 
 Fiddle_with_Energetics = 0;
@@ -23,10 +24,10 @@ IonConc = 1e18;
 if Fiddle_with_Energetics == 1
 
     %row
-    DHOMO = 0.005;
+    DHOMO = 0.0;
     %DHOMO = Delta_HOMO(4);
     %column
-    DLUMO = -0.005;
+    DLUMO = -0.15;
     %DLUMO = Delta_LUMO(11);
         if doped == 0
             %HTL Energetics
@@ -111,31 +112,31 @@ suns = 1;
 % 
 % JV_sol_el = VappFunction(illuminated_sol_el, 'sweep', [V_max, V_min, tmax], tmax, 200*(V_max-V_min)+1, 0);
 
-JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
-JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.2, -0.2, 1, 1, 281);
+JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.3, -0.2, 1e-4, 1, 301);
+%JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.3, -0.2, 0.1, 1, 301);
 % JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.2, -0.2, 100e-3, 1, 281);
 
 Plot_Current_Contributions(JV_sol_ion) 
-Plot_Current_Contributions(JV_sol_el) 
+%Plot_Current_Contributions(JV_sol_el) 
 stats_ion = CVstats(JV_sol_ion)
-stats_el = CVstats(JV_sol_el)
+%stats_el = CVstats(JV_sol_el)
 
 % %% Plot JVs
 % figure('Name', 'JVPlot', 'Position', [100 100 1250 1250])
-% colors_JV = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880],[0 0.4470 0.7410],[0.9290 0.6940 0.1250]};
-% % v_fw = dfana.calcVapp(JV_sol_ion_fw);
-% % v_rev = dfana.calcVapp(JV_sol_ion_rev);
-v = dfana.calcVapp(JV_sol_el)';
-% v_ion = dfana.calcVapp(JV_sol_ion);
-% 
-% hold on
-% xline(0, 'black', 'LineWidth', 1)
-% yline(0, 'black', 'LineWidth', 1)
-% 
-% % j_fw = dfana.calcJ(JV_sol_ion_fw).tot(:,1);
-% % j_rev = dfana.calcJ(JV_sol_ion_rev).tot(:,1);
-%j_el = dfana.calcJ(JV_sol_el).tot(:,1);
-j_ion = dfana.calcJ(JV_sol_ion).tot(:,1);
+% % colors_JV = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880],[0 0.4470 0.7410],[0.9290 0.6940 0.1250]};
+% % % v_fw = dfana.calcVapp(JV_sol_ion_fw);
+% % % v_rev = dfana.calcVapp(JV_sol_ion_rev);
+% v = dfana.calcVapp(JV_sol_el)';
+% % v_ion = dfana.calcVapp(JV_sol_ion);
+% % 
+% % hold on
+% % xline(0, 'black', 'LineWidth', 1)
+% % yline(0, 'black', 'LineWidth', 1)
+% % 
+% % % j_fw = dfana.calcJ(JV_sol_ion_fw).tot(:,1);
+% % % j_rev = dfana.calcJ(JV_sol_ion_rev).tot(:,1);
+% j_el = dfana.calcJ(JV_sol_el).tot(:,1);
+% j_ion = dfana.calcJ(JV_sol_ion).tot(:,1);
 % % plot(v_fw(1:end), j_fw(1:end)*1000, 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3) 
 % plot(v_ion(1:end), j_ion(1:end)*1000, 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3) 
 % hold on

@@ -19,12 +19,12 @@ tic
 %% Define parameter space
 %Choose to use doped or undoped TLs
 doped = 0;
-high_performance = 1;
+high_performance = 0;
 n_values = 7;
 Delta_TL = linspace(0, 0.3, n_values);
 Symmetric_offset = 1;
 %Fix the offset for the ETL or HTL
-Fix_ETL = 1;
+Fix_ETL = 0;
 %Energetic offset between the perovskite and TL for the TL with fixed
 %energetics 
 Fixed_offset = 0.15;
@@ -32,8 +32,8 @@ Fixed_offset = 0.15;
 %recombination error becomes huge for reasons I do not fully understand...
 %The saga continues - only seems to matter for the HTL, not the ETL...
 Delta_TL(1) = 1e-3;
-Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
-% Ion_Conc = [1e15 1e18 0];
+% Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
+Ion_Conc = [1e18 0];
 n_ion_concs = length(Ion_Conc);
 
 %Rows are the Ion Concentrations
@@ -258,11 +258,12 @@ end
 toc
 
 %% Plot results 
-plot_JVs = 0;
+plot_JVs = 1;
 Stats_array = zeros(n_ion_concs, n_values, 5);
 if plot_JVs == 1
-    J_srh_result = cell(2, n_values);
-    J_vsr_result = cell(2, n_values);
+    J_result = cell(2, n_values);
+%     J_srh_result = cell(2, n_values);
+%     J_vsr_result = cell(2, n_values);
     V_plot = cell(2, n_values);
 end
 e = solCV{1,1}.par.e;
@@ -274,30 +275,32 @@ for i = 1:n_ion_concs
             Stats_array(i,j,2) = results{i,j}.Voc_f;
             Stats_array(i,j,3) = results{i,j}.FF_f;
             Stats_array(i,j,4) = results{i,j}.efficiency_f;
-            x = solCV{i,j}.par.x_sub;
-            loss_currents = dfana.calcr(solCV{i,j},'sub');
-            Vapp = dfana.calcVapp(solCV{i,j});
-            end_value = cast((length(Vapp)-1)/2, 'int32');
-            J_srh = e*trapz(x, loss_currents.srh, 2)';
-            J_vsr = e*trapz(x, loss_currents.vsr, 2)';
-            J_srh_OC = interp1(Vapp(1:end_value), J_srh(1:end_value), Stats_array(i,j,2));
-            J_vsr_OC = interp1(Vapp(1:end_value), J_vsr(1:end_value), Stats_array(i,j,2));
-            if J_srh_OC > J_vsr_OC
-                Stats_array(i,j,5) = 0;
-            elseif J_srh_OC < J_vsr_OC
-                Stats_array(i,j,5) = 1;
-            end
-            if plot_JVs == 1
-                if i == 7
-                    V_plot{1,j} = Vapp;
-                    J_srh_result{1,j} = J_srh;
-                    J_vsr_result{1,j} = J_vsr;
-                elseif i == 8
-                    V_plot{2,j} = Vapp;
-                    J_srh_result{2,j} = J_srh;
-                    J_vsr_result{2,j} = J_vsr;
-                end
-            end
+            J_result{i,j} = dfana.calcJ(solCV{i,j}).tot(:,1);
+            V_plot{i,j} = dfana.calcVapp(solCV{i,j});
+%             x = solCV{i,j}.par.x_sub;
+%             loss_currents = dfana.calcr(solCV{i,j},'sub');
+%             Vapp = dfana.calcVapp(solCV{i,j});
+%             end_value = cast((length(Vapp)-1)/2, 'int32');
+%             J_srh = e*trapz(x, loss_currents.srh, 2)';
+%             J_vsr = e*trapz(x, loss_currents.vsr, 2)';
+%             J_srh_OC = interp1(Vapp(1:end_value), J_srh(1:end_value), Stats_array(i,j,2));
+%             J_vsr_OC = interp1(Vapp(1:end_value), J_vsr(1:end_value), Stats_array(i,j,2));
+%             if J_srh_OC > J_vsr_OC
+%                 Stats_array(i,j,5) = 0;
+%             elseif J_srh_OC < J_vsr_OC
+%                 Stats_array(i,j,5) = 1;
+%             end
+%             if plot_JVs == 1
+%                 if i == 7
+%                     V_plot{1,j} = Vapp;
+%                     J_srh_result{1,j} = J_srh;
+%                     J_vsr_result{1,j} = J_vsr;
+%                 elseif i == 8
+%                     V_plot{2,j} = Vapp;
+%                     J_srh_result{2,j} = J_srh;
+%                     J_vsr_result{2,j} = J_vsr;
+%                 end
+%             end
         catch
             warning('No Stats')
             Stats_array(i,j,:) = 0;
@@ -340,6 +343,46 @@ xticklabels({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'})
 ylim(lims(num,:))
 %legend({'1e15', '5e15', '1e16', '5e16', '1e17', '5e17', '1e18', 'No Ions'}, 'Location', LegendLoc(num), 'FontSize', 25, 'NumColumns', 2)
 title(legend, 'Ion Concentration (cm^{-3})', 'FontSize', 25)
+
+%% Plot JV curves w/w.o. ions
+plot_JVs = 1;
+if plot_JVs == 1
+
+    figure('Name', 'JVPlot', 'Position', [100 100 800 800])
+    %Colours = flip(parula(n_values));
+    Colours = {[0.4660 0.6740 0.1880], [0.3010 0.7450 0.9330], [0 0.4470 0.7410], [0.4940 0.1840 0.5560]};
+    %Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
+    %Set which ion concentration to plot for
+    %Have coppied the array above so you can see which nuber is the right one
+    %easily
+    num_Ion_Conc = 2;
+    
+    count = 1;
+    for j = [1 3 5 7]
+        v = dfana.calcVapp(solCV{num_Ion_Conc, j});
+        J = dfana.calcJ(solCV{num_Ion_Conc, j}).tot(:,1);
+        
+        hold on
+        xline(0, 'black', 'HandleVisibility', 'off')
+        yline(0, 'black', 'HandleVisibility', 'off')
+        plot(v(:), J(:)*1000, 'color', Colours{count}, 'LineWidth', 3) 
+        count = count + 1;
+        hold off
+    
+    end
+    
+    box on 
+    set(gca, 'FontSize', 25)
+    xlim([-0.15, 1.2])
+    ylim([-25,5])
+
+    legend({'  0.0', '  0.1', '  0.2', '  0.3'}, 'Location', 'northwest', 'FontSize', 25, 'NumColumns', 2)
+    title(legend, ['Transport Layer' newline 'Energetic Offset (eV)'], 'FontSize', 25)
+    xlabel('Voltage(V)', 'FontSize', 30)
+    ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
+    ax1 = gcf;
+    
+end
 
 %% Plot J_srh and _sr for high ions vs no ions as a function of offset
 plot_JVs = 0;
@@ -413,7 +456,7 @@ if plot_JVs == 1
 end
 
 %% Save results and solutions
-save_file = 1;
+save_file = 0;
 if save_file == 1
     if doped == 0
         filename = 'DeltaE_v5_undoped_HigherPerforamnce.mat';

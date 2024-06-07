@@ -1,4 +1,4 @@
-function SaPsol = doSaP_v2(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, light_intensity)
+function SaPsol = doSaP_v2(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, light_intensity, PulseBool)
 % Performs a simulation of a stabilise and pulse (SaP) measurement
 % Input arguments:
 % SOL_INI = solution containing intitial conditions (dark eqm device)
@@ -21,7 +21,11 @@ num_pulses = length(Vpulse);
 %The first column is the solution after being held at the relevant Vbias
 %for time tstab
 %The other columns are the resuls of the pulsed JVs
-SaPsol = cell(num_bias, num_pulses+1);
+if PulseBool == 1
+    SaPsol = cell(num_bias, num_pulses+1);
+elseif PulseBool == 0
+    SaPsol = cell(num_bias, 1);
+end
 
 %% Go to correct light intensity
 %Funtion assumes you are using the first light source currently 
@@ -135,72 +139,74 @@ for i = 1:num_bias
 end    
 
 %% Perform the Pulsed JV for each Vbias 
-for i = 1:num_bias
-    if Vbias(i) ~= 100
-
-        disp(['Starting SaP for Vstab = ' num2str(Vbias(i)) ' V'])    
-
-        for j = 1:num_pulses
-            par = SaPsol{i,1}.par;
-        
-            %turn off ion motion for the duration of the pulse
-            %assuming that this is a valid assumption
-            par.mobseti = 0;
-        
-            %ramp voltage up to the applied voltage over time tramp 
-            %NB, this is t_ramp, not tramp...
-            par.tmesh_type = 1;
-            par.t0 = 0;
-            par.tmax = tramp;
-            par.tpoints = 100;
-        
-            par.V_fun_type = 'sweep';
-            par.V_fun_arg(1) = Vbias(i);
-            par.V_fun_arg(2) = Vpulse(j);
-            par.V_fun_arg(3) = tramp;
-
-            try
-                sol = df(SaPsol{i,1}, par);
-            catch
-                warning(['Could not ramp to voltage for Vpulse = ' num2str(Vpulse(j)) ' V'])
-                sol = 0;
-            end
-            
-            if not(isa(sol, 'struct'))
-                SaPsol{i,j+1}.Jpulse = 0;
-            elseif isa(sol, 'struct')
-        
-                par = sol.par;
+if PulseBool == 1
+    for i = 1:num_bias
+        if Vbias(i) ~= 100
+    
+            disp(['Starting SaP for Vstab = ' num2str(Vbias(i)) ' V'])    
+    
+            for j = 1:num_pulses
+                par = SaPsol{i,1}.par;
             
                 %turn off ion motion for the duration of the pulse
                 %assuming that this is a valid assumption
                 par.mobseti = 0;
             
-                %Hold device at Vpulse for tsample 
-                %On paper they say this is 1e-3 seconds after the pulse applied 
+                %ramp voltage up to the applied voltage over time tramp 
+                %NB, this is t_ramp, not tramp...
                 par.tmesh_type = 1;
                 par.t0 = 0;
-                par.tmax = tsample;
+                par.tmax = tramp;
                 par.tpoints = 100;
             
-                par.V_fun_type = 'constant';
-                par.V_fun_arg(1) = Vpulse(j);
-                
-                disp(['Vpulse = ' num2str(Vpulse(j)) ' V'])
-
+                par.V_fun_type = 'sweep';
+                par.V_fun_arg(1) = Vbias(i);
+                par.V_fun_arg(2) = Vpulse(j);
+                par.V_fun_arg(3) = tramp;
+    
                 try
-                    SaPsol{i,j+1} = df(sol, par);
-                    SaPsol{i,j+1}.Jpulse = dfana.calcJ(SaPsol{i,j+1}).tot(end,1);
+                    sol = df(SaPsol{i,1}, par);
                 catch
-                    warning(['Could not solve Vpulse = ' num2str(Vpulse(j)) ' V'])
+                    warning(['Could not ramp to voltage for Vpulse = ' num2str(Vpulse(j)) ' V'])
+                    sol = 0;
+                end
+                
+                if not(isa(sol, 'struct'))
                     SaPsol{i,j+1}.Jpulse = 0;
-                end 
-            end
+                elseif isa(sol, 'struct')
             
-        end 
-    else
-        for j = 1:num_pulses
-            SaPsol{i,j}.Jpulse = 0;
+                    par = sol.par;
+                
+                    %turn off ion motion for the duration of the pulse
+                    %assuming that this is a valid assumption
+                    par.mobseti = 0;
+                
+                    %Hold device at Vpulse for tsample 
+                    %On paper they say this is 1e-3 seconds after the pulse applied 
+                    par.tmesh_type = 1;
+                    par.t0 = 0;
+                    par.tmax = tsample;
+                    par.tpoints = 100;
+                
+                    par.V_fun_type = 'constant';
+                    par.V_fun_arg(1) = Vpulse(j);
+                    
+                    disp(['Vpulse = ' num2str(Vpulse(j)) ' V'])
+    
+                    try
+                        SaPsol{i,j+1} = df(sol, par);
+                        SaPsol{i,j+1}.Jpulse = dfana.calcJ(SaPsol{i,j+1}).tot(end,1);
+                    catch
+                        warning(['Could not solve Vpulse = ' num2str(Vpulse(j)) ' V'])
+                        SaPsol{i,j+1}.Jpulse = 0;
+                    end 
+                end
+                
+            end 
+        else
+            for j = 1:num_pulses
+                SaPsol{i,j}.Jpulse = 0;
+            end
         end
     end
 end

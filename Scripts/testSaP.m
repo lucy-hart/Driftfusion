@@ -2,12 +2,12 @@
 % par = pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 %par = pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
 %par=pc('Input_files/SnO2_MAPI_Spiro_TestSaP.csv');
-par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP.csv');
-% par=pc('Input_files/NiO-TripleCat-C60.csv');
-% par.RelTol_vsr = 0.1;
-%par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_PaperParams.csv');
-%par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
-
+% par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_4.csv');
+par=pc('Input_files/NiO-TripleCat-C60-Fiddled.csv');
+% par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_PaperParams.csv');
+% par.prob_distro_function = 'Boltz';
+% par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
+par.RelTol_vsr = 0.1;
 compare_fixed_ion_JV = 1;
 
 % DHOMO = 0.35;
@@ -66,15 +66,15 @@ if check_JV ==1
     ylabel('Voltage (V)')
 end
 %% Do the SaP measurement
-%Vbias = linspace(0,1.3,14);
-Vbias = [0.0 0.1 0.2];
+Vbias = linspace(0,1.5,16);
+%Vbias = [0 0.1];
 %Vpulse = linspace(0,1.3,27);
-Vpulse = [0 0.1];
+Vpulse = [0];
 tramp = 8e-4;
 tsample = 1e-3;
 tstab = 200;
 
-sol = doSaP_v2(eqm.ion, Vbias, Vpulse, tramp, tsample, tstab, suns);
+sol = doSaP_v2(eqm.ion, Vbias, Vpulse, tramp, tsample, tstab, suns, 1);
 
 %% Do JVs with mobseti = 0 to compare the aP JVs
 fixed_ion_JVs = cell(1, length(Vbias));
@@ -83,8 +83,13 @@ if compare_fixed_ion_JV == 1
     for i=1:length(Vbias)
         disp(['Doing JV for Vstab = ' num2str(Vbias(i)) ' V'])
         sol{i,1}.par.mobseti = 0;
-        fixed_ion_JVs{i} = doCV(sol{i,1}, suns, -0.2, 1.3, -0.1, 0.1, 1, 301);
-        J_fixed_ion{i} = dfana.calcJ(fixed_ion_JVs{i}).tot(:,1);
+        try
+            fixed_ion_JVs{i} = doCV(sol{i,1}, suns, -0.1, 1.05, -0.1, 1, 0.5, 116);
+            J_fixed_ion{i} = dfana.calcJ(fixed_ion_JVs{i}).tot(:,1);
+        catch
+            warning(['Fixed ion JV failed at Vbias of ', num2str(Vbias(i))])
+            J_fixed_ion{i} = zeros(116,1);
+        end
         if i == 1
             V_fixed_ion = dfana.calcVapp(fixed_ion_JVs{i});
         end
@@ -92,25 +97,25 @@ if compare_fixed_ion_JV == 1
 end
 
 %% Look at the voltage stabilisation
-t = sol{1, 1}.t;
-
-Jstab = zeros(length(Vbias), length(t));
-
-for i = 1:length(Vbias)
-    Jtemp = dfana.calcJ(sol{i,1});
-    Jstab(i,:) = Jtemp.tot(:,1);
-end
+% t = sol{1, 1}.t;
+% 
+% Jstab = zeros(length(Vbias), length(t));
+% 
+% for i = 1:length(Vbias)
+%     Jtemp = dfana.calcJ(sol{i,1});
+%     Jstab(i,:) = Jtemp.tot(:,1);
+% end
 
 %%
-figure('Name', 'JstabData')
-hold on
-box on
-for i = 1:length(Vbias)
-    plot(t, 1e3*Jstab(i,:), 'DisplayName', [num2str(Vbias(i)) ' V'])
-end
-ylabel('Current Density (mA cm^{-2})')
-xlabel('Time (s)')
-legend()
+% figure('Name', 'JstabData')
+% hold on
+% box on
+% for i = 1:length(Vbias)
+%     plot(t, 1e3*Jstab(i,:), 'DisplayName', [num2str(Vbias(i)) ' V'])
+% end
+% ylabel('Current Density (mA cm^{-2})')
+% xlabel('Time (s)')
+% legend()
 %% Extract the current values from the pulsed JVs
 bias = 1;
 t = sol{bias, 2}.t;
@@ -131,15 +136,15 @@ for i = 1:length(Vpulse)
 end
 
 %%
-figure('Name', 'PulsedJVCurrents')
-hold on
-box on
-for i = 1:length(Vpulse)
-    plot(t, 1e3*Jt(i,:), 'DisplayName', [num2str(Vpulse(i)) ' V'])
-end
-ylabel('Current Density (mA cm^{-2})')
-xlabel('Time (s)')
-legend()
+% figure('Name', 'PulsedJVCurrents')
+% hold on
+% box on
+% for i = 1:length(Vpulse)
+%     plot(t, 1e3*Jt(i,:), 'DisplayName', [num2str(Vpulse(i)) ' V'])
+% end
+% ylabel('Current Density (mA cm^{-2})')
+% xlabel('Time (s)')
+% legend()
 
 %% Plot pulsed JVs 
 figure('Name', 'PulsedJVs')
@@ -150,24 +155,24 @@ box on
 xline(0, 'black', 'HandleVisibility', 'off')
 yline(0, 'black', 'HandleVisibility', 'off')
 
-for i = 1:length(Vbias)%-2
+for i = 1:length(Vbias)
     Jpulse = zeros(1, length(Vpulse));
     for j = 1:length(Vpulse)
         Jpulse(j) = sol{i,j+1}.Jpulse;
     end
     plot(Vpulse(Jpulse ~= 0), 1e3*Jpulse(Jpulse ~= 0), 'DisplayName', num2str(Vbias(i), '%.2f'), 'color', cmap(i,:))
     if compare_fixed_ion_JV == 1
-        plot(V_fixed_ion, 1e3*J_fixed_ion{i}, 'HandleVisibility', 'Off', 'color', 'black', 'LineStyle', ':')
+        plot(V_fixed_ion, 1e3*J_fixed_ion{i}, 'HandleVisibility', 'Off', 'color', cmap(i,:), 'LineStyle', '-')
     end
 end
 
 if check_JV == 1
-    plot(v(1:141), J_el(1:141)*1000, 'color', 'black', 'LineWidth', 3, 'LineStyle', ':')
+    plot(v(1:141), J_el(1:141)*1000, 'color', 'black', 'LineWidth', 3, 'LineStyle', '-')
 end
 ylabel('Current Density (mA cm^{-2})')
-ylim([-15, 2])
+ylim([-25, 5])
 xlabel('Voltage (V)')
-xlim([Vpulse(1), 1.35])
+xlim([0, 1.05])
 %legend()
 %title(legend, 'V_{bias} (V)')
 
@@ -192,43 +197,46 @@ xlim([Vpulse(1), 1.35])
 % title(legend, 'V_{bias} (V)')
 % 
 %% Do SaP analysis
-all_data = {sol};
-Jvalues = zeros(length(Vbias), length(Vpulse),length(all_data));
+all_data = {J_fixed_ion};%, sol2};
+
+idx_stop = floor(length(V_fixed_ion));
+V_SaP_Analysis = V_fixed_ion(1:idx_stop);
+Jvalues = zeros(length(Vbias), idx_stop, length(all_data));
 Voc = zeros(length(all_data), length(Vbias));
 dJdV_Voc = zeros(length(all_data), length(Vbias));
 for k = 1:length(all_data)
     data = all_data{k};
     for i = 1:length(Vbias)
-        for j = 1:length(Vpulse)
-            Jvalues(i,j,k) = data{i,j+1}.Jpulse;
-        end
+        %for j = 1:length(V_fixed_ion)
+            Jvalues(i,:,k) = data{i}(1:idx_stop);
+        %end
     end
 end  
+% 
+colours = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980], [0.4660 0.6740 0.1880], [0.9290 0.6940 0.1250]};
+h = Vbias(2) - Vbias(1);
+for k = 1:length(all_data)
+    for i = 1:length(Vbias)
+        J_temp = Jvalues(i,:,k);
+        Voc(i) = interp1(J_temp(J_temp~=0), V_SaP_Analysis(J_temp~=0), 0);
+        dJdV = gradient(J_temp(J_temp~=0), V_SaP_Analysis(J_temp~=0));
+%         plot(V_SaP_Analysis(J_temp~=0), dJdV, color = colours{k})
+        hold on
+        dJdV_Voc(k,i) = interp1(V_SaP_Analysis(J_temp~=0), dJdV, Voc(i));
+    end
+end
 
-% colours = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980], [0.4660 0.6740 0.1880], [0.9290 0.6940 0.1250]};
-% h = Vbias(2) - Vbias(1);
-% for k = 1:length(all_data)
-%     for i = 1:length(Vbias)
-%         J_temp = Jvalues(i,:,k);
-%         Voc(i) = interp1(J_temp(J_temp~=0), Vpulse(J_temp~=0), 0);
-%         dJdV = gradient(J_temp(J_temp~=0), Vpulse(J_temp~=0));
-%         plot(Vpulse(J_temp~=0), dJdV, color = colours{k})
-%         hold on
-%         dJdV_Voc(k,i) = interp1(Vpulse(J_temp~=0), dJdV, Voc(i));
-%     end
-% end
-
-% %% Plot SaP analysis
-% %NB: Smaller DeltaE_ETL also had vs = 50 cms-1
+%% Plot SaP analysis
+%NB: Smaller DeltaE_ETL also had vs = 50 cms-1
 % figure('Name', 'SaP-Analysis')
 % 
-% subplot(1,2,1)
+% subplot(1,1,1)
 % hold on
 % box on
 % xline(0, 'black', 'HandleVisibility', 'off')
 % yline(0, 'black', 'HandleVisibility', 'off')
-% %plot(Vbias, dJdV_Voc(2,:),'DisplayName','v_s = 50 cm s^{-1}', 'Color', [0 0.4470 0.7410])
-% plot(Vbias, dJdV_Voc(1,:),'DisplayName','v_s = 1 cm s^{-1}', 'Color', [0.8500 0.3250 0.0980])
+% %plot(Vbias, dJdV_Voc(2,:),'DisplayName','v_s = 0.05 cm s^{-1}', 'Color', [0 0.4470 0.7410])
+% plot(Vbias, dJdV_Voc(1,:),'DisplayName','v_s = 50 cm s^{-1}', 'Color', [0.8500 0.3250 0.0980])
 % 
 % xlabel('V_{bias} (V)')
 % xlim([Vbias(1), Vbias(end)])
