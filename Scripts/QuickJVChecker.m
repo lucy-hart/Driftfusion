@@ -1,15 +1,6 @@
-% par=pc('Input_files/SnO2_MAPI_Spiro.csv');
-%par=pc('Input_files/SnO2_C60_MAPI_Spiro.csv');
-%par=pc('Input_files/SnO2_C60_MAPI_Spiro.csv');
-%par=pc('Input_files/TiO2_MAPI_Spiro.csv');
-%par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_PaperParams.csv');
-% par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_4.csv');
-%par=pc('Input_files/TiO2_MAPI_Spiro.csv');
-% par=pc('Input_files/NiO-FACs-Al2O3-C60-Charlie.csv');
-% par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
-par=pc('Input_files/NiO-TripleCat-C60-Fiddled.csv');
-% par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
-% par=pc('Input_files/1_layer_test.csv');
+par = pc('Input_files/PTAA_MAPI_NoOffset_FastJVPaperParams.csv');
+par.prob_distro_function = 'Boltz';
+%par=pc('Input_files/PTAA_MAPI_NoOffset.csv');
 % doped = 1;
 % if doped == 1
 %     par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
@@ -18,8 +9,8 @@ par=pc('Input_files/NiO-TripleCat-C60-Fiddled.csv');
 % end
 
 Fiddle_with_Energetics = 0;
-Fiddle_with_IonConc = 0;
-IonConc = 1e18;
+Fiddle_with_IonConc = 1;
+IonConc = 1e19;
 %%
 if Fiddle_with_Energetics == 1
 
@@ -93,7 +84,7 @@ par = refresh_device(par);
 eqm_QJV = equilibrate(par);
 
 %%
-suns = 1;
+suns = 0.98;
 % V_bias = 1.2;
 % V_max = 1.2;
 % V_min = 0;
@@ -113,13 +104,13 @@ suns = 1;
 % JV_sol_el = VappFunction(illuminated_sol_el, 'sweep', [V_max, V_min, tmax], tmax, 200*(V_max-V_min)+1, 0);
 
 JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.3, -0.2, 1e-4, 1, 301);
-%JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.3, -0.2, 0.1, 1, 301);
+JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.3, -0.2, 0.1, 1, 301);
 % JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.2, -0.2, 100e-3, 1, 281);
 
 Plot_Current_Contributions(JV_sol_ion) 
-%Plot_Current_Contributions(JV_sol_el) 
+Plot_Current_Contributions(JV_sol_el) 
 stats_ion = CVstats(JV_sol_ion)
-%stats_el = CVstats(JV_sol_el)
+stats_el = CVstats(JV_sol_el)
 
 % %% Plot JVs
 % figure('Name', 'JVPlot', 'Position', [100 100 1250 1250])
