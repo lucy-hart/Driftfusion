@@ -7,7 +7,8 @@
 %par=pc('Input_files/TiO2_MAPI_Spiro.csv');
 % par=pc('Input_files/NiO-FACs-Al2O3-C60-Charlie.csv');
 % par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
-par=pc('Input_files/NiO-TripleCat-C60-Fiddled.csv');
+% par=pc('Input_files/NiO-TripleCat-C60-Fiddled.csv');
+par=pc('Input_files/TripleCat-ForSaP.csv');
 % par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
 % par=pc('Input_files/1_layer_test.csv');
 % doped = 1;
