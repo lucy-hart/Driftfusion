@@ -1,7 +1,6 @@
 %Use this file to symmetrically sweep HOMO/LUMO offsets vs ion
 %concentration for a device with doped or undoped interlayers
 
-%There have been some choices made here
 %Doping is fixed s.t. Fermi Level offset is alway 0.1 eV from the relevant
 %band edge
 %Work function of the electrodes is handled as follows
@@ -32,8 +31,7 @@ Fixed_offset = 0.15;
 %recombination error becomes huge for reasons I do not fully understand...
 %The saga continues - only seems to matter for the HTL, not the ETL...
 Delta_TL(1) = 1e-3;
-% Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
-Ion_Conc = [1e18 0];
+Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
 n_ion_concs = length(Ion_Conc);
 
 %Rows are the Ion Concentrations
@@ -187,12 +185,7 @@ for i = 1:n_ion_concs
             par.Ncat(:) = params{i,j}(1);
             par.Nani(:) = params{i,j}(1);
         end 
-        
-        %Do this as it seesm to reduce the discrepency between surface
-        %volumetric surace recombination model and the abrupt interface one
-        %But also made solution less stable? Maybe better to tinker with
-        %this on the one which varies surface recombination...
-        %par.frac_vsr_zone = 0.05;
+
         par = refresh_device(par);
 
         soleq{i,j} = equilibrate(par);
@@ -257,13 +250,11 @@ end
 
 toc
 
-%% Plot results 
+%% Get results in format useful for plotting
 plot_JVs = 1;
 Stats_array = zeros(n_ion_concs, n_values, 5);
 if plot_JVs == 1
     J_result = cell(2, n_values);
-%     J_srh_result = cell(2, n_values);
-%     J_vsr_result = cell(2, n_values);
     V_plot = cell(2, n_values);
 end
 e = solCV{1,1}.par.e;
@@ -277,183 +268,12 @@ for i = 1:n_ion_concs
             Stats_array(i,j,4) = results{i,j}.efficiency_f;
             J_result{i,j} = dfana.calcJ(solCV{i,j}).tot(:,1);
             V_plot{i,j} = dfana.calcVapp(solCV{i,j});
-%             x = solCV{i,j}.par.x_sub;
-%             loss_currents = dfana.calcr(solCV{i,j},'sub');
-%             Vapp = dfana.calcVapp(solCV{i,j});
-%             end_value = cast((length(Vapp)-1)/2, 'int32');
-%             J_srh = e*trapz(x, loss_currents.srh, 2)';
-%             J_vsr = e*trapz(x, loss_currents.vsr, 2)';
-%             J_srh_OC = interp1(Vapp(1:end_value), J_srh(1:end_value), Stats_array(i,j,2));
-%             J_vsr_OC = interp1(Vapp(1:end_value), J_vsr(1:end_value), Stats_array(i,j,2));
-%             if J_srh_OC > J_vsr_OC
-%                 Stats_array(i,j,5) = 0;
-%             elseif J_srh_OC < J_vsr_OC
-%                 Stats_array(i,j,5) = 1;
-%             end
-%             if plot_JVs == 1
-%                 if i == 7
-%                     V_plot{1,j} = Vapp;
-%                     J_srh_result{1,j} = J_srh;
-%                     J_vsr_result{1,j} = J_vsr;
-%                 elseif i == 8
-%                     V_plot{2,j} = Vapp;
-%                     J_srh_result{2,j} = J_srh;
-%                     J_vsr_result{2,j} = J_vsr;
-%                 end
-%             end
         catch
             warning('No Stats')
             Stats_array(i,j,:) = 0;
         end
     end
 end 
-
-%%
-figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 800])
-Colours = parula(n_ion_concs-1);
-num = 2;
-labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
-LegendLoc = ["northeast", "southwest", "southeast", "northeast"];
-if doped == 0
-%     lims = [[-23 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
-    lims = [[-23 -15]; [0.77 1.24]; [0.5, 0.9]; [16 27]];
-elseif doped == 1
-%     lims = [[-24 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
-    lims = [[-24 -15]; [0.77 1.24]; [0.5, 0.9]; [18 27]];
-end
-box on 
-for i = 1:n_ion_concs
-    hold on
-    if i == n_ion_concs
-        plot(Delta_TL, Stats_array(n_ion_concs,:,5).*Stats_array(n_ion_concs,:,num), 'marker', 'x', 'Color', 'black', 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
-        plot(Delta_TL, (1-Stats_array(n_ion_concs,:,5)).*Stats_array(n_ion_concs,:,num), 'marker', 'o', 'Color', 'black', 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
-        plot(Delta_TL, Stats_array(n_ion_concs,:,num), 'marker', 'none', 'Color', 'black')
-    else
-%         plot(Delta_TL, Stats_array(i-1,:,5).*Stats_array(i-1,:,num), 'marker', 'x', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
-%         plot(Delta_TL, (1-Stats_array(i-1,:,5)).*Stats_array(i-1,:,num), 'marker', 'o', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
-        plot(Delta_TL, Stats_array(i,:,num), 'marker', 'none', 'Color', Colours(i,:))
-    end
-end
-set(gca, 'Fontsize', 25)
-xlabel('Transport Layer Energetic Offset (eV)', 'FontSize', 30)
-ylabel(labels(num), 'FontSize', 30)
-xlim([0, 0.3])
-xticks([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3])
-xticklabels({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'})
-ylim(lims(num,:))
-%legend({'1e15', '5e15', '1e16', '5e16', '1e17', '5e17', '1e18', 'No Ions'}, 'Location', LegendLoc(num), 'FontSize', 25, 'NumColumns', 2)
-title(legend, 'Ion Concentration (cm^{-3})', 'FontSize', 25)
-
-%% Plot JV curves w/w.o. ions
-plot_JVs = 1;
-if plot_JVs == 1
-
-    figure('Name', 'JVPlot', 'Position', [100 100 800 800])
-    %Colours = flip(parula(n_values));
-    Colours = {[0.4660 0.6740 0.1880], [0.3010 0.7450 0.9330], [0 0.4470 0.7410], [0.4940 0.1840 0.5560]};
-    %Ion_Conc = [1e15 5e15 1e16 5e16 1e17 5e17 1e18 0];
-    %Set which ion concentration to plot for
-    %Have coppied the array above so you can see which nuber is the right one
-    %easily
-    num_Ion_Conc = 2;
-    
-    count = 1;
-    for j = [1 3 5 7]
-        v = dfana.calcVapp(solCV{num_Ion_Conc, j});
-        J = dfana.calcJ(solCV{num_Ion_Conc, j}).tot(:,1);
-        
-        hold on
-        xline(0, 'black', 'HandleVisibility', 'off')
-        yline(0, 'black', 'HandleVisibility', 'off')
-        plot(v(:), J(:)*1000, 'color', Colours{count}, 'LineWidth', 3) 
-        count = count + 1;
-        hold off
-    
-    end
-    
-    box on 
-    set(gca, 'FontSize', 25)
-    xlim([-0.15, 1.2])
-    ylim([-25,5])
-
-    legend({'  0.0', '  0.1', '  0.2', '  0.3'}, 'Location', 'northwest', 'FontSize', 25, 'NumColumns', 2)
-    title(legend, ['Transport Layer' newline 'Energetic Offset (eV)'], 'FontSize', 25)
-    xlabel('Voltage(V)', 'FontSize', 30)
-    ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
-    ax1 = gcf;
-    
-end
-
-%% Plot J_srh and _sr for high ions vs no ions as a function of offset
-plot_JVs = 0;
-if plot_JVs == 1
-    figure('Name', 'JVPlot', 'Position', [100 100 800 800])
-    Colours = parula(n_values);
-    
-    for j = 1:n_values
-        
-        subplot(1,2,1)
-        
-         xline(0, 'black', 'HandleVisibility', 'off')
-         yline(0, 'black', 'HandleVisibility', 'off')
-        if j == 1
-            plot(V_plot{1,j}, J_vsr_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
-            hold on
-            plot(V_plot{2,j}, J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
-            hold off
-        else
-            hold on
-            plot(V_plot{1,j}, J_vsr_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
-            plot(V_plot{2,j}, J_vsr_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
-            hold off
-        end
-            
-        box on
-    
-        set(gca, 'FontSize', 25)
-        xlim([-0.15, 1.2])
-        ylim([-5, 25])
-        
-        legend({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'}, 'Location', 'southwest', 'FontSize', 25)
-        title(legend, 'Transport Layer Offset (eV)', 'FontSize', 25)
-        
-        xlabel('Voltage(V)', 'FontSize', 30)
-        ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
-    
-    end
-    
-    for j = 1:n_values
-        
-        subplot(1,2,2)
-    
-         xline(0, 'black', 'HandleVisibility', 'off')
-         yline(0, 'black', 'HandleVisibility', 'off')
-    
-        if j == 1
-            plot(V_plot{1,j}, J_srh_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
-            hold on
-            plot(V_plot{2,j}, J_srh_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
-            hold off
-        else
-            hold on
-            plot(V_plot{1,j}, J_srh_result{1,j}*1000, 'color', Colours(j,:), 'LineWidth', 3) 
-            plot(V_plot{2,j}, J_srh_result{2,j}*1000, 'color', Colours(j,:), 'LineWidth', 3, 'LineStyle', '--', 'HandleVisibility', 'off') 
-            hold off
-        end
-        box on 
-    
-        set(gca, 'FontSize', 25)
-        xlim([-0.15, 1.2])
-        ylim([-5, 25])
-        
-        legend({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'}, 'Location', 'southwest', 'FontSize', 25)
-        title(legend, 'Transport Layer Offset (eV)', 'FontSize', 25)
-        
-        xlabel('Voltage(V)', 'FontSize', 30)
-        ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
-    
-    end
-end
 
 %% Save results and solutions
 save_file = 0;

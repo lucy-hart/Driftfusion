@@ -1,7 +1,6 @@
-%Use this file to symmetrically sweep HOMO/LUMO offsets vs ion
-%concentration for a device with doped or undoped interlayers
+%Use this file to symmetrically sweep HOMO/LUMO offsets vs surface 
+% recombination velocity for a device with doped or undoped interlayers
 
-%There have been some choices made here
 %Doping is fixed s.t. Fermi Level offset is alway 0.1 eV from the relevant
 %band edge
 %Work function of the electrodes is handled as follows
@@ -14,6 +13,7 @@
 %TURN SAVE OFF TO START OFF WITH (final cell)
 %% Define parameter space
 %Choose to use doped or undoped TLs
+%Choose to use normal or high efficiency parameters
 doped = 1;
 high_performance = 1;
 n_values = 7;
@@ -83,7 +83,7 @@ end
 %Less similar to the experimental situation maybe, as there the same
 %electrode materials are used for both interlayers
 Piers_version = 0;
-%Only makes sense to do this for the doped case so put this is as a
+%Only makes sense to do this for the doped case so put this in as a
 %protection in case you forget to change it
 if doped == 0
     Piers_version = 0;
@@ -145,12 +145,7 @@ for i = 1:n_recom
         par.sn(4) = params{i,j}(1);
         par.sp(2) = params{i,j}(1);
         par.sp(4) = params{i,j}(1);
-        
-        %Do this as it seesm to reduce the discrepency between surface
-        %volumetric surace recombination model and the abrupt interface one
-        %But also made solution less stable? Maybe better to tinker with
-        %this on the one which varies surface recombination...
-        %par.frac_vsr_zone = 0.05;
+
         par = refresh_device(par);
 
         soleq{i,j} = equilibrate(par);
@@ -210,7 +205,7 @@ for i = 1:n_recom
     end
 end
 
-%% Plot results 
+%% Get results in format useful for plotting
 Stats_array_el = zeros(n_values, n_values, 4);
 Stats_array_ion = zeros(n_values, n_values, 4);
 e = solCV_ion{1,1}.par.e;
@@ -243,56 +238,13 @@ for i = 1:n_values
     end
 end  
 
-%%
-figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 700])
-num = 2;
-labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
-
-if doped == 1
-    lims = [[-22 -18]; [0.8 1.195]; [0.15, 0.85]; [7 21]];
-else
-    lims = [[-22 -10]; [0.55 1.16]; [0.15, 0.85]; [5 25.5]];
-end
-
-box on 
-
-%Coutourf has column and row inidices as x and y respectively
-contourf(Delta_TL, v_sr, Stats_array_ion(:,:,num), 'LineWidth', 0.1)
-ylabel('Surface Recombination Velocity (cm s^{-1})')
-set(gca, 'YScale', 'log')
-xlabel('\DeltaE_{TL} (eV)')
-xlim([0, 0.3])
-ylim([1, 1e3])
-c = colorbar;
-c.Label.String = labels(num);
-clim(lims(num,:))
-
-%%
-figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 700])
-num = 4;
-labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
-LegendLoc = ["northeast", "southwest", "southeast", "northeast"];
-
-box on 
-
-%Coutourf has column and row inidices as x and y respectively
-contourf(Delta_TL, v_sr, Stats_array_ion(:,:,num)-Stats_array_el(:,:,num), 'LineWidth', 0.1)
-ylabel('Surface Recombination Velocity (cm s^{-1})')
-set(gca, 'YScale', 'log')
-xlabel('\DeltaE_{TL} (eV)')
-xlim([0, 0.3])
-ylim([1, 1e3])
-c = colorbar;
-c.Label.String = labels(num);
-%clim([-0.1,2])
-
 %% Save results and solutions
 save_file = 0;
 if save_file == 1
     if doped == 0
         filename = 'DeltaE_v5_undoped.mat';
     elseif doped == 1
-        filename = 'DeltaE_v5_doped_VaryHTL_FixedETL_0p15eV_vsr_100cms-1.mat';
+        filename = 'DeltaE_v5_doped.mat';
     end 
     save(filename, 'results', 'solCV')
 end
