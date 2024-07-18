@@ -35,10 +35,6 @@ sol_ill = changeLight(sol_ini, light_intensity, 0, 1);
 for i = 1:num_bias
     
     par = sol_ill.par;
-
-    if Vbias(i) >= 1
-        par.mu_p(1) = par.mu_p(1)/1000;
-    end
     
     try
         %ramp voltage up to the applied voltage 
