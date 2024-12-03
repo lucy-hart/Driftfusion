@@ -2,16 +2,33 @@
 par=pc('Input_files/TripleCat-ForSaP.csv');
 par.RelTol_vsr = 0.1;
 
-% IonConc = [1e16 1e17 1e18];
-vsurf = [5];
-num_samples = length(vsurf);
+%IonConc = [1e16 5e16 1e17 5e17 1e18];
+% vsurf = [5 50 500];
+%vsurf = [1e7 1e5 1e3 10];
+%tau = [10e-9 50e-9 100e-9 500e-9 1e-6];
+Vbi_offset = [0 0.05 0.1 0.15];
+num_samples = length(Vbi_offset);
 devices = cell(num_samples, 1);
 
 for i = 1:num_samples
+    if i == 1
+        Phi0_left = par.Phi_left;
+        Phi0_right = par.Phi_right;
+    end
 %     par.Ncat(:) = IonConc(i);
 %     par.Nani(:) = IonConc(i);
-    par.sn(1) = vsurf(i);
-    par.sp(3) = vsurf(i);
+    par.Ncat(:) = 1e17;
+    par.Nani(:) = 1e17;
+%     par.sn_r = vsurf(i);
+%     par.sp_r = vsurf(i);
+%     par.sn_l = 1;
+%     par.sp_r = 1;
+%     par.sn_r = 1e7;
+%     par.sp_l = 1e7;
+    par.Phi_left = Phi0_left + Vbi_offset(i);
+    par.Phi_right = Phi0_right - Vbi_offset(i);
+%     par.taun = tau(i);
+%     par.taup = tau(i);
     par = refresh_device(par);
     devices{i} = equilibrate(par);
 end
@@ -56,7 +73,7 @@ for j=1:num_samples
 end
 
 %% Plot pulsed JVs 
-num = 1;
+num = 3;
 figure('Name', 'PulsedJVs')
 cmap = colormap(parula(length(Vbias)));
 cmap = flip(cmap);
@@ -94,7 +111,8 @@ end
 %Extract Vflat
 
 %% Plot dJdV curves
-legend_title = 'N_{ion} (cm^{-3})';
+% legend_title = 'N_{ion} (cm^{-3})';
+legend_title = 'V_{bi} (V)';
 figure('Name', 'SaP-Analysis')
 
 % subplot(1,1,1)
@@ -104,7 +122,7 @@ xline(0, 'black', 'HandleVisibility', 'off')
 yline(0, 'black', 'HandleVisibility', 'off')
 colours = {[0.9290 0.6940 0.1250], [0.4660 0.6740 0.1880], [0.3010 0.7450 0.9330], [0 0.4470 0.7410], [0.4940 0.1840 0.5560]};
 for k = 1:num_samples
-    plot(Vbias, dJdV_Voc(k,:),'Color', colours{k}, 'DisplayName', num2str(vsurf(k), '%.1e'))
+    plot(Vbias, dJdV_Voc(k,:),'Color', colours{k}, 'DisplayName', num2str(1-2*Vbi_offset(k)))%, '%.0e'))
 end
 xlabel('V_{bias} (V)', 'FontSize', 20)
 xlim([Vbias(1), Vbias(end)])

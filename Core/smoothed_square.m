@@ -8,7 +8,7 @@ period = coeff(3);
 duty_cycle = coeff(4);
 
 t_pulse = (duty_cycle*period)/100;
-tau = 0.01*t_pulse;
+tau = 1e-4;
 
 t0 = 0.05*period;
 t1 = t0 + t_pulse/2;

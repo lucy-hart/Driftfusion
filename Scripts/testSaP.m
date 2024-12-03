@@ -2,8 +2,8 @@
 % par = pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 %par = pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
 %par=pc('Input_files/SnO2_MAPI_Spiro_TestSaP.csv');
-% par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_4.csv');
-par=pc('Input_files/NiO-TripleCat-C60-Fiddled.csv');
+par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_4.csv');
+% par=pc('Input_files/NiO-TripleCat-C60.csv');
 % par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_PaperParams.csv');
 % par.prob_distro_function = 'Boltz';
 % par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
@@ -44,7 +44,7 @@ eqm = equilibrate(par);
 
 %% See what device performance is at illumination used for SaP measurement
 check_JV = 0;
-suns = 1;
+suns = 0;
 if check_JV ==1 
     JVsol_el = doCV(eqm.el, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
     JVsol_ion = doCV(eqm.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
@@ -173,7 +173,7 @@ ylabel('Current Density (mA cm^{-2})')
 ylim([-25, 5])
 xlabel('Voltage (V)')
 xlim([0, 1.05])
-%legend()
+legend()
 %title(legend, 'V_{bias} (V)')
 
 %% Plot Vx at 0.6 V
@@ -197,34 +197,34 @@ xlim([0, 1.05])
 % title(legend, 'V_{bias} (V)')
 % 
 %% Do SaP analysis
-all_data = {J_fixed_ion};%, sol2};
-
-idx_stop = floor(length(V_fixed_ion));
-V_SaP_Analysis = V_fixed_ion(1:idx_stop);
-Jvalues = zeros(length(Vbias), idx_stop, length(all_data));
-Voc = zeros(length(all_data), length(Vbias));
-dJdV_Voc = zeros(length(all_data), length(Vbias));
-for k = 1:length(all_data)
-    data = all_data{k};
-    for i = 1:length(Vbias)
-        %for j = 1:length(V_fixed_ion)
-            Jvalues(i,:,k) = data{i}(1:idx_stop);
-        %end
-    end
-end  
+% all_data = {J_fixed_ion};%, sol2};
 % 
-colours = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980], [0.4660 0.6740 0.1880], [0.9290 0.6940 0.1250]};
-h = Vbias(2) - Vbias(1);
-for k = 1:length(all_data)
-    for i = 1:length(Vbias)
-        J_temp = Jvalues(i,:,k);
-        Voc(i) = interp1(J_temp(J_temp~=0), V_SaP_Analysis(J_temp~=0), 0);
-        dJdV = gradient(J_temp(J_temp~=0), V_SaP_Analysis(J_temp~=0));
-%         plot(V_SaP_Analysis(J_temp~=0), dJdV, color = colours{k})
-        hold on
-        dJdV_Voc(k,i) = interp1(V_SaP_Analysis(J_temp~=0), dJdV, Voc(i));
-    end
-end
+% idx_stop = floor(length(V_fixed_ion));
+% V_SaP_Analysis = V_fixed_ion(1:idx_stop);
+% Jvalues = zeros(length(Vbias), idx_stop, length(all_data));
+% Voc = zeros(length(all_data), length(Vbias));
+% dJdV_Voc = zeros(length(all_data), length(Vbias));
+% for k = 1:length(all_data)
+%     data = all_data{k};
+%     for i = 1:length(Vbias)
+%         %for j = 1:length(V_fixed_ion)
+%             Jvalues(i,:,k) = data{i}(1:idx_stop);
+%         %end
+%     end
+% end  
+% % 
+% colours = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980], [0.4660 0.6740 0.1880], [0.9290 0.6940 0.1250]};
+% h = Vbias(2) - Vbias(1);
+% for k = 1:length(all_data)
+%     for i = 1:length(Vbias)
+%         J_temp = Jvalues(i,:,k);
+%         Voc(i) = interp1(J_temp(J_temp~=0), V_SaP_Analysis(J_temp~=0), 0);
+%         dJdV = gradient(J_temp(J_temp~=0), V_SaP_Analysis(J_temp~=0));
+% %         plot(V_SaP_Analysis(J_temp~=0), dJdV, color = colours{k})
+%         hold on
+%         dJdV_Voc(k,i) = interp1(V_SaP_Analysis(J_temp~=0), dJdV, Voc(i));
+%     end
+% end
 
 %% Plot SaP analysis
 %NB: Smaller DeltaE_ETL also had vs = 50 cms-1
