@@ -193,5 +193,13 @@ legend({'5e15', '1e16', '5e16', '1e17', '5e17', '1e18', 'No Ions', ''}, 'Locatio
 save_file = 0;
 if save_file == 1
     filename = 'DeltaE_v5_undoped_SAM_remix.mat'; 
-    save(filename, 'results', 'solCV')
+    save(filename, 'results', 'solCV','Stats_array')
+end
+
+%%
+np_cell = cell(length(Ion_Conc),3);
+for i = 1:length(Ion_Conc)
+    np_cell{i,1} = dfana.calcVapp(solCV{i,1})';
+    np_cell{i,2} = solCV{i,1}.u(:,601,2);
+    np_cell{i,3} = solCV{i,1}.u(:,500,3);
 end
