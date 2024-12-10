@@ -76,7 +76,7 @@ tstab = 200;
 
 sol = doSaP_v2(eqm.ion, Vbias, Vpulse, tramp, tsample, tstab, suns, 1);
 
-%% Do JVs with mobseti = 0 to compare the aP JVs
+%% Do JVs with mobseti = 0 to compare the SaP JVs
 fixed_ion_JVs = cell(1, length(Vbias));
 J_fixed_ion = cell(1, length(Vbias));
 if compare_fixed_ion_JV == 1

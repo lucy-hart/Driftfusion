@@ -8,7 +8,8 @@
 % par=pc('Input_files/NiO-FACs-Al2O3-C60-Charlie.csv');
 % par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 % par=pc('Input_files/NiO-TripleCat-C60-Fiddled.csv');
-par=pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
+par1=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_SAM_HTLComparison.csv');
+par2=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_SAM.csv');
 % par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
 % par=pc('Input_files/1_layer_test.csv');
 % doped = 1;
@@ -19,7 +20,7 @@ par=pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
 % end
 
 Fiddle_with_Energetics = 0;
-Fiddle_with_IonConc = 1;
+Fiddle_with_IonConc = 0;
 IonConc = 1e17;
 %%
 if Fiddle_with_Energetics == 1
@@ -91,18 +92,19 @@ end
 par.vsr_mode = 1;
 par.frac_vsr_zone = 0.05;
 par = refresh_device(par);
-eqm_QJV = equilibrate(par);
+eqm_QJV1 = equilibrate(par1);
+eqm_QJV2 = equilibrate(par2);
 
 %%
-suns = 0.5;
-V_bias = -0.5;
+suns = 1;
+% V_bias = -0.5;
 % V_max = 1.2;
 % V_min = 0;
 % scan_rate = 0.2;
 % deltaV = V_max - V_min;
 % tmax = deltaV/scan_rate;
 % 
-biased_eqm_ion = genVappStructs(eqm_QJV.ion, V_bias, 0);
+% biased_eqm_ion = genVappStructs(eqm_QJV.ion, V_bias, 0);
 % biased_eqm_el = genVappStructs(eqm_QJV.el, V_bias, 1);
 % 
 % illuminated_sol_ion = changeLight(eqm_QJV.ion, suns, 0, 1);
@@ -113,13 +115,15 @@ biased_eqm_ion = genVappStructs(eqm_QJV.ion, V_bias, 0);
 % 
 % JV_sol_el = VappFunction(illuminated_sol_el, 'sweep', [V_max, V_min, tmax], tmax, 200*(V_max-V_min)+1, 0);
 
-% JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.5, 0.5, -0.5, 1e-4, 1, 201);
+JV_sol_ion = doCV(eqm_QJV1.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
+JV_sol_ion2 = doCV(eqm_QJV2.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
 % % JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.3, -0.2, 0.1, 1, 301);
 % % JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.2, -0.2, 100e-3, 1, 281);
 % 
-% Plot_Current_Contributions(JV_sol_ion) 
+Plot_Current_Contributions(JV_sol_ion)
+Plot_Current_Contributions(JV_sol_ion2)
 % % Plot_Current_Contributions(JV_sol_el) 
-% stats_ion = CVstats(JV_sol_ion)
+%stats_ion = CVstats(JV_sol_ion)
 % % stats_el = CVstats(JV_sol_el)
 
 % %% Plot JVs

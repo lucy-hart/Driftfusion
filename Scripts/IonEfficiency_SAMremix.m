@@ -165,7 +165,7 @@ c.Label.String = labels(num);
 %%
 figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 800])
 Colours = parula(n_ion_concs-1);
-num = 2;
+num = 3;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "northeast"];
 lims = [[-22 -10]; [0.9 1.195]; [0.15, 0.85]; [12 19]];

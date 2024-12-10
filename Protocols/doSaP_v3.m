@@ -1,4 +1,4 @@
-function SaPsol = doSaP_v2(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, light_intensity, PulseBool, IonsOn)
+function SaPsol = doSaP_v3(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, light_intensity, PulseBool, IonsOn)
 % Performs a simulation of a stabilise and pulse (SaP) measurement
 % Input arguments:
 % SOL_INI = solution containing intitial conditions (dark eqm device)
@@ -146,7 +146,11 @@ if PulseBool == 1
             disp(['Starting SaP for Vstab = ' num2str(Vbias(i)) ' V'])    
     
             for j = 1:num_pulses
-                par = SaPsol{i,1}.par;
+                if j == 1
+                    par = SaPsol{i,1}.par;
+                else
+                    par = sol.par;
+                end
             
                 %turn off ion motion for the duration of the pulse
                 %assuming that this is a valid assumption
@@ -199,6 +203,53 @@ if PulseBool == 1
                     catch
                         warning(['Could not solve Vpulse = ' num2str(Vpulse(j)) ' V'])
                         SaPsol{i,j+1}.Jpulse = 0;
+                    end 
+
+                    par.tmesh_type = 1;
+                    par.t0 = 0;
+                    par.tmax = 40e-3-tsample;
+                    par.tpoints = 100;
+                
+                    par.V_fun_type = 'constant';
+                    par.V_fun_arg(1) = Vpulse(j);
+    
+                    try
+                        sol = df(SaPsol{i,j+1}, par);
+                    catch
+                        warning(['Could not continue Vpulse = ' num2str(Vpulse(j)) ' V'])
+                        sol = SaPsol{i,j+1};
+                    end 
+
+                    par.tmesh_type = 1;
+                    par.t0 = 0;
+                    par.tmax = tramp;
+                    par.tpoints = 100;
+                
+                    par.V_fun_type = 'sweep';
+                    par.V_fun_arg(1) = Vpulse(j);
+                    par.V_fun_arg(2) = Vbias(i);
+                    par.V_fun_arg(3) = tramp;
+    
+                    try
+                        sol = df(sol, par);
+                    catch
+                        warning(['Could not ramp down to Vbias for Vpulse = ' num2str(Vpulse(j)) ' V'])
+                        sol = SaPsol{i,j+1};
+                    end
+
+                    par.tmesh_type = 1;
+                    par.t0 = 0;
+                    par.tmax = 1;
+                    par.tpoints = 100;
+                
+                    par.V_fun_type = 'constant';
+                    par.V_fun_arg(1) = Vbias(i);
+    
+                    try
+                        sol = df(sol, par);
+                    catch
+                        warning('Could not go back to Vbias')
+                        sol = SaPsol{i,j+1};
                     end 
                 end
                 

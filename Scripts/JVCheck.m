@@ -1,8 +1,7 @@
-par = pc("Input_files/ptaa_mapi_pcbm.csv");
+par = pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_SAM.csv');
 eqm = equilibrate(par);
-CV_sol_ion = doCV(eqm.ion, 1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
-CV_sol_el = doCV(eqm.el, 1, -0.3, 1.3, -0.3, 1e-3, 1, 321);
-
+CV_sol_ion = doCV(eqm.ion, 1, -0.3, 1.7, -0.3, 1e-4, 1, 401);
+%%
 Vapp = dfana.calcVapp(CV_sol_ion);
 Jion = dfana.calcJ(CV_sol_ion);
 Jel = dfana.calcJ(CV_sol_el);
