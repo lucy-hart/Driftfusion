@@ -1,5 +1,6 @@
-par = pc('Input_files/PTAA_MAPI_NoOffset_FastJVPaperParams.csv');
-par.prob_distro_function = 'Boltz';
+%par = pc('Input_files/PTAA_MAPI_NoOffset_FastJVPaperParams.csv');
+par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
+%par.prob_distro_function = 'Boltz';
 %par=pc('Input_files/PTAA_MAPI_NoOffset.csv');
 % doped = 1;
 % if doped == 1
@@ -10,7 +11,7 @@ par.prob_distro_function = 'Boltz';
 
 Fiddle_with_Energetics = 0;
 Fiddle_with_IonConc = 1;
-IonConc = 1e19;
+IonConc = 5e16;
 %%
 if Fiddle_with_Energetics == 1
 

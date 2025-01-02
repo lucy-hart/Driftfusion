@@ -10,15 +10,16 @@ if MyParams == 0
     V_bias = 1.15;
 elseif MyParams == 1
     par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
-    v_surf_l = logspace(log10(5), log10(500), 5);
-    v_surf_r = logspace(log10(20), log10(2000), 5);
+    v_surf_l = logspace(log10(5), log10(100), 3);
+    mu_l = [1e-4 1e-5 1e-6];
+    %v_surf_r = logspace(log10(20), log10(400), 3);
     labels = {'20', '63', '200', '630', '2000'};
     %See comment above
-    V_bias = 1.157;
+    V_bias = 1.15;
 end
 par.RelTol_vsr = 0.075;
 
-num_samples = length(v_surf);
+num_samples = length(v_surf_l);
 devices = cell(num_samples, 1);
 
 results_ion = zeros(num_samples, 4);
@@ -31,7 +32,8 @@ j_el = cell(1, num_samples);
 
 for i = 1:num_samples
     par.sn(2) = v_surf_l(i);
-    par.sp(4) = v_surf_r(i);
+    par.mu_p(1) = mu_l(i);
+    %par.sp(4) = v_surf_r(i);
     par = refresh_device(par);
     devices{i} = equilibrate(par);
 end

@@ -1,10 +1,13 @@
-par = pc('Input_files/PTAA_MAPI_NoOffset_FastJVPaperParams.csv');
-%par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
+%par = pc('Input_files/PTAA_MAPI_NoOffset_FastJVPaperParams.csv');
+par = pc('Input_files/PTAA_MAPI_NoOffset.csv');
 par.RelTol_vsr = 0.075;
 
-%IonConc = logspace(16,18,5);
-IonConc = 1e19;
+%IonConc = logspace(16,18,3);
+IonConc = [5e16 1e17 5e17];
+%IonConc = 1e19;
 num_samples = length(IonConc);
+taus = [20e-9 100e-9 200e-9];
+%mobs = flip(logspace(-1.3,0,num_samples));
 devices = cell(num_samples, 1);
 
 results_ion = zeros(num_samples, 4);
@@ -17,6 +20,10 @@ j_bias = cell(1, num_samples);
 for i = 1:num_samples
     par.Ncat(:) = IonConc(i);
     par.Nani(:) = IonConc(i);
+%     par.mu_n(3) = mobs(i);
+%     par.mu_p(3) = mobs(i);
+    par.taun(3) = taus(i);
+    par.taup(3) = taus(i);
     par = refresh_device(par);
     devices{i} = equilibrate(par);
 end
@@ -48,7 +55,7 @@ for i = 1:num_samples
     %Fix this value based on the Voc of the default parameters (Nion = 5e16
     %cm-3) - better reflects the paper where they don't change scan range
     %to take account Voc decreases during aging
-    V_bias = 1.157;
+    V_bias = 1.15;
     
     biased_eqm_ion = genVappStructs(devices{i}.ion, V_bias, 1);
     illuminated_sol_ion = changeLight(biased_eqm_ion, suns, 0, 1);
