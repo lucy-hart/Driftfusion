@@ -18,7 +18,7 @@ doped = 0;
 n_values = 11;
 Delta_TL = linspace(0, 0.5, n_values);
 Delta_TL(1) = 1e-3;
-Ion_Conc = [5e15 1e16 5e16 1e17 5e17 1e18 0];
+% Ion_Conc = [5e15 1e16 5e16 1e17 5e17 1e18 0];
 n_ion_concs = length(Ion_Conc);
 
 include_ions = 0;
@@ -43,7 +43,6 @@ results = cell(n_ion_concs, n_values);
 %% Do (many) JV sweeps
 %Select the correct input file for doped or undoped cases 
 par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_SAM.csv');
-
 
 %Set the illumination for the JV sweeps 
 illumination = 1;
@@ -165,7 +164,7 @@ c.Label.String = labels(num);
 %%
 figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 800])
 Colours = parula(n_ion_concs-1);
-num = 3;
+num = 2;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
 LegendLoc = ["northeast", "southwest", "southeast", "northeast"];
 lims = [[-22 -10]; [0.9 1.195]; [0.15, 0.85]; [12 19]];
