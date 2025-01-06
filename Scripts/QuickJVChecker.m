@@ -8,7 +8,7 @@
 % par=pc('Input_files/NiO-FACs-Al2O3-C60-Charlie.csv');
 % par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 % par=pc('Input_files/NiO-TripleCat-C60-Fiddled.csv');
-par1=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_SAM_HTLComparison.csv');
+par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
 par2=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_SAM.csv');
 % par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
 % par=pc('Input_files/1_layer_test.csv');
@@ -19,17 +19,18 @@ par2=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_SAM.csv');
 %     par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
 % end
 
-Fiddle_with_Energetics = 0;
-Fiddle_with_IonConc = 0;
-IonConc = 1e17;
+Fiddle_with_Energetics = 1;
+Fiddle_with_IonConc = 1;
+IonConc = 1e18;
+doped = 0;
 %%
 if Fiddle_with_Energetics == 1
 
     %row
-    DHOMO = 0.25;
+    DHOMO = 0.05;
     %DHOMO = Delta_HOMO(4);
     %column
-    DLUMO = -0.25;
+    DLUMO = -0.2;
     %DLUMO = Delta_LUMO(11);
         if doped == 0
             %HTL Energetics
@@ -92,7 +93,7 @@ end
 par.vsr_mode = 1;
 par.frac_vsr_zone = 0.05;
 par = refresh_device(par);
-eqm_QJV1 = equilibrate(par1);
+eqm_QJV = equilibrate(par);
 eqm_QJV2 = equilibrate(par2);
 
 %%
@@ -115,7 +116,7 @@ suns = 1;
 % 
 % JV_sol_el = VappFunction(illuminated_sol_el, 'sweep', [V_max, V_min, tmax], tmax, 200*(V_max-V_min)+1, 0);
 
-JV_sol_ion = doCV(eqm_QJV1.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
+JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
 JV_sol_ion2 = doCV(eqm_QJV2.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
 % % JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.3, -0.2, 0.1, 1, 301);
 % % JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.2, -0.2, 100e-3, 1, 281);
