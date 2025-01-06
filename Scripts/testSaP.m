@@ -2,7 +2,7 @@
 % par = pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 %par = pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
 %par=pc('Input_files/SnO2_MAPI_Spiro_TestSaP.csv');
-par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_4.csv');
+par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_3.csv');
 % par=pc('Input_files/NiO-TripleCat-C60.csv');
 % par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_PaperParams.csv');
 % par.prob_distro_function = 'Boltz';
