@@ -13,16 +13,16 @@
 tic
 %% Define parameter space
 %Choose to use doped or undoped TLs and which of v_sr or tau_SRH to vary
-doped = 0.5;
+doped = 1;
 surface = 1;
 
 %Set up the parameters for the ion concentrations
-% Ion_Conc = [5e15 1e16 5e16 1e17 5e17 1e18 0];
-Ion_Conc = [1e18 0];
+Ion_Conc = [5e15 1e16 5e16 1e17 5e17 1e18 0];
+%Ion_Conc = [1e18 0];
 n_ion_concs = length(Ion_Conc);
 
 if surface == 1
-    v_sr = logspace(-2,3,11);
+    v_sr = [1];%logspace(-1,4,11);
     n_recom  = length(v_sr);
     %Rows are the ion concentrations    
     %Columns are the surface recombination velocities
@@ -61,14 +61,14 @@ end
 %% Choose the nergetics of the TLs 
 %Default values are FILL THIS IN
 %Will use these values if Fiddle_with_Energetics is 0
-Fiddle_with_Energetics = 0;
+Fiddle_with_Energetics = 1;
 
 if Fiddle_with_Energetics == 1
     %Choose the offsets for the system
     %Positive offset for DHOMO means TL VB lies above the perovskite VB
     %Negative offset for DLUMO means TL CB lies below the perovskite CB
-    DHOMO = 0.35;
-    DLUMO = -0.35;
+    DHOMO = 0.2;
+    DLUMO = -0.2;
 
     %HTL Energetics
     par.Phi_left = -5.15;
@@ -171,8 +171,8 @@ for i = 1:n_ion_concs
         
         %electron only scan
         if i == n_ion_concs 
-            Voc_max = 1.1;
-            num_points = 301;
+            Voc_max = 1.2;
+            num_points = 281;
             while Voc_max >= Voc_max_lim
                 try            
                     solCV{i, j} = doCV(soleq{i, j}.el, illumination, -0.2, Voc_max, -0.2, 1, 1, num_points);           
@@ -193,8 +193,8 @@ for i = 1:n_ion_concs
             end
         
         else
-            Voc_max = 1.1;
-            num_points = 301; 
+            Voc_max = 1.2;
+            num_points = 281; 
             while Voc_max >= Voc_max_lim
                 try
                     solCV{i, j} = doCV(soleq{i, j}.ion, illumination, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);
@@ -224,7 +224,6 @@ Stats_array = zeros(n_ion_concs, n_recom, 5);
 J_srh_result = cell(2, n_recom);
 J_vsr_result = cell(2,n_recom);
 V_plot = cell(2, n_recom);
-e = solCV{1,1}.par.e;
 
 for i = 1:n_ion_concs
     for j = 1:n_recom
