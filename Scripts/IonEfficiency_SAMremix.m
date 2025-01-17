@@ -18,7 +18,8 @@ doped = 0;
 n_values = 11;
 Delta_TL = linspace(0, 0.5, n_values);
 Delta_TL(1) = 1e-3;
-% Ion_Conc = [5e15 1e16 5e16 1e17 5e17 1e18 0];
+Ion_Conc = [5e15 1e16 5e16 1e17 5e17 1e18 0];
+%Ion_Conc = [5e16 1e18 0];
 n_ion_concs = length(Ion_Conc);
 
 include_ions = 0;

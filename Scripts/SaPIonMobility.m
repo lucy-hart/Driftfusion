@@ -50,7 +50,7 @@ if compare_fixed_ion_JV == 1
 end
 
 %% Look at the voltage stabilisation
-which = 3;
+which = 2;
 sol = sol_pulsed{which};
 t = sol{1, 1}.t;
 

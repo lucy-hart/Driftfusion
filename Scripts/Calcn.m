@@ -1,11 +1,12 @@
 %Code to calculate charge stored on device active layers
 
-nbar = cell(7,1);
-pbar = cell(7,1);
-npbar = cell(7,1);
-Rsrh = cell(7,1);
+num = 2;
+nbar = cell(num,1);
+pbar = cell(num,1);
+npbar = cell(num,1);
+Rsrh = cell(num,1);
 
-for i = 1:7
+for i = 1:num
     sol = solCV{i};
     w = sol.par.d_active;
     num_start = sum(sol.par.layer_points(1:2))+1;
@@ -20,12 +21,12 @@ end
 %%
 figure('Name', 'carirrier bar')
 
-which = 21+round(100*Stats_array(:,1,2));
-%which = ones(7).*21+114;
-values = zeros(7,3);
-r = zeros(7,1);
+%which = 21+round(100*Stats_array(:,1,2));
+which = ones(num).*21+100;
+values = zeros(num,3);
+r = zeros(num,1);
 hold on 
-for j = 1:7
+for j = 1:num
     plot(j, nbar{j}(which(j)), 'Marker', 'o')
     plot(j, pbar{j}(which(j)), 'Marker', 'x')
     plot(j, npbar{j}(which(j)), 'Marker', 's')

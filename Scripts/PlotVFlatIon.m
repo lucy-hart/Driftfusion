@@ -6,7 +6,7 @@
 num_ion_concs = length(solCV(:,1))-1;
 num_offsets = length(solCV(1,:));
 
-Symmetric = 1;
+Symmetric = 0;
 
 Vbi = zeros(1, num_offsets);
 TL_offset = zeros(1, num_offsets);

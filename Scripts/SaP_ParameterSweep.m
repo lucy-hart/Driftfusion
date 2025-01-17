@@ -1,15 +1,17 @@
 %% File to test that what varying device parameters does to SaP measurements
 par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_3.csv');
+%par=pc('Input_files/NiO-TripleCat-C60.csv');
 par.RelTol_vsr = 0.1;
 
 % IonConc = [1e16 1e17 1e18];
-vsurf = [1 10];
+% vsurf = [1 10];
 %vsurf = [1e5 1e3 10];
 %default = -4;
 %offsets = [0.15 0.0 -0.15];
-% tau = [2.5e-9 25e-9 250e-9];
+tau = [2.5e-9 25e-9 250e-9];
+suns_ar = [0.4 0.7 1];
 % Vbi_offset = [0 0.05 0.1 0.15];
-num_samples = length(vsurf);
+num_samples = length(tau);
 devices = cell(num_samples, 1);
 
 for i = 1:num_samples
@@ -32,7 +34,7 @@ for i = 1:num_samples
 %     par.taun(3) = tau(i);
 %     par.taup(3) = tau(i);
 %     par.sp(2) = 0.1;
-    par.sn(4) = vsurf(i);
+%     par.sn(4) = vsurf(i);
 %     par.sn(2) = 0.1;
 %     par.sn(4) = 0.1;
 %     par.Phi_EA(5) = default + offsets(i);
@@ -57,7 +59,7 @@ end
 sol = cell(num_samples, 1);
 Vbias = linspace(0,1.2,13);
 %Vbias = [1.0 1.1 1.2 1.3 1.4 1.5];
-suns = 1;
+%suns = 1;
 %Vbias(15) = [];
 %Vbias = linspace(0,0.2,3);
 Vpulse = [0];
@@ -66,6 +68,7 @@ tsample = 1e-3;
 tstab = 200;
 
 for i = 1:num_samples
+    suns = suns_ar(i);
     sol{i} = doSaP_v2(devices{i}.ion, Vbias, Vpulse, tramp, tsample, tstab, suns, 0);
 end
 %% Do JVs with mobseti = 0 
@@ -76,6 +79,7 @@ Vmin = 0;
 numpoints = 100*(Vmax-Vmin) + 1;
 
 for j=1:num_samples
+    suns = suns_ar(j);
     for i=1:length(Vbias)
         sol_temp = sol{j}{i};
         disp(['Doing JV for Vstab = ' num2str(Vbias(i)) ' V and j = ', num2str(j)])
@@ -104,11 +108,12 @@ xline(0, 'black', 'HandleVisibility', 'off')
 yline(0, 'black', 'HandleVisibility', 'off')
 
 for i = 1:length(Vbias)
-    plot(V_fixed_ion, 1e3*J_fixed_ion{num,i}, 'HandleVisibility', 'Off', 'color', cmap(i,:), 'LineStyle', '-')
+    plot(V_fixed_ion, J_fixed_ion{num,i}/J_fixed_ion{num,1}(1), 'HandleVisibility', 'Off', 'color', cmap(i,:), 'LineStyle', '-')
 end
 
 ylabel('Current Density (mA cm^{-2})')
-ylim([-25, 80])
+% ylim([-25, 20])
+ylim([-1.1, 1.1])
 xlabel('Voltage (V)')
 xlim([0, 1.2])
 %legend()
