@@ -75,8 +75,8 @@ for i = 1:n_ion_concs
         par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
         par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
         par.EF0(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
-        if par.Phi_right > par.Phi_EA(5) - 0.1
-            par.Phi_right = par.Phi_EA(5) - 0.1;
+        if par.Phi_right > par.Phi_EA(5) - 0.05
+            par.Phi_right = par.Phi_EA(5) - 0.05;
         end
 
         %ion conc
@@ -90,6 +90,10 @@ for i = 1:n_ion_concs
         %But also made solution less stable? Maybe better to tinker with
         %this on the one which varies surface recombination...
         %par.frac_vsr_zone = 0.05;
+        par.light_source1 = 'laser';
+        par.laser_lambda1 = 532;
+        par.pulsepow = 62;
+        par.RelTol_vsr = 0.1;
         par = refresh_device(par);
 
         soleq{i,j} = equilibrate(par);
@@ -183,25 +187,15 @@ end
 figure('Name', 'JV Parameter vs Energy Offsets vs Ion Conc', 'Position', [50 50 800 800])
 Colours = parula(n_ion_concs-1);
 num = 5;
-labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)"];
-LegendLoc = ["northeast", "southwest", "southeast", "northeast"];
-if doped == 0
-%     lims = [[-23 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
-    lims = [[-23 -15]; [0.77 1.24]; [0.5, 0.9]; [16 27]];
-elseif doped == 1
-%     lims = [[-24 -15]; [0.77 1.24]; [0.5, 0.9]; [10 23]];
-    lims = [[-24 -15]; [0.77 1.24]; [0.5, 0.9]; [18 27]];
-end
+labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)", "QFLS_{SC} (eV)"];
+LegendLoc = ["northeast", "southwest", "southeast", "northeast", "southwest"];
+
 box on 
 for i = 1:n_ion_concs
     hold on
     if i == n_ion_concs
-        plot(Delta_TL, Stats_array(n_ion_concs,:,5).*Stats_array(n_ion_concs,:,num), 'marker', 'x', 'Color', 'black', 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
-        plot(Delta_TL, (1-Stats_array(n_ion_concs,:,5)).*Stats_array(n_ion_concs,:,num), 'marker', 'o', 'Color', 'black', 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
         plot(Delta_TL, Stats_array(n_ion_concs,:,num), 'marker', 'none', 'Color', 'black')
     else
-%         plot(Delta_TL, Stats_array(i-1,:,5).*Stats_array(i-1,:,num), 'marker', 'x', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
-%         plot(Delta_TL, (1-Stats_array(i-1,:,5)).*Stats_array(i-1,:,num), 'marker', 'o', 'Color', Colours(i-1,:), 'LineStyle', 'none', 'MarkerSize', 10, 'HandleVisibility', 'Off')
         plot(Delta_TL, Stats_array(i,:,num), 'marker', 'none', 'Color', Colours(i,:))
     end
 end
@@ -211,9 +205,6 @@ ylabel(labels(num), 'FontSize', 30)
 xlim([0, 0.3])
 xticks([0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3])
 xticklabels({'0.00', '0.05', '0.10', '0.15', '0.20', '0.25', '0.30'})
-ylim(lims(num,:))
-%legend({'1e15', '5e15', '1e16', '5e16', '1e17', '5e17', '1e18', 'No Ions'}, 'Location', LegendLoc(num), 'FontSize', 25, 'NumColumns', 2)
-title(legend, 'Ion Concentration (cm^{-3})', 'FontSize', 25)
 
 
 %% Save results and solutions
