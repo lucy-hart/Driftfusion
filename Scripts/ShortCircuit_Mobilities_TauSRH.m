@@ -14,8 +14,8 @@ tic
 %% Define parameter space
 %
 doped = 0;
-mu = 0;
-Nion = 1e18;
+mu = 1;
+Nion = 1e17;
 eps_pero = 25;
 
 %
@@ -23,7 +23,7 @@ mu_TL_ar = logspace(log10(5e-6),-3,7);
 n_TL_mus = length(mu_TL_ar);
 
 if mu == 1
-    mu_pero = logspace(-1,log10(50),7);
+    mu_pero = logspace(log10(0.1),log10(50),7);
     n_pero_var  = length(mu_pero);
     %Rows are the TL mobilities    
     %Columns are the perovskite mobilities
@@ -49,7 +49,7 @@ end
 %%
 %Select the correct input file for doped or undoped cases
 if doped == 0
-    par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
+    par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_Weidong.csv');
     Voc_max_lim = 1.05;
 elseif doped == 1
     par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
@@ -59,7 +59,7 @@ elseif doped == 0.5
     Voc_max_lim = 0.80;
 end
 
-%% Choose the nergetics of the TLs 
+%% Choose the energetics of the TLs 
 %Default values are FILL THIS IN
 %Will use these values if Fiddle_with_Energetics is 0
 Fiddle_with_Energetics = 1;
@@ -68,37 +68,33 @@ if Fiddle_with_Energetics == 1
     %Choose the offsets for the system
     %Positive offset for DHOMO means TL VB lies above the perovskite VB
     %Negative offset for DLUMO means TL CB lies below the perovskite CB
-    DHOMO = 0.25;
-    DLUMO = -0.2;
+    % DHOMO = 0.25;
+    DLUMO = -0.05;
 
     %HTL Energetics
-    par.Phi_left = -5.15;
-    par.Phi_IP(1) = par.Phi_IP(3) + DHOMO;
-    par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
-    par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
-    if doped == 0
-        par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
-    elseif doped == 1
-        par.EF0(1) = par.Phi_IP(1) + 0.1;
-    end 
-    if par.Phi_left < par.Phi_IP(1) + 0.01
-        par.Phi_left = par.Phi_IP(1) + 0.01;
-    end
+    % par.Phi_left = -5.15;
+    % par.Phi_IP(1) = par.Phi_IP(3) + DHOMO;
+    % par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
+    % par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+    % if doped == 0
+    %     par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+    % elseif doped == 1
+    %     par.EF0(1) = par.Phi_IP(1) + 0.1;
+    % end 
+    % if par.Phi_left < par.Phi_IP(1) + 0.01
+    %     par.Phi_left = par.Phi_IP(1) + 0.01;
+    % end
 
     %ETL Energetics
-    par.Phi_right = -4.05;
+    par.Phi_right = -4.00;
     par.Phi_EA(5) = par.Phi_EA(3) + DLUMO;
     par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
-    par.Et(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
-    if doped == 0
-         par.EF0(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
-    elseif doped == 1
-        par.EF0(5) = par.Phi_EA(5) - 0.1;
+    par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+    par.EF0(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+    if par.Phi_right > par.Phi_EA(5) - 0.05
+        par.Phi_right = par.Phi_EA(5) - 0.05;
     end
-    if par.Phi_right > par.Phi_EA(5) - 0.01
-        par.Phi_right = par.Phi_EA(5) - 0.01;
-    end
-    
+   
     par.Ncat(:) = Nion;
     par.Nani(:) = Nion;
     par.epp(2:4) = eps_pero;
@@ -121,7 +117,7 @@ illumination = 1;
 %changed for the cases where E_LUMO (E_HOMO) is far below (above) the CB
 %(VB)
 for i = 1:n_TL_mus
-    for j = 6:n_pero_var
+    for j = 1:n_pero_var
         if mu == 0
             disp(["tau_SRH = ", num2str(tau_SRH(j)), " s"])
         elseif mu == 1
@@ -137,11 +133,15 @@ for i = 1:n_TL_mus
             par.mu_p(3) = params{i,j}(2);
         end
 
-        par.mu_n(1) = params{i,j}(1);
+        % par.mu_n(1) = params{i,j}(1);
         par.mu_n(5) = params{i,j}(1);
-        par.mu_p(1) = params{i,j}(1);
+        % par.mu_p(1) = params{i,j}(1);
         par.mu_p(5) = params{i,j}(1);
 
+        par.light_source1 = 'laser';
+        par.laser_lambda1 = 532;
+        par.pulsepow = 62;
+        par.RelTol_vsr = 0.1;
         par = refresh_device(par);
 
         soleq{i,j} = equilibrate(par);
@@ -150,7 +150,7 @@ for i = 1:n_TL_mus
         num_points = 301; 
         while Voc_max >= Voc_max_lim
             try
-                solCV{i, j} = doCV(soleq{i, j}.ion, illumination, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);
+                solCV{i, j} = doCV(soleq{i, j}.ion, illumination, -0.2, Voc_max, -0.2, 10e-3, 1, num_points);
                 error_log(i,j) = 0;
                 results{i,j} = CVstats(solCV{i, j});
                 Voc_max = 0;
@@ -180,12 +180,12 @@ x = solCV{1,6}.par.x_sub;
 d = solCV{1,6}.par.d(3);
 
 for i = 1:n_TL_mus
-    for j = 6:n_pero_var
+    for j = 1:n_pero_var
         try
-%             Stats_array(i,j,1) = 1e3*results{i,j}.Jsc_f;
-%             Stats_array(i,j,2) = results{i,j}.Voc_f;
-%             Stats_array(i,j,3) = results{i,j}.FF_f;
-%             Stats_array(i,j,4) = results{i,j}.efficiency_f;
+            Stats_array(i,j,1) = 1e3*results{i,j}.Jsc_f;
+            Stats_array(i,j,2) = results{i,j}.Voc_f;
+            Stats_array(i,j,3) = results{i,j}.FF_f;
+            Stats_array(i,j,4) = results{i,j}.efficiency_f;
             %Calculate QFLS 
             [~, ~, Efn_ion, Efp_ion] = dfana.calcEnergies(solCV{i,j});
             QFLS_ion = trapz(x(num_start:num_stop), Efn_ion(:, num_start:num_stop)-Efp_ion(:,num_start:num_stop),2)/d;            
