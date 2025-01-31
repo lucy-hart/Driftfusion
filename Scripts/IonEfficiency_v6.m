@@ -18,7 +18,7 @@
 tic
 %% Define parameter space
 %Choose to use doped or undoped TLs
-doped = 1;
+doped = 0;
 high_performance = 0;
 n_values = 7;
 Delta_TL = linspace(0, 0.3, n_values);
@@ -26,10 +26,10 @@ Delta_TL = linspace(0, 0.3, n_values);
 % Delta_TL = [0 0.3];
 Symmetric_offset = 0;
 %Fix the offset for the ETL or HTL
-Fix_ETL = 1;
+Fix_ETL = 0;
 %Energetic offset between the perovskite and TL for the TL with fixed
 %energetics 
-Fixed_offset = 0.15;
+Fixed_offset = 0.25;
 %This is a bit of a hack, but if the offfset is exactly 0, the surface
 %recombination error becomes huge for reasons I do not fully understand...
 %The saga continues - only seems to matter for the HTL, not the ETL...
@@ -458,7 +458,7 @@ if plot_JVs == 1
 end
 
 %% Save results and solutions
-save_file = 1;
+save_file = 0;
 if save_file == 1
     if doped == 0
         filename = 'DeltaE_v5_undoped_SAMComparison.mat';

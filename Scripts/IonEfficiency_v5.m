@@ -22,7 +22,7 @@ Ion_Conc = [5e15 1e16 5e16 1e17 5e17 1e18 0];
 n_ion_concs = length(Ion_Conc);
 
 if surface == 1
-    v_sr = [1];%logspace(-1,4,11);
+    v_sr = [0.1];%[0.1 1 10 100 1000 1e4];%logspace(-1,4,11);
     n_recom  = length(v_sr);
     %Rows are the ion concentrations    
     %Columns are the surface recombination velocities
@@ -67,8 +67,8 @@ if Fiddle_with_Energetics == 1
     %Choose the offsets for the system
     %Positive offset for DHOMO means TL VB lies above the perovskite VB
     %Negative offset for DLUMO means TL CB lies below the perovskite CB
-    DHOMO = 0.2;
-    DLUMO = -0.2;
+    DHOMO = 0.25;
+    DLUMO = -0.15;
 
     %HTL Energetics
     par.Phi_left = -5.15;
@@ -224,7 +224,9 @@ Stats_array = zeros(n_ion_concs, n_recom, 5);
 J_srh_result = cell(2, n_recom);
 J_vsr_result = cell(2,n_recom);
 V_plot = cell(2, n_recom);
-
+e = solCV{1,1}.par.e;
+%%
+e = solCV{1,1}.par.e;
 for i = 1:n_ion_concs
     for j = 1:n_recom
         try
@@ -306,7 +308,7 @@ if surface == 0
     xlim([1, 1000])
 elseif surface == 1
     xlabel('Surface Recombination Velocity (cm s^{-1})', 'FontSize', 30)
-    xlim([1e-1, 1e2])
+    xlim([1e-1, 1e4])
 end
 ylabel(labels(num), 'FontSize', 30)
 ylim(lims(num,:))

@@ -68,7 +68,7 @@ if Fiddle_with_Energetics == 1
     %Choose the offsets for the system
     %Positive offset for DHOMO means TL VB lies above the perovskite VB
     %Negative offset for DLUMO means TL CB lies below the perovskite CB
-    DHOMO = 0.2;
+    DHOMO = 0.25;
     DLUMO = -0.2;
 
     %HTL Energetics
@@ -121,7 +121,7 @@ illumination = 1;
 %changed for the cases where E_LUMO (E_HOMO) is far below (above) the CB
 %(VB)
 for i = 1:n_TL_mus
-    for j = 1:n_pero_var
+    for j = 6:n_pero_var
         if mu == 0
             disp(["tau_SRH = ", num2str(tau_SRH(j)), " s"])
         elseif mu == 1
@@ -146,8 +146,8 @@ for i = 1:n_TL_mus
 
         soleq{i,j} = equilibrate(par);
        
-        Voc_max = 1.2;
-        num_points = 281; 
+        Voc_max = 1.3;
+        num_points = 301; 
         while Voc_max >= Voc_max_lim
             try
                 solCV{i, j} = doCV(soleq{i, j}.ion, illumination, -0.2, Voc_max, -0.2, 1e-4, 1, num_points);
@@ -174,18 +174,18 @@ toc
 %% Extract results 
 Stats_array = zeros(n_TL_mus, n_pero_var, 5);
 
-num_start = sum(solCV{1,1}.par.layer_points(1:2))+1;
-num_stop = num_start + solCV{1,1}.par.layer_points(3)-1;
-x = solCV{1,1}.par.x_sub;
-d = solCV{1,1}.par.d(3);
+num_start = sum(solCV{1,6}.par.layer_points(1:2))+1;
+num_stop = num_start + solCV{1,6}.par.layer_points(3)-1;
+x = solCV{1,6}.par.x_sub;
+d = solCV{1,6}.par.d(3);
 
 for i = 1:n_TL_mus
-    for j = 1:n_pero_var
+    for j = 6:n_pero_var
         try
-            Stats_array(i,j,1) = 1e3*results{i,j}.Jsc_f;
-            Stats_array(i,j,2) = results{i,j}.Voc_f;
-            Stats_array(i,j,3) = results{i,j}.FF_f;
-            Stats_array(i,j,4) = results{i,j}.efficiency_f;
+%             Stats_array(i,j,1) = 1e3*results{i,j}.Jsc_f;
+%             Stats_array(i,j,2) = results{i,j}.Voc_f;
+%             Stats_array(i,j,3) = results{i,j}.FF_f;
+%             Stats_array(i,j,4) = results{i,j}.efficiency_f;
             %Calculate QFLS 
             [~, ~, Efn_ion, Efp_ion] = dfana.calcEnergies(solCV{i,j});
             QFLS_ion = trapz(x(num_start:num_stop), Efn_ion(:, num_start:num_stop)-Efp_ion(:,num_start:num_stop),2)/d;            
@@ -201,7 +201,7 @@ end
 %%
 figure('Name', 'JV Parameter vs Recombination vs Ion Conc', 'Position', [50 50 800 800])
 Colours = parula(n_TL_mus);
-num = 1;
+num = 5;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)", "QFLS_{SC}"];
 LegendLoc = ["northeast", "southwest", "southeast", "southeast"];
 if doped == 0
@@ -229,7 +229,7 @@ if surface == 0
     xlim([1, 1000])
 elseif surface == 1
     xlabel('Perovskite Mobility (cm^{2} V^{-1} s^{-1})', 'FontSize', 30)
-    xlim([1e-1, 10])
+    xlim([1e-1, 50])
 end
 ylabel(labels(num), 'FontSize', 30)
 ylim(lims(num,:))
