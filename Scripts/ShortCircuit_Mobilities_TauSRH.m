@@ -13,7 +13,7 @@
 tic
 %% Define parameter space
 %
-doped = 0;
+symmetric = 1;
 mu = 1;
 Nion = 1e17;
 eps_pero = 25;
@@ -48,15 +48,12 @@ end
 
 %%
 %Select the correct input file for doped or undoped cases
-if doped == 0
+if symmetric == 0
     par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_Weidong.csv');
     Voc_max_lim = 1.05;
-elseif doped == 1
-    par=pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
+elseif symmetric == 1
+    par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
     Voc_max_lim = 1.05;
-elseif doped == 0.5
-    par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP.csv');
-    Voc_max_lim = 0.80;
 end
 
 %% Choose the energetics of the TLs 
@@ -68,33 +65,38 @@ if Fiddle_with_Energetics == 1
     %Choose the offsets for the system
     %Positive offset for DHOMO means TL VB lies above the perovskite VB
     %Negative offset for DLUMO means TL CB lies below the perovskite CB
-    % DHOMO = 0.25;
-    DLUMO = -0.05;
-
-    %HTL Energetics
-    % par.Phi_left = -5.15;
-    % par.Phi_IP(1) = par.Phi_IP(3) + DHOMO;
-    % par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
-    % par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
-    % if doped == 0
-    %     par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
-    % elseif doped == 1
-    %     par.EF0(1) = par.Phi_IP(1) + 0.1;
-    % end 
-    % if par.Phi_left < par.Phi_IP(1) + 0.01
-    %     par.Phi_left = par.Phi_IP(1) + 0.01;
-    % end
-
-    %ETL Energetics
-    par.Phi_right = -4.00;
-    par.Phi_EA(5) = par.Phi_EA(3) + DLUMO;
-    par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
-    par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
-    par.EF0(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
-    if par.Phi_right > par.Phi_EA(5) - 0.05
-        par.Phi_right = par.Phi_EA(5) - 0.05;
+    DHOMO = 0;
+    DLUMO = 0;
+    if symmetric == 1
+        %HTL Energetics
+        par.Phi_left = -5.15;
+        par.Phi_IP(1) = par.Phi_IP(3) + DHOMO;
+        par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
+        par.EF0(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+        par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+        if par.Phi_left < par.Phi_IP(1) + 0.1
+            par.Phi_left = par.Phi_IP(1) + 0.1;
+        end
+        %ETL Energetics
+        par.Phi_right = -4.05;
+        par.Phi_EA(5) = par.Phi_EA(3) + DLUMO;
+        par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
+        par.EF0(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
+        par.Et(5) = (par.Phi_IP(5)+par.Phi_EA(5))/2;
+        if par.Phi_right > par.Phi_EA(5) - 0.1
+            par.Phi_right = par.Phi_EA(5) - 0.1;
+        end
+    elseif symmetric == 0
+        %ETL Energetics
+        par.Phi_right = -4.00;
+        par.Phi_EA(5) = par.Phi_EA(3) + DLUMO;
+        par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
+        par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+        par.EF0(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+        if par.Phi_right > par.Phi_EA(5) - 0.05
+            par.Phi_right = par.Phi_EA(5) - 0.05;
+        end
     end
-   
     par.Ncat(:) = Nion;
     par.Nani(:) = Nion;
     par.epp(2:4) = eps_pero;
@@ -204,11 +206,11 @@ Colours = parula(n_TL_mus);
 num = 5;
 labels = ["J_{SC} (mA cm^{-2})", "V_{OC} (V)", "FF", "PCE (%)", "QFLS_{SC}"];
 LegendLoc = ["northeast", "southwest", "southeast", "southeast"];
-if doped == 0
+if symmetric == 0
     lims = [[-24 -5]; [0.8 1.2]; [0.5, 0.9]; [10 23]; [0.8 1.1]];
-elseif doped == 1
+elseif symmetric == 1
     lims = [[-24 -5]; [0.8 1.2]; [0.5, 0.9]; [10 23]; [0.8 1.1]];
-elseif doped == 0.5
+elseif symmetric == 0.5
     lims = [[-24 -5]; [0.85 1.1]; [0.5, 0.9]; [10 23]; [0.8 1.1]];
 end
 box on 
