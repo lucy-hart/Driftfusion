@@ -92,6 +92,10 @@ end
 par.vsr_mode = 1;
 par.frac_vsr_zone = 0.05;
 %par.mu_n(3) = 100;
+par.light_source1 = 'laser';
+par.laser_lambda1 = 532;
+par.pulsepow = 62;
+par.RelTol_vsr = 0.1;
 par = refresh_device(par);
 % eqm_QJV = equilibrate(par1);
 eqm_QJV = equilibrate(par);
@@ -118,8 +122,8 @@ V_bias = 1.32;
 
 % JV_sol_ion = doCV(eqm_QJV1.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
 % JV_sol_ion = doCV(illuminated_sol_ion, suns, V_bias, V_bias+0.01,  V_bias, 1e-4, 0.5, 25);
-%JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.2, -0.2, 0.1, 1, 281);
-JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
+JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.2, -0.2, 0.1, 1, 281);
+JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.2, -0.2, 10e-3, 1, 281);
 % 
 % Plot_Current_Contributions(JV_sol_el)
 Plot_Current_Contributions(JV_sol_ion)

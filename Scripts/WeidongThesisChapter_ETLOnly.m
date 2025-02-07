@@ -2,25 +2,17 @@
 %Choose to use doped or undoped TLs
 doped = 0;
 
-n_values = 400;
-params = zeros(n_values,5);
+n_values = 100;
+params = zeros(n_values,2);
 
 Delta_TL = 0.4;
-Ion_Conc = 3;
-mu_pero = 3;
 mu_ETL = 3;
-Lamb = [800e-7 1200e-7 2000e-7];
 
 %seeds: 0, 42
 rng(42,'twister');
 
-idxes = randi(length(Lamb),n_values,1);
 params(:,1) = -0.1 + Delta_TL.*rand(n_values,1);
-params(:,2) = 10.^(15 + Ion_Conc.*rand(n_values,1));
-params(:,3) = 10.^(-1 + mu_pero.*rand(n_values,1));
-params(:,4) = 10.^(-5 + mu_ETL.*rand(n_values,1));
-l_amb = Lamb(idxes)';
-params(:,5) = 0.5*(l_amb.^2)./(0.0257.*params(:,3));
+params(:,2) = 10.^(-5 + mu_ETL.*rand(n_values,1));
 
 % Set up structures for storing the results
 results = zeros(n_values,3);
@@ -59,16 +51,8 @@ for i = 1:n_values
 
     %ion conc
 
-    par.Ncat(:) = params(i,2);
-    par.Nani(:) = params(i,2);
-
-    par.mu_n(3) = params(i,3);
-    par.mu_p(3) = params(i,3);
-    par.mu_n(5) = params(i,4);
-    par.mu_p(5) = params(i,4);
-
-    par.taun(3) = params(i,5);
-    par.taup(3) = params(i,5);
+    par.mu_n(5) = params(i,2);
+    par.mu_p(5) = params(i,2);
 
     par.light_source1 = 'laser';
     par.laser_lambda1 = 532;
