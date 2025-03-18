@@ -2,25 +2,27 @@
 %Choose to use doped or undoped TLs
 doped = 0;
 
-n_values = 400;
+n_values = 53;
 params = zeros(n_values,5);
 
 Delta_TL = 0.4;
 Ion_Conc = 3;
 mu_pero = 3;
 mu_ETL = 3;
-Lamb = [800e-7 1200e-7 2000e-7];
+%Lamb = [800e-7 1200e-7 2000e-7];
+tau_pero = 3;
 
-%seeds: 0, 42
-rng(42,'twister');
+%seeds: 0, 42, 666
+rng(666,'twister');
 
-idxes = randi(length(Lamb),n_values,1);
+% idxes = randi(length(Lamb),n_values,1);
 params(:,1) = -0.1 + Delta_TL.*rand(n_values,1);
 params(:,2) = 10.^(15 + Ion_Conc.*rand(n_values,1));
 params(:,3) = 10.^(-1 + mu_pero.*rand(n_values,1));
 params(:,4) = 10.^(-5 + mu_ETL.*rand(n_values,1));
-l_amb = Lamb(idxes)';
-params(:,5) = 0.5*(l_amb.^2)./(0.0257.*params(:,3));
+params(:,5) = 10.^(-9 + tau_pero.*rand(n_values,1));
+% l_amb = Lamb(idxes)';
+% params(:,5) = 0.5*(l_amb.^2)./(0.0257.*params(:,3));
 
 % Set up structures for storing the results
 results = zeros(n_values,3);

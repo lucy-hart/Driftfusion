@@ -2,7 +2,7 @@
 % par = pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 %par = pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
 %par=pc('Input_files/SnO2_MAPI_Spiro_TestSaP.csv');
-par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_3.csv');
+par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_3_NoETL.csv');
 % par=pc('Input_files/NiO-TripleCat-C60.csv');
 % par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_PaperParams.csv');
 % par.prob_distro_function = 'Boltz';
@@ -44,7 +44,7 @@ eqm = equilibrate(par);
 
 %% See what device performance is at illumination used for SaP measurement
 check_JV = 0;
-suns = 0;
+suns = 1;
 if check_JV ==1 
     JVsol_el = doCV(eqm.el, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
     JVsol_ion = doCV(eqm.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
@@ -74,7 +74,7 @@ tramp = 8e-4;
 tsample = 1e-3;
 tstab = 200;
 
-sol = doSaP_v2(eqm.ion, Vbias, Vpulse, tramp, tsample, tstab, suns, 1);
+sol = doSaP_v2(eqm.ion, Vbias, Vpulse, tramp, tsample, tstab, suns, 0, 0);
 
 %% Do JVs with mobseti = 0 to compare the SaP JVs
 fixed_ion_JVs = cell(1, length(Vbias));
@@ -117,23 +117,23 @@ end
 % xlabel('Time (s)')
 % legend()
 %% Extract the current values from the pulsed JVs
-bias = 1;
-t = sol{bias, 2}.t;
-
-Jt = zeros(length(Vpulse), length(t));
-
-for i = 1:length(Vpulse)
-    try
-        Jtemp = dfana.calcJ(sol{bias,i+1});
-        Jtot = Jtemp.tot(:,1);
-    catch
-        Jtot = 0;
-    end
-    if length(Jtot) < length(t)
-        Jtot(end+1:numel(t)) = Jtot(1);
-    end
-    Jt(i,:) = Jtot(:,1);
-end
+% bias = 1;
+% t = sol{bias, 2}.t;
+% 
+% Jt = zeros(length(Vpulse), length(t));
+% 
+% for i = 1:length(Vpulse)
+%     try
+%         Jtemp = dfana.calcJ(sol{bias,i+1});
+%         Jtot = Jtemp.tot(:,1);
+%     catch
+%         Jtot = 0;
+%     end
+%     if length(Jtot) < length(t)
+%         Jtot(end+1:numel(t)) = Jtot(1);
+%     end
+%     Jt(i,:) = Jtot(:,1);
+% end
 
 %%
 % figure('Name', 'PulsedJVCurrents')
@@ -156,11 +156,11 @@ xline(0, 'black', 'HandleVisibility', 'off')
 yline(0, 'black', 'HandleVisibility', 'off')
 
 for i = 1:length(Vbias)
-    Jpulse = zeros(1, length(Vpulse));
-    for j = 1:length(Vpulse)
-        Jpulse(j) = sol{i,j+1}.Jpulse;
-    end
-    plot(Vpulse(Jpulse ~= 0), 1e3*Jpulse(Jpulse ~= 0), 'DisplayName', num2str(Vbias(i), '%.2f'), 'color', cmap(i,:))
+%     Jpulse = zeros(1, length(Vpulse));
+%     for j = 1:length(Vpulse)
+%         Jpulse(j) = sol{i,j+1}.Jpulse;
+%     end
+%     plot(Vpulse(Jpulse ~= 0), 1e3*Jpulse(Jpulse ~= 0), 'DisplayName', num2str(Vbias(i), '%.2f'), 'color', cmap(i,:))
     if compare_fixed_ion_JV == 1
         plot(V_fixed_ion, 1e3*J_fixed_ion{i}, 'HandleVisibility', 'Off', 'color', cmap(i,:), 'LineStyle', '-')
     end

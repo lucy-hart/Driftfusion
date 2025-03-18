@@ -28,12 +28,12 @@ Plot_Current_Contributions(CV_sol_ion,0)
 stats = CVstats(CV_sol_ion)
 
 %%
-num_start = sum(CV_sol_ion.par.layer_points(1:2))+1;
-num_stop = num_start + CV_sol_ion.par.layer_points(3)-1;
-x = CV_sol_ion.par.x_sub;
-d = CV_sol_ion.par.d(3);
-[~, ~, Efn, Efp] = dfana.calcEnergies(CV_sol_ion);
-QFLS_SC = trapz(x(num_start:num_stop), Efn(291, num_start:num_stop)-Efp(291,num_start:num_stop))/d;
+num_start = sum(JV_sol_ion.par.layer_points(1:2))+1;
+num_stop = num_start + JV_sol_ion.par.layer_points(3)-1;
+x = JV_sol_ion.par.x_sub;
+d = JV_sol_ion.par.d(3);
+[~, ~, Efn, Efp] = dfana.calcEnergies(JV_sol_el);
+QFLS_SC = trapz(x(num_start:num_stop), Efn(:, num_start:num_stop)-Efp(:,num_start:num_stop),2)/d;
   
 %% Calculate QFLS at OC point
 %Need to find time point solutuion is evaluated which is closest to Voc first

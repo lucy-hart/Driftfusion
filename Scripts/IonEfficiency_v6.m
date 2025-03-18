@@ -26,10 +26,10 @@ Delta_TL = linspace(0, 0.3, n_values);
 % Delta_TL = [0 0.3];
 Symmetric_offset = 0;
 %Fix the offset for the ETL or HTL
-Fix_ETL = 0;
+Fix_ETL = 1;
 %Energetic offset between the perovskite and TL for the TL with fixed
 %energetics 
-Fixed_offset = 0.25;
+Fixed_offset = 0.15;
 %This is a bit of a hack, but if the offfset is exactly 0, the surface
 %recombination error becomes huge for reasons I do not fully understand...
 %The saga continues - only seems to matter for the HTL, not the ETL...

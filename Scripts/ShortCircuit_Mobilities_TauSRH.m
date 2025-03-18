@@ -65,8 +65,8 @@ if Fiddle_with_Energetics == 1
     %Choose the offsets for the system
     %Positive offset for DHOMO means TL VB lies above the perovskite VB
     %Negative offset for DLUMO means TL CB lies below the perovskite CB
-    DHOMO = 0.2;
-    DLUMO = -0.2;
+    DHOMO = 0;%.2;
+    DLUMO = -0;%.2;
     if symmetric == 1
         %HTL Energetics
         par.Phi_left = -5.15;

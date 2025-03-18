@@ -5,11 +5,11 @@ doped = 0;
 n_values = 100;
 params = zeros(n_values,2);
 
-Delta_TL = 0.4;
+Delta_TL = 0.3;
 mu_ETL = 3;
 
-%seeds: 0, 42
-rng(42,'twister');
+%seeds: 0, 42, 7
+rng(7,'twister');
 
 params(:,1) = -0.1 + Delta_TL.*rand(n_values,1);
 params(:,2) = 10.^(-5 + mu_ETL.*rand(n_values,1));
@@ -30,7 +30,7 @@ end
 
 illumination = 1;
 max_val = 1.2;
-phi_R = -4.0;
+phi_R = -4.15;
 
 %Reset the electrode work functions in each loop to be safe as they are
 %changed for the cases where E_LUMO (E_HOMO) is far below (above) the CB
