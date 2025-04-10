@@ -6,9 +6,9 @@
 % parC60 = pc('Input_files/SAM_MAPI_C60.csv');
 % parPM6 = pc('Input_files/SAM_MAPI_PM6Y6.csv');
 % parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
-parFerro = pc('Input_files/SAM_MAFACsPbIBr_Ferrocene_C60_EunyoungValues.csv');
+parFerro = pc('Input_files/SAM_MAFACsPbIBr_C60_Dark.csv');
 % parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6.csv');
-parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60_EunyoungValues.csv');
+parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
 %parC60.AbsTol_vsr = 1e10;
 % parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJSurf.csv');
 % parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6_BHJSurf.csv');
