@@ -28,16 +28,14 @@ J_values(:,7) = J.tot(:,1);
 figure('Name', 'Current Contributions', 'Position', [50 50 1000 1000])
 line_colour = {[0.8500 0.3250 0.0980], [0.9290 0.6940 0.1250], [0.4940 0.1840 0.5560],...
                 [0 0.4470 0.7410], [0.3010 0.7450 0.9330], [1 1 0], [0.4660 0.6740 0.1880]};
-V = dfana.calcVapp(CVsol);
+V = dfana.calcVapp(CVsol)';
 for n = 1:7
     plot(V(:), (J_values(:,n)), 'color', line_colour{n})
     hold on
 end
 plot(V(1:num_values), zeros(1,num_values), 'black', 'LineWidth', 1)
 hold off
-V1 = CVsol.par.V_fun_arg(2);
-V2 = CVsol.par.V_fun_arg(3);
-xlim([0, max([V1, V2])])
+xlim([min(V), max(V)])
 xlabel('Voltage (V)')
 ylim([J_values(1,1)*1.1, 0.01])
 ylabel('Current Density (Acm^{-2})')

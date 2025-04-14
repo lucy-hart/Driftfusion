@@ -97,7 +97,7 @@ classdef dfplot
             [u,t,x,par,dev,n,p,a,c,V] = dfana.splitsol(sol);
             [J, j, x] = dfana.calcJ(sol);
 
-            figure(3);
+            figure('Name', 'Jx');
             dfplot.x2d(sol, x, {J.n, J.p, J.a, J.c, J.disp, J.tot},...
                 {'Jn', 'Jp', 'Ja', 'Jc', 'Jdisp', 'Jtot'}, {'-','-','-','-','-','-'},...
                 'Current density [Acm-2]', tarr, xrange, 0, 0);
@@ -113,7 +113,7 @@ classdef dfplot
             [u,t,x,par,dev,n,p,a,c,V] = dfana.splitsol(sol);
             [J, j, x] = dfana.calcJ(sol);
 
-            figure(301);
+            figure('Name', 'jx');
             dfplot.x2d(sol, par.x_sub, {j.n, j.p, j.a, j.c, j.disp}, {'jn', 'jp', 'ja', 'jc', 'jdisp'},...
                 {'-','-','-','-','-'}, 'Flux [cm-2 s-1]', tarr, xrange, 0, 0);
         end

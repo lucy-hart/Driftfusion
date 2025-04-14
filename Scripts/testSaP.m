@@ -1,8 +1,8 @@
 %% File to test that doSaP is doing what I intend
-% par = pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
+par = pc('Input_files/EnergyOffsetSweepParameters_v5_doped.csv');
 %par = pc('Input_files/EnergyOffsetSweepParameters_v5_undoped.csv');
 %par=pc('Input_files/SnO2_MAPI_Spiro_TestSaP.csv');
-par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_3_NoETL.csv');
+%par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_3_NoETL.csv');
 % par=pc('Input_files/NiO-TripleCat-C60.csv');
 % par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_PaperParams.csv');
 % par.prob_distro_function = 'Boltz';
@@ -10,35 +10,41 @@ par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_3_NoETL.csv');
 par.RelTol_vsr = 0.1;
 compare_fixed_ion_JV = 1;
 
-% DHOMO = 0.35;
-% DLUMO = -0.35;
-% IonConc = 1e17;
-%            
-% %HTL Energetics
-% par.Phi_left = -5.15; 
-% par.Phi_IP(1) = par.Phi_IP(3) + DHOMO;
-% par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
-% par.EF0(1) = par.Phi_IP(1) + 0.1;
-% par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
-% if par.Phi_left < par.Phi_IP(1) + 0.1
-%     par.Phi_left = par.Phi_IP(1) + 0.1;
-% end
-% %ETL Energetics
-% par.Phi_right = -4.05;
-% par.Phi_EA(5) = par.Phi_EA(3) + DLUMO;
-% par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
-% par.EF0(5) = par.Phi_EA(5) - 0.1;
-% par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
-% if par.Phi_right > par.Phi_EA(5) - 0.1
-%     par.Phi_right = par.Phi_EA(5) - 0.1;
-% end
-% 
-% par.Ncat(:) = IonConc;
-% par.Nani(:) = IonConc;
-% 
-% % par.frac_vsr_zone = 0.05;
-% par.RelTol_vsr = 0.1;
-% par = refresh_device(par);
+DHOMO = 0.2;
+DLUMO = -0.2;
+IonConc = 1e17;
+           
+%HTL Energetics
+par.Phi_left = -5.15; 
+par.Phi_IP(1) = par.Phi_IP(3) + DHOMO;
+par.Phi_EA(1) = par.Phi_IP(1) + 2.5;
+par.EF0(1) = par.Phi_IP(1) + 0.1;
+par.Et(1) = (par.Phi_IP(1)+par.Phi_EA(1))/2;
+if par.Phi_left < par.Phi_IP(1) + 0.1
+    par.Phi_left = par.Phi_IP(1) + 0.1;
+end
+%ETL Energetics
+par.Phi_right = -4.05;
+par.Phi_EA(5) = par.Phi_EA(3) + DLUMO;
+par.Phi_IP(5) = par.Phi_EA(5) - 2.5;
+par.EF0(5) = par.Phi_EA(5) - 0.1;
+par.Et(5) = (par.Phi_IP(5) + par.Phi_EA(5))/2;
+if par.Phi_right > par.Phi_EA(5) - 0.1
+    par.Phi_right = par.Phi_EA(5) - 0.1;
+end
+
+par.Ncat(:) = IonConc;
+par.Nani(:) = IonConc;
+par.taun(3) = 1e-8;
+par.taup(3) = 1e-8;
+par.sn(4) = 100;
+par.sp(4) = 100;
+par.sn(2) = 1;
+par.sp(2) = 1;
+
+% par.frac_vsr_zone = 0.05;
+par.RelTol_vsr = 0.1;
+par = refresh_device(par);
 
 eqm = equilibrate(par);
 
@@ -66,7 +72,7 @@ if check_JV ==1
     ylabel('Voltage (V)')
 end
 %% Do the SaP measurement
-Vbias = linspace(0,1.5,16);
+Vbias = linspace(0,1.2,13);
 %Vbias = [0 0.1];
 %Vpulse = linspace(0,1.3,27);
 Vpulse = [0];
@@ -84,7 +90,7 @@ if compare_fixed_ion_JV == 1
         disp(['Doing JV for Vstab = ' num2str(Vbias(i)) ' V'])
         sol{i,1}.par.mobseti = 0;
         try
-            fixed_ion_JVs{i} = doCV(sol{i,1}, suns, -0.1, 1.05, -0.1, 1, 0.5, 116);
+            fixed_ion_JVs{i} = doCV(sol{i,1}, suns, -0.1, 1.2, -0.1, 1, 0.5, 131);
             J_fixed_ion{i} = dfana.calcJ(fixed_ion_JVs{i}).tot(:,1);
         catch
             warning(['Fixed ion JV failed at Vbias of ', num2str(Vbias(i))])
@@ -162,7 +168,9 @@ for i = 1:length(Vbias)
 %     end
 %     plot(Vpulse(Jpulse ~= 0), 1e3*Jpulse(Jpulse ~= 0), 'DisplayName', num2str(Vbias(i), '%.2f'), 'color', cmap(i,:))
     if compare_fixed_ion_JV == 1
+        if i ~= 10
         plot(V_fixed_ion, 1e3*J_fixed_ion{i}, 'HandleVisibility', 'Off', 'color', cmap(i,:), 'LineStyle', '-')
+        end
     end
 end
 
@@ -170,10 +178,10 @@ if check_JV == 1
     plot(v(1:141), J_el(1:141)*1000, 'color', 'black', 'LineWidth', 3, 'LineStyle', '-')
 end
 ylabel('Current Density (mA cm^{-2})')
-ylim([-25, 5])
+ylim([-25, 25])
 xlabel('Voltage (V)')
-xlim([0, 1.05])
-legend()
+xlim([0, 1.2])
+%legend()
 %title(legend, 'V_{bias} (V)')
 
 %% Plot Vx at 0.6 V
@@ -197,51 +205,51 @@ legend()
 % title(legend, 'V_{bias} (V)')
 % 
 %% Do SaP analysis
-% all_data = {J_fixed_ion};%, sol2};
+all_data = {J_fixed_ion};%, sol2};
+
+idx_stop = floor(length(V_fixed_ion));
+V_SaP_Analysis = V_fixed_ion(1:idx_stop);
+Jvalues = zeros(length(Vbias), idx_stop, length(all_data));
+Voc = zeros(length(all_data), length(Vbias));
+dJdV_Voc = zeros(length(all_data), length(Vbias));
+for k = 1:length(all_data)
+    data = all_data{k};
+    for i = 1:length(Vbias)
+        %for j = 1:length(V_fixed_ion)
+            Jvalues(i,:,k) = data{i}(1:idx_stop);
+        %end
+    end
+end  
 % 
-% idx_stop = floor(length(V_fixed_ion));
-% V_SaP_Analysis = V_fixed_ion(1:idx_stop);
-% Jvalues = zeros(length(Vbias), idx_stop, length(all_data));
-% Voc = zeros(length(all_data), length(Vbias));
-% dJdV_Voc = zeros(length(all_data), length(Vbias));
-% for k = 1:length(all_data)
-%     data = all_data{k};
-%     for i = 1:length(Vbias)
-%         %for j = 1:length(V_fixed_ion)
-%             Jvalues(i,:,k) = data{i}(1:idx_stop);
-%         %end
-%     end
-% end  
-% % 
-% colours = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980], [0.4660 0.6740 0.1880], [0.9290 0.6940 0.1250]};
-% h = Vbias(2) - Vbias(1);
-% for k = 1:length(all_data)
-%     for i = 1:length(Vbias)
-%         J_temp = Jvalues(i,:,k);
-%         Voc(i) = interp1(J_temp(J_temp~=0), V_SaP_Analysis(J_temp~=0), 0);
-%         dJdV = gradient(J_temp(J_temp~=0), V_SaP_Analysis(J_temp~=0));
-% %         plot(V_SaP_Analysis(J_temp~=0), dJdV, color = colours{k})
-%         hold on
-%         dJdV_Voc(k,i) = interp1(V_SaP_Analysis(J_temp~=0), dJdV, Voc(i));
-%     end
-% end
+colours = {[0 0.4470 0.7410], [0.8500 0.3250 0.0980], [0.4660 0.6740 0.1880], [0.9290 0.6940 0.1250]};
+h = Vbias(2) - Vbias(1);
+for k = 1:length(all_data)
+    for i = 1:length(Vbias)
+        J_temp = Jvalues(i,:,k);
+        Voc(i) = interp1(J_temp(J_temp~=0), V_SaP_Analysis(J_temp~=0), 0);
+        dJdV = gradient(J_temp(J_temp~=0), V_SaP_Analysis(J_temp~=0));
+%         plot(V_SaP_Analysis(J_temp~=0), dJdV, color = colours{k})
+        hold on
+        dJdV_Voc(k,i) = interp1(V_SaP_Analysis(J_temp~=0), dJdV, Voc(i));
+    end
+end
 
 %% Plot SaP analysis
 %NB: Smaller DeltaE_ETL also had vs = 50 cms-1
-% figure('Name', 'SaP-Analysis')
-% 
-% subplot(1,1,1)
-% hold on
-% box on
-% xline(0, 'black', 'HandleVisibility', 'off')
-% yline(0, 'black', 'HandleVisibility', 'off')
-% %plot(Vbias, dJdV_Voc(2,:),'DisplayName','v_s = 0.05 cm s^{-1}', 'Color', [0 0.4470 0.7410])
-% plot(Vbias, dJdV_Voc(1,:),'DisplayName','v_s = 50 cm s^{-1}', 'Color', [0.8500 0.3250 0.0980])
-% 
-% xlabel('V_{bias} (V)')
-% xlim([Vbias(1), Vbias(end)])
-% ylabel('dJ/dV|_{Voc} (\Omega^{-1} cm^{-2})')
-% legend('Location', 'northwest')
+figure('Name', 'SaP-Analysis')
+
+%subplot(1,1,1)
+hold on
+box on
+xline(0, 'black', 'HandleVisibility', 'off')
+yline(0, 'black', 'HandleVisibility', 'off')
+%plot(Vbias, dJdV_Voc(2,:),'DisplayName','v_s = 0.05 cm s^{-1}', 'Color', [0 0.4470 0.7410])
+plot(Vbias, Voc(:), 'Color', [0.8500 0.3250 0.0980])
+
+xlabel('V_{bias} (V)')
+xlim([Vbias(1), Vbias(end)])
+ylabel('V_{OC} (V)')
+ylim([min(Voc), max(Voc)])
 
 % subplot(1,2,2)
 % hold on

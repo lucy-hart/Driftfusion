@@ -27,14 +27,21 @@ elseif PulseBool == 0
     SaPsol = cell(num_bias, 1);
 end
 
-%% Go to correct light intensity
-%Funtion assumes you are using the first light source currently 
-sol_ill = changeLight(sol_ini, light_intensity, 0, 1);
+
 
 %% Generate solutions after voltage stabilisation period
 for i = 1:num_bias
     
-    par = sol_ill.par;
+    % Go to correct light intensity
+    %Funtion assumes you are using the first light source currently
+    if i == 1 
+        sol_ill = changeLight(sol_ini, light_intensity, 0, 1);
+        par = sol_ill.par;    
+    else
+        sol_ill = SaPsol{i-1,1};
+        par = SaPsol{i-1,1}.par;
+    end
+   
 
 %     if Vbias(i) >= 1
 %         par.mu_p(1) = par.mu_p(1)/1000;
@@ -48,7 +55,11 @@ for i = 1:num_bias
         par.tpoints = 100;
     
         par.V_fun_type = 'sweep';
-        par.V_fun_arg(1) = 0;
+        if i == 1
+            par.V_fun_arg(1) = 0;
+        else
+            par.V_fun_arg(1) = Vbias(i-1);
+        end
         par.V_fun_arg(2) = Vbias(i);
         par.V_fun_arg(3) = 1e-2;
     
@@ -77,7 +88,11 @@ for i = 1:num_bias
             par.tpoints = 100;
         
             par.V_fun_type = 'sweep';
-            par.V_fun_arg(1) = 0;
+            if i == 1
+                par.V_fun_arg(1) = 0;
+            else
+                par.V_fun_arg(1) = Vbias(i-1);
+            end
             par.V_fun_arg(2) = Vbias(i) + 0.01;
             par.V_fun_arg(3) = 1e-2;
         
@@ -108,7 +123,11 @@ for i = 1:num_bias
                 par.tpoints = 100;
             
                 par.V_fun_type = 'sweep';
-                par.V_fun_arg(1) = 0;
+                if i == 1
+                    par.V_fun_arg(1) = 0;
+                else
+                    par.V_fun_arg(1) = Vbias(i-1);
+                end
                 par.V_fun_arg(2) = Vbias(i) - 0.01;
                 par.V_fun_arg(3) = 1e-2;
             
