@@ -48,7 +48,7 @@ end
 %i.e., calibrate for errors in numerical integration
 t_hold = 60;
 
-voltage_ar = [-5 -4 -3 -2 -1 -0.5 0 0.1];
+voltage_ar = [-0.5 -0.4 -0.3 -0.2 -0.1 -0.5 0 0.1];
 % voltage_ar = linspace(-0.5, 0.1, 7);
 Jdark = doDarkJV(eqm_C60.ion, voltage_ar, t_hold);
 Jdark2 = doDarkJV(eqm_PM6.ion, voltage_ar, t_hold);
@@ -93,7 +93,7 @@ hold off
 
 set(gca, 'FontSize', 25)
 xlabel('Voltage (V)', 'FontSize', 25)
-xlim([-5, voltage_ar(end)])
+xlim([-0.5, voltage_ar(end)])
 %ylim([1e-14, 1])
 ylabel('Current Density (A cm^{-2})', 'FontSize', 25)
 legend({' CsFAMA', '', ' +0.35 eV', ''}, 'FontSize', 25, 'Location', 'northwest')

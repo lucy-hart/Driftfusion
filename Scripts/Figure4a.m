@@ -23,14 +23,11 @@ illumination = 1;
 %Set this to one if you are using the '..._ShowInterface.csv' file
 surface = 0;
 
-%Reset the electrode work functions in each loop to be safe as they are
-%changed for the cases where E_LUMO (E_HOMO) is far below (above) the CB
-%(VB)
 for i = 1:n_HOMOs
     disp(["Donor_HOMO = ", num2str(Donor_HOMO(i)), " eV"])
     
-    par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJ_SRH.csv');
-%     par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
+%     par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJ_SRH.csv');
+    par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
 %     par = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_ShowInterface.csv');
 
     %Donor HOMO Energetics
@@ -120,7 +117,7 @@ text(0.21, 21.2, txt, 'FontSize', 30)
 yyaxis right
 set(gca, 'Fontsize', 25, 'YScale', 'log')
 ylabel('J_{d} (A cm^{-2})', 'FontSize', 30)
-ylim([9e-15, 1e-10])
+ylim([1e-10, 1e-6])
 for i = 1:n_HOMOs
     plot(Donor_HOMO(i)+5.5, abs(Jdark{i}.Jvalue(1)), 'color', 'red', 'LineStyle', 'none', 'Marker', 'square', ...
         'MarkerSize', 15, 'MarkerFaceColor', 'red')
