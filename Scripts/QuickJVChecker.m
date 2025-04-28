@@ -8,7 +8,7 @@
 % par=pc('Input_files/NiO-FACs-Al2O3-C60-Charlie.csv');
 %par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_Weidong_fiddled.csv');
 %par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_3_NoETL.csv');
-par=pc('Input_files/FaCs-PCBM-Charlie.csv');
+par=pc('Input_files/HighEfficiencyPaper.csv');
 %par1=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_SAM_HTLComparison.csv');
 %par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_SAM.csv');
 % par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
@@ -108,73 +108,76 @@ eqm_QJV = equilibrate(par);
 
 
 %%
-suns = 1;
+suns = 1.2;
 V_bias = 1.1;
 V_max = V_bias;
 V_min = -0.1;
+
 scan_rate = 10e-3;
 deltaV = V_max - V_min;
 tmax = deltaV/scan_rate;
 % % % 
-biased_eqm_ion = genVappStructs(eqm_QJV.ion, V_bias, 0);
+% biased_eqm_ion = genVappStructs(eqm_QJV.ion, V_bias, 0);
 % biased_eqm_el = genVappStructs(eqm_QJV.el, V_bias, 1);
 % 
-illuminated_sol_ion = changeLight(biased_eqm_ion, suns, 0, 1);
+% illuminated_sol_ion = changeLight(biased_eqm_ion, suns, 0, 1);
 % % illuminated_sol_el = changeLight(biased_eqm_el, suns, 0, 1);
 % % 
-JV_sol_ion_rev = VappFunction(illuminated_sol_ion, 'sweep', [V_max, V_min, tmax], tmax, 200*(V_max-V_min)+1, 0);
-JV_sol_ion_fw = VappFunction(JV_sol_ion_rev, 'sweep', [V_min, V_max, tmax], tmax, 200*(V_max-V_min)+1, 0);
+% JV_sol_ion_rev = VappFunction(illuminated_sol_ion, 'sweep', [V_max, V_min, tmax], tmax, 200*(V_max-V_min)+1, 0);
+% JV_sol_ion_fw = VappFunction(JV_sol_ion_rev, 'sweep', [V_min, V_max, tmax], tmax, 200*(V_max-V_min)+1, 0);
 % 
 % JV_sol_el = VappFunction(illuminated_sol_el, 'sweep', [V_max, V_min, tmax], tmax, 200*(V_max-V_min)+1, 0);
 
 % JV_sol_ion = doCV(eqm_QJV1.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
 % JV_sol_ion = doCV(illuminated_sol_ion, suns, V_bias, V_bias+0.01,  V_bias, 1e-4, 0.5, 25);
 %JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.1, -0.2, 1, 1, 261);
-% JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
-% [Ec, Ev, Efn, Efp] = dfana.calcEnergies(JV_sol_ion);
-% a = Ec(21,:)';
-% b = Ev(21,:)';
-% c = Efn(21,:)';
-% d = Efp(21,:)';
-% Plot_Current_Contributions(JV_sol_ion)
+JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.25, -0.2, 1e-4, 1, 291);
+
+% [Ec, Ev, Efn, Efp] = dfana.calcEnergies(eqm_QJV.ion);
+% a = Ec(200,:)';
+% b = Ev(200,:)';
+% c = Efn(200,:)';
+% d = Efp(200,:)';
+Plot_Current_Contributions(JV_sol_ion)
 % Plot_Current_Contributions(JV_sol_ion_rev)
 % % Plot_Current_Contributions(JV_sol_el) 
-% stats_ion = CVstats(JV_sol_ion)
+stats_ion = CVstats(JV_sol_ion)
 %stats_el = CVstats(JV_sol_el)
 %% 
-% %% Plot JVs
-figure('Name', 'JVPlot', 'Position', [100 100 1250 1250])
-% colors_JV = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880],[0 0.4470 0.7410],[0.9290 0.6940 0.1250]};
-v_fw = dfana.calcVapp(JV_sol_ion_fw);
-v_rev = dfana.calcVapp(JV_sol_ion_rev);
-% v = dfana.calcVapp(JV_sol_el)';
-%v_ion = dfana.calcVapp(JV_sol_ion)';
-% % vice w
-hold on
-xline(0, 'black', 'LineWidth', 1)
-yline(0, 'black', 'LineWidth', 1)
+% % %% Plot JVs
+% figure('Name', 'JVPlot', 'Position', [100 100 1250 1250])
+% % colors_JV = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880],[0 0.4470 0.7410],[0.9290 0.6940 0.1250]};
+% v_fw = dfana.calcVapp(JV_sol_ion_fw);
+% v_rev = dfana.calcVapp(JV_sol_ion_rev);
+% % v = dfana.calcVapp(JV_sol_el)';
+% %v_ion = dfana.calcVapp(JV_sol_ion)';
+% % % vice w
+% hold on
+% xline(0, 'black', 'LineWidth', 1)
+% yline(0, 'black', 'LineWidth', 1)
+% % % 
+% j_fw = dfana.calcJ(JV_sol_ion_fw).tot(:,1);
+% j_rev = dfana.calcJ(JV_sol_ion_rev).tot(:,1);
+% % j_el = dfana.calcJ(JV_sol_el).tot(:,1);
+% %j_ion = dfana.calcJ(JV_sol_ion).tot(:,1); 
+% plot(v_fw(1:end), j_fw(1:end)*1000, 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3, 'LineStyle', '--') 
+% % plot(v_ion(1:end), j_ion(1:end)*1000, 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3) 
+% % hold on
+% plot(v_rev(1:end), j_rev(1:end)*1000, 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3) 
+% % plot(v_el(1:end), j_el(1:end)*1000, 'color', [0 0.4470 0.7410], 'LineWidth', 3)
+% % hold on
+
 % % 
-j_fw = dfana.calcJ(JV_sol_ion_fw).tot(:,1);
-j_rev = dfana.calcJ(JV_sol_ion_rev).tot(:,1);
-% j_el = dfana.calcJ(JV_sol_el).tot(:,1);
-%j_ion = dfana.calcJ(JV_sol_ion).tot(:,1);
-plot(v_fw(1:end), j_fw(1:end)*1000, 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3, 'LineStyle', '--') 
-% plot(v_ion(1:end), j_ion(1:end)*1000, 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3) 
-% hold on
-plot(v_rev(1:end), j_rev(1:end)*1000, 'color', [0.4660 0.6740 0.1880], 'LineWidth', 3) 
-% plot(v_el(1:end), j_el(1:end)*1000, 'color', [0 0.4470 0.7410], 'LineWidth', 3)
-% hold on
-% 
-hold off
-% 
-box on 
-set(gca, 'FontSize', 25)
-xlim([-0.15, 1.2])
-ylim([-25,5])
-legend({'','','Fw','Rev'}, 'Location', 'northwest', 'FontSize', 30)
-xlabel('Voltage(V)', 'FontSize', 30)
-ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
-ax1 = gcf;
+% hold off
+% % 
+% box on 
+% set(gca, 'FontSize', 25)
+% xlim([-0.15, 1.2])
+% ylim([-25,5])
+% legend({'','','Fw','Rev'}, 'Location', 'northwest', 'FontSize', 30)
+% xlabel('Voltage(V)', 'FontSize', 30)
+% ylabel('Current Density (mAcm^{-2})', 'FontSize', 30)
+% ax1 = gcf;
 
 %% Save Plots at 300 dpi
 save_plot = 0;

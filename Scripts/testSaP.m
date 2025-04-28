@@ -11,7 +11,7 @@ par.RelTol_vsr = 0.1;
 compare_fixed_ion_JV = 1;
 
 DHOMO = 0.2;
-DLUMO = -0.2;
+DLUMO = -0.3;
 IonConc = 1e17;
            
 %HTL Energetics
@@ -35,12 +35,16 @@ end
 
 par.Ncat(:) = IonConc;
 par.Nani(:) = IonConc;
-par.taun(3) = 1e-8;
-par.taup(3) = 1e-8;
-par.sn(4) = 100;
-par.sp(4) = 100;
+par.taun(3) = 0.5e-8;
+par.taup(3) = 0.5e-8;
+par.sn(4) = 1e7;
+par.sp(4) = 50;
 par.sn(2) = 1;
-par.sp(2) = 1;
+par.sp(2) = 1e7;
+par.Nc(1) = 5e19;
+par.Nc(5) = 5e19;
+par.Nv(1) = 5e19;
+par.Nv(5) = 5e19;
 
 % par.frac_vsr_zone = 0.05;
 par.RelTol_vsr = 0.1;
