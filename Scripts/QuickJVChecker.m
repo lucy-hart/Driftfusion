@@ -29,7 +29,7 @@ if Fiddle_with_Energetics == 1
     %row
     DHOMO = 0.25;
     %DHOMO = Delta_HOMO(4);
-    %columN
+        %columN
     DLUMO = -0.1;
     %DLUMO = Delta_LUMO(11);
         if doped == 0
@@ -100,11 +100,16 @@ par.frac_vsr_zone = 0.05;
 % par.laser_lambda1 = 532;
 % par.pulsepow = 62;
 % par.RelTol_vsr = 0.1;
+%par.mu_c(1)=0;
 par = refresh_device(par);
 
 % eqm_QJV = equilibrate(par1);
 % par.z_c = -1;
 eqm_QJV = equilibrate(par);
+% biased_eqm_ion = genVappStructs(eqm_QJV.ion, 1.3, 0);
+% biased_eqm_ion.par.mu_a(3) = 0;
+% par = refresh_device(biased_eqm_ion.par);
+% eqm_QJV = equilibrate(par);
 
 
 %%
