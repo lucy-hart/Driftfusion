@@ -14,10 +14,7 @@ parPM6 = pc('Input_files/SAM_MAFACsPbIBr_C60_Dark.csv');
 
 eqm_C60 = equilibrate(parC60);
 eqm_PM6 = equilibrate(parPM6);
-% parPM6.RelTol = 1e-9;
-% parPM7.RelTol = 1e-9;
-% parPBDBT.RelTol = 1e-9;
-%eqm_PM6 = equilibrate(parPM6);
+
 % eqm_PM7 = equilibrate(parPM7);
 % eqm_PBDBT = equilibrate(parPBDBT);
 % parC60.AbsTol = 1e-12;
@@ -48,7 +45,8 @@ end
 %i.e., calibrate for errors in numerical integration
 t_hold = 60;
 
-voltage_ar = [-0.5 -0.4 -0.3 -0.2 -0.1 -0.5 0 0.1];
+voltage_ar = [-0.5 -0.4 -0.3 -0.2 -0.1 0 0.1];
+
 % voltage_ar = linspace(-0.5, 0.1, 7);
 Jdark = doDarkJV(eqm_C60.ion, voltage_ar, t_hold);
 Jdark2 = doDarkJV(eqm_PM6.ion, voltage_ar, t_hold);
@@ -95,6 +93,7 @@ set(gca, 'FontSize', 25)
 xlabel('Voltage (V)', 'FontSize', 25)
 xlim([-0.5, voltage_ar(end)])
 %ylim([1e-14, 1])
+
 ylabel('Current Density (A cm^{-2})', 'FontSize', 25)
 legend({' CsFAMA', '', ' +0.35 eV', ''}, 'FontSize', 25, 'Location', 'northwest')
 

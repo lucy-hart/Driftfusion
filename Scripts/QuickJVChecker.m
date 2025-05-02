@@ -6,11 +6,9 @@
 % parC60 = pc('Input_files/SAM_MAPI_C60.csv');
 % parPM6 = pc('Input_files/SAM_MAPI_PM6Y6.csv');
 % parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
-parFerro = pc('Input_files/SAM_MAFACsPbIBr_C60_Dark.csv');
 % parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6.csv');
 parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
-%parC60.AbsTol_vsr = 1e10;
-% parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_BHJSurf.csv');
+parPM6 = pc('Input_files/SAM_MAFACsPbIBr_C60_Dark.csv');
 % parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6_BHJSurf.csv');
 % parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PCE12Y6_BHJSurf.csv');
 % parC60 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_NoC60.csv');
@@ -20,7 +18,7 @@ parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
 
 % devices = {parC60, parPM6, parPBDBT};
 %%
-run_C60 = 1;
+run_C60 = 0;
 light = 1;
 
 if light == 1
@@ -43,35 +41,38 @@ if run_C60 == 1
     end
 end
 
-eqm_QJV_Ferro = equilibrate(parFerro);
-CV_sol_Ferro = doCV(eqm_QJV_Ferro.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
-stats_Ferro = CVstats(CV_sol_Ferro);
-Plot_Current_Contributions(CV_sol_Ferro)
-
-Vapp = dfana.calcVapp(CV_sol_Ferro);
-J_Ferro = dfana.calcJ(CV_sol_Ferro);
-
+eqm_QJV_PM6 = equilibrate(parPM6);
+CV_sol_PM6 = doCV(eqm_QJV_PM6.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
+stats_PM6 = CVstats(CV_sol_PM6)
+Plot_Current_Contributions(CV_sol_PM6)
+% 
+% eqm_QJV_PM7 = equilibrate(parPM7);
+% CV_sol_PM7 = doCV(eqm_QJV_PM7.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
+% 
+% eqm_QJV_PBDBT = equilibrate(parPBDBT);
+% CV_sol_PBDBT = doCV(eqm_QJV_PBDBT.ion, suns, Vmin, 1.25, Vmin, scan_rate, 1, 291);
+% Plot_Current_Contributions(CV_sol_PBDBT)
 
 %%
-if run_C60 == 1 && light == 1
-    figure('Name', 'JV Plots', 'Position', [50 50 1000 1000])
-
-    box on
-    hold on
-    xline(0, 'LineWidth', 2, 'Color', 'black')
-    yline(0, 'LineWidth', 2, 'Color', 'black')
-    plot(Vapp(1:145), 1e3*J_C60.tot(1:145,1), 'LineWidth', 4, 'Color', 'black')
-    plot(Vapp(1:145), 1e3*J_Ferro.tot(1:145,1), 'LineWidth', 4, 'Color', 'red')   
-    
-    hold off
-
-    set(gca, 'FontSize', 25)
-    xlabel('Voltage (V)', 'FontSize', 30)
-    ylabel('Current Density (mA cm^{-2})', 'FontSize', 30)
-    xlim([-0.15, 1.2])
-    ylim([-25, 5])
-    legend({'', '', ' CsFAMA', ' +0.35 eV', ' +0.25 eV', ' +0.15 eV'}, 'FontSize', 25, 'Location', 'northwest')
-end 
+% if run_C60 == 1 && light == 1
+%     figure('Name', 'JV Plots', 'Position', [50 50 1000 1000])
+% 
+%     box on
+%     hold on
+%     xline(0, 'LineWidth', 2, 'Color', 'black')
+%     yline(0, 'LineWidth', 2, 'Color', 'black')
+%     plot(Vapp(1:145), 1e3*J_C60.tot(1:145,1), 'LineWidth', 4, 'Color', 'black')
+%     plot(Vapp(1:145), 1e3*J_Ferro.tot(1:145,1), 'LineWidth', 4, 'Color', 'red')   
+%     
+%     hold off
+% 
+%     set(gca, 'FontSize', 25)
+%     xlabel('Voltage (V)', 'FontSize', 30)
+%     ylabel('Current Density (mA cm^{-2})', 'FontSize', 30)
+%     xlim([-0.15, 1.2])
+%     ylim([-25, 5])
+%     legend({'', '', ' CsFAMA', ' +0.35 eV', ' +0.25 eV', ' +0.15 eV'}, 'FontSize', 25, 'Location', 'northwest')
+% end 
 
 %%
 log = 1;
