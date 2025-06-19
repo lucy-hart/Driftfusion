@@ -5,10 +5,10 @@
 % parPM6 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6.csv');
 % parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6.csv');
 % parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PBDBTY6.csv');
-parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
+parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60_Dark.csv');
 %parC60.AbsTol_vsr = 1e-20;
 % parY6 = pc('Input_files/SAM_MAFACsPbIBr_Y6.csv');
-parPM6 = pc('Input_files/SAM_MAFACsPbIBr_C60_Dark.csv');
+parPM6 = pc('Input_files/SAM_MAFACsPbIBr_Y6_C60_Dark.csv');
 % parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6_BHJSurf.csv');
 % parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PCE12Y6_BHJSurf.csv');
 

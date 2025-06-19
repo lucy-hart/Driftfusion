@@ -7,8 +7,8 @@
 % parPM6 = pc('Input_files/SAM_MAPI_PM6Y6.csv');
 % parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
 % parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6.csv');
-parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
-parPM6 = pc('Input_files/SAM_MAFACsPbIBr_C60_Dark.csv');
+parC60 = pc('Input_files/SAM_MAFACsPbIBr_C60_Dark.csv');
+parPM6 = pc('Input_files/SAM_MAFACsPbIBr_Y6_C60_Dark.csv');
 % parPM7 = pc('Input_files/SAM_MAFACsPbIBr_PM7Y6_BHJSurf.csv');
 % parPBDBT = pc('Input_files/SAM_MAFACsPbIBr_PCE12Y6_BHJSurf.csv');
 % parC60 = pc('Input_files/SAM_MAFACsPbIBr_PM6Y6_NoC60.csv');
@@ -18,7 +18,7 @@ parPM6 = pc('Input_files/SAM_MAFACsPbIBr_C60_Dark.csv');
 
 % devices = {parC60, parPM6, parPBDBT};
 %%
-run_C60 = 0;
+run_C60 = 1;
 light = 1;
 
 if light == 1
