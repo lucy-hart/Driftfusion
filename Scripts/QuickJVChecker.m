@@ -8,7 +8,7 @@
 % par=pc('Input_files/NiO-FACs-Al2O3-C60-Charlie.csv');
 %par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_Weidong_fiddled.csv');
 %par=pc('Input_files/TiO2_MAPI_Spiro_TestSaP_3_NoETL.csv');
-par=pc('Input_files/FACs-PCBM-Charlie.csv');
+par=pc('Input_files/HighEfficiencyPaper.csv');
 %par1=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_SAM_HTLComparison.csv');
 %par=pc('Input_files/EnergyOffsetSweepParameters_v5_undoped_SAM.csv');
 % par = pc('Input_files/PTAA_MAPI_NegOffset_lowerVbi.csv');
@@ -106,6 +106,9 @@ par = refresh_device(par);
 % eqm_QJV = equilibrate(par1);
 % par.z_c = -1;
 eqm_QJV = equilibrate(par);
+[Ec, Ev, Efn, Efp] = dfana.calcEnergies(eqm_QJV.ion);
+Ec_plot = Ec(200,:)';
+Ev_plot = Ev(200,:)';
 % biased_eqm_ion = genVappStructs(eqm_QJV.ion, 1.3, 0);
 % biased_eqm_ion.par.mu_a(3) = 0;
 % par = refresh_device(biased_eqm_ion.par);
@@ -122,31 +125,31 @@ scan_rate = 10e-3;
 deltaV = V_max - V_min;
 tmax = deltaV/scan_rate;
 % % % 
-biased_eqm_ion = genVappStructs(eqm_QJV.ion, V_bias, 0);
+%biased_eqm_ion = genVappStructs(eqm_QJV.ion, V_bias, 0);
 % biased_eqm_el = genVappStructs(eqm_QJV.el, V_bias, 1);
 % 
-illuminated_sol_ion = changeLight(biased_eqm_ion, suns, 0, 1);
+%illuminated_sol_ion = changeLight(biased_eqm_ion, suns, 0, 1);
 % % illuminated_sol_el = changeLight(biased_eqm_el, suns, 0, 1);
 % % 
-JV_sol_ion_rev = VappFunction(illuminated_sol_ion, 'sweep', [V_max, V_min, tmax], tmax, 200*(V_max-V_min)+1, 0);
+%JV_sol_ion_rev = VappFunction(illuminated_sol_ion, 'sweep', [V_max, V_min, tmax], tmax, 200*(V_max-V_min)+1, 0);
 % JV_sol_ion_fw = VappFunction(JV_sol_ion_rev, 'sweep', [V_min, V_max, tmax], tmax, 200*(V_max-V_min)+1, 0);
 % 
 % JV_sol_el = VappFunction(illuminated_sol_el, 'sweep', [V_max, V_min, tmax], tmax, 200*(V_max-V_min)+1, 0);
 
-% JV_sol_ion = doCV(eqm_QJV1.ion, suns, -0.2, 1.2, -0.2, 1e-4, 1, 281);
+%JV_sol_ion = doCV(eqm_QJV1.ion, suns, -0.2, 1.25, -0.2, 1e-4, 1, 281);
 % JV_sol_ion = doCV(illuminated_sol_ion, suns, V_bias, V_bias+0.01,  V_bias, 1e-4, 0.5, 25);
 %JV_sol_el = doCV(eqm_QJV.el, suns, -0.2, 1.1, -0.2, 1, 1, 261);
-% JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.25, -0.2, 1e-3, 1, 291);
+JV_sol_ion = doCV(eqm_QJV.ion, suns, -0.2, 1.25, -0.2, 1e-3, 1, 291);
 
 % [Ec, Ev, Efn, Efp] = dfana.calcEnergies(eqm_QJV.ion);
 % a = Ec(200,:)';
 % b = Ev(200,:)';
 % c = Efn(200,:)';
 % d = Efp(200,:)';
-Plot_Current_Contributions(JV_sol_ion_rev)
+Plot_Current_Contributions(JV_sol_ion)
 % Plot_Current_Contributions(JV_sol_ion_rev)
 % % Plot_Current_Contributions(JV_sol_el) 
-%stats_ion = CVstats(JV_sol_ion)
+stats_ion = CVstats(JV_sol_ion)
 %stats_el = CVstats(JV_sol_el)
 %% 
 % % %% Plot JVs

@@ -1,15 +1,17 @@
-function SaPsol = doSaP_v3(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, light_intensity, PulseBool, IonsOn)
+function SaPsol = doSaP_v3(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, tcycle, tpulse, light_intensity, PulseBool, IonsOn)
 % Performs a simulation of a stabilise and pulse (SaP) measurement
 % Input arguments:
 % SOL_INI = solution containing intitial conditions (dark eqm device)
 % VBIAS = array of stabilisation biases to sample at
 % VPULSE = array of voltages to sample at in the pulsed JV
 % TRAMP = the rise time of the voltage pulse (8e-4 s from paper)
-% TSAMPLE = time after voltage pulse when current is measured
+% TSAMPLE = time after voltage pulse when current is measured (must be an array of length same as
+% Vpulse)
 % TSTAB = time for which the device is stabilised at Vbias
+% TCYCLE = time between pulses
+% TPULSE = duration of the pulse (must be an array of length same as
+% Vpulse)
 % LIGHT_INTENSITY = light intensity at which the measurement is done
-% 
-%
 
 %% Start Code
 disp('Starting SaP')
@@ -27,8 +29,6 @@ elseif PulseBool == 0
     SaPsol = cell(num_bias, 1);
 end
 
-
-
 %% Generate solutions after voltage stabilisation period
 for i = 1:num_bias
     
@@ -41,11 +41,6 @@ for i = 1:num_bias
         sol_ill = SaPsol{i-1,1};
         par = SaPsol{i-1,1}.par;
     end
-   
-
-%     if Vbias(i) >= 1
-%         par.mu_p(1) = par.mu_p(1)/1000;
-%     end
     
     try
         %ramp voltage up to the applied voltage 
@@ -208,7 +203,7 @@ if PulseBool == 1
                     %On paper they say this is 1e-3 seconds after the pulse applied 
                     par.tmesh_type = 1;
                     par.t0 = 0;
-                    par.tmax = tsample;
+                    par.tmax = tsample(j);
                     par.tpoints = 100;
                 
                     par.V_fun_type = 'constant';
@@ -226,7 +221,7 @@ if PulseBool == 1
 
                     par.tmesh_type = 1;
                     par.t0 = 0;
-                    par.tmax = 40e-3-tsample;
+                    par.tmax = tpulse(j) - tsample(j) - 2*tramp;
                     par.tpoints = 100;
                 
                     par.V_fun_type = 'constant';
@@ -258,7 +253,7 @@ if PulseBool == 1
 
                     par.tmesh_type = 1;
                     par.t0 = 0;
-                    par.tmax = 1;
+                    par.tmax = tcycle;
                     par.tpoints = 100;
                 
                     par.V_fun_type = 'constant';
