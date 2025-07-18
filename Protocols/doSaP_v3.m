@@ -5,8 +5,8 @@ function SaPsol = doSaP_v3(sol_ini, Vbias, Vpulse, tramp, tsample, tstab, tcycle
 % VBIAS = array of stabilisation biases to sample at
 % VPULSE = array of voltages to sample at in the pulsed JV
 % TRAMP = the rise time of the voltage pulse (8e-4 s from paper)
-% TSAMPLE = time after voltage pulse when current is measured (must be an array of length same as
-% Vpulse)
+% TSAMPLE = time after voltage pulse when current is measured (must be an 
+% array of length same as Vpulse)
 % TSTAB = time for which the device is stabilised at Vbias
 % TCYCLE = time between pulses
 % TPULSE = duration of the pulse (must be an array of length same as
@@ -210,10 +210,11 @@ if PulseBool == 1
                     par.V_fun_arg(1) = Vpulse(j);
                     
                     disp(['Vpulse = ' num2str(Vpulse(j)) ' V'])
+                    SaPsol{i,j+1}.tpulse = tramp+tsample(j)+(j-1)*(tpulse(j)-tsample(j)+tramp+tcycle);
     
                     try
                         SaPsol{i,j+1} = df(sol, par);
-                        SaPsol{i,j+1}.Jpulse = dfana.calcJ(SaPsol{i,j+1}).tot(end,1);
+                        SaPsol{i,j+1}.Jpulse = dfana.calcJ(SaPsol{i,j+1}).tot(end,1);                        
                     catch
                         warning(['Could not solve Vpulse = ' num2str(Vpulse(j)) ' V'])
                         SaPsol{i,j+1}.Jpulse = 0;
