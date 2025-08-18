@@ -60,9 +60,9 @@ if time_fraction >= 1 || time_fraction < 0 || ~isnumeric(time_fraction)
 end
 
 % name of the variables
-names = ["potential", "electrons", "holes", "cations", "anions"];
+names = ["potential", "electron", "hole", "trapped electron", "trapped hole", "cation"];
 % which values have to be considered in a linear or in a log10 scale
-compare_log = [false, true, true, false, false];
+compare_log = [false, true, true, true, true, false];
 
 % no need to calculate end_time for each of the 4 solutions: if they
 % break they break at the same time

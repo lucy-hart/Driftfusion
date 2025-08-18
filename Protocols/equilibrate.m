@@ -46,6 +46,10 @@ par.N_ionic_species = 0;
 % Switch off volumetric surface recombination check
 par.vsr_check = 0;
 
+active = par.active_layer;
+xstart = par.pcum0(active);
+xstop = par.pcum0(active+1);
+
 %% General initial parameters
 % Set applied bias to zero
 par.V_fun_type = 'constant';
@@ -80,6 +84,9 @@ par.SRHset = 1;
 
 % Characteristic diffusion time
 t_diff = (par.dcum0(end)^2)/(2*par.kB*par.T*min(min(par.mu_n), min(par.mu_p)));
+% t_trap_eqm = (min(min(par.Nani.*par.taup), min(par.Nani.*par.taun)))^-1;
+% t_upper = max(t_diff, t_trap_eqm);
+% disp(num2str(t_diff) + " " + num2str(t_trap_eqm))
 par.tmax = 100*t_diff;
 par.t0 = par.tmax/1e6;
 
@@ -87,21 +94,30 @@ par.t0 = par.tmax/1e6;
 disp('Solution with mobility switched on')
 sol = df(sol, par);
 
-all_stable = verifyStabilization(sol.u, sol.t, 0.7);
+all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
 
 % loop to check electrons have reached stable config- if not accelerate ions by
 % order of mag
 j = 1;
-
-while any(all_stable) == 0
+num = 0;
+while any(all_stable) == 0 %&& par.tmax*10^j < 10
     disp(['increasing equilibration time, tmax = ', num2str(par.tmax*10^j)]);
 
     par.tmax = 10*par.tmax;
     par.t0 = par.tmax/1e6;
-
-    sol = df(sol, par);
-
-    all_stable = verifyStabilization(sol.u, sol.t, 0.7);
+    try
+        sol = df(sol, par);
+        all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
+        dfplot.ELnpx(sol, sol.t(end))
+    catch
+        warning('Stabilisation failed')
+        num = num + 1;
+        if num <= 2
+            continue
+        else
+            break
+        end
+    end    
 end
 
 soleq.el = sol;
@@ -110,6 +126,8 @@ sol_ic = extract_IC(soleq.el, [soleq.el.t(end)*0.7, soleq.el.t(end)]);
 compare_rec_flux(sol_ic, par.RelTol_vsr, par.AbsTol_vsr, 0);
 % Switch VSR check on for future use
 soleq.el.par.vsr_check = 1;
+soleq.el.par.taun = par_origin.taun;
+soleq.el.par.taup = par_origin.taup;
 
 disp('Electronic carrier equilibration complete')
 
@@ -127,14 +145,7 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
     disp('Closed circuit equilibrium with ions')
 
     % Take ratio of electron and ion mobilities in the active layer
-    rat_anion = par.mu_n(par.active_layer)/par.mu_a(par.active_layer);
     rat_cation = par.mu_n(par.active_layer)/par.mu_c(par.active_layer);
-
-    % If the ratio is infinity (ion mobility set to zero) then set the ratio to
-    % zero instead
-    if isnan(rat_anion) || isinf(rat_anion)
-        rat_anion = 0;
-    end
 
     if isnan(rat_cation) || isinf(rat_cation)
         rat_cation = 0;
@@ -142,22 +153,32 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
 
     par.mobset = 1;
     par.mobseti = 1;           % Ions are accelerated to reach equilibrium
-    par.K_a = rat_anion;
     par.K_c = rat_cation;
     par.tmax = 1e4*t_diff;
     par.t0 = par.tmax/1e3;
 
     sol = df(sol, par);
-    all_stable = verifyStabilization(sol.u, sol.t, 0.7);
+    all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
 
     % loop to check ions have reached stable config- if not accelerate ions by
     % order of mag
-    while any(all_stable) == 0
+    num = 0;
+    while any(all_stable) == 0 %&& par.tmax*10^j < 10
         disp(['increasing equilibration time, tmax = ', num2str(par.tmax*10^j)]);
         par.tmax = par.tmax*10;
         par.t0 = par.tmax/1e6;
-        sol = df(sol, par);
-        all_stable = verifyStabilization(sol.u, sol.t, 0.7);
+        try
+            sol = df(sol, par);
+            all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
+        catch
+            warning('Stabilisation failed')
+            num = num + 1;
+            if num <= 2
+                continue
+            else
+                break
+            end
+        end
     end
 
     % write solution
@@ -168,7 +189,7 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
     % Reset switches
     soleq.ion.par.vsr_check = 1;
     soleq.ion.par.mobseti = 1;
-    soleq.ion.par.K_a = 1;
+    % soleq.ion.par.K_a = 1;
     soleq.ion.par.K_c = 1;
 
     disp('Ionic carrier equilibration complete')
