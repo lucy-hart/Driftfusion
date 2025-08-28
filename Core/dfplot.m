@@ -98,8 +98,8 @@ classdef dfplot
             [J, j, x] = dfana.calcJ(sol);
 
             figure('Name', 'Jx');
-            dfplot.x2d(sol, x, {J.n, J.p, J.a, J.c, J.disp, J.tot},...
-                {'Jn', 'Jp', 'Ja', 'Jc', 'Jdisp', 'Jtot'}, {'-','-','-','-','-','-'},...
+            dfplot.x2d(sol, x, {J.n, J.p, J.c, J.disp, J.tot},...
+                {'Jn', 'Jp', 'Jc', 'Jdisp', 'Jtot'}, {'-','-','-','-','-','-'},...
                 'Current density [Acm-2]', tarr, xrange, 0, 0);
         end
 
@@ -114,7 +114,7 @@ classdef dfplot
             [J, j, x] = dfana.calcJ(sol);
 
             figure('Name', 'jx');
-            dfplot.x2d(sol, par.x_sub, {j.n, j.p, j.a, j.c, j.disp}, {'jn', 'jp', 'ja', 'jc', 'jdisp'},...
+            dfplot.x2d(sol, par.x_sub, {j.n, j.p, j.c, j.disp}, {'jn', 'jp', 'jc', 'jdisp'},...
                 {'-','-','-','-','-'}, 'Flux [cm-2 s-1]', tarr, xrange, 0, 0);
         end
 
@@ -385,7 +385,7 @@ classdef dfplot
             r = dfana.calcr(sol, "sub");
 
             figure('Name', 'rx')
-            dfplot.x2d(sol, x_sub, {r.btb, r.srh_n+r.srh_p, r.vsr, r.tot},{'rbtb', 'rsrh', 'rvsr', 'rtot'},...
+            dfplot.x2d(sol, x_sub, {r.btb, r.srh, r.vsr, r.tot},{'rbtb', 'rsrh', 'rvsr', 'rtot'},...
                 {'-','-','-','-'}, 'Recombination rate [cm-3s-1]', tarr, xrange, 0, 0);
         end
 
@@ -662,14 +662,19 @@ classdef dfplot
             % XRANGE = 2 element array with [xmin, xmax]
             [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
             [u,t,x,par,dev,n,p,Nt,Pt,c,V] = dfana.splitsol(sol);
-            N_frac = Nt./dev.Nani;
-            P_frac = Pt./dev.Nani;
-            empty = 1 - N_frac - P_frac;
+            Ntrap_n = repmat(dev.Ntrap_n, length(t), 1);
+            Ntrap_p = repmat(dev.Ntrap_p, length(t), 1);
+            Nt_eqm = repmat(dev.Nt_eqm, length(t), 1);
+            Pt_eqm = repmat(dev.Pt_eqm, length(t), 1);
+            N_frac = Nt./Ntrap_n;
+            P_frac = Pt./Ntrap_p;
+            N_frac_eqm = Nt_eqm./Ntrap_n;
+            P_frac_eqm = Pt_eqm./Ntrap_p;
 
             figure('Name', 'TrapFilling')
             subplot(2,1,1);
-            dfplot.x2d(sol, x, {N_frac, P_frac, empty}, {'N_{t}', 'P_{t}', 'Empty'},...
-                {'-', '-', '-'}, 'Filling Fraction', tarr, xrange, 0, 0);
+            dfplot.x2d(sol, x, {N_frac, P_frac, N_frac_eqm, P_frac_eqm}, {'N_{t}', 'P_{t}', 'N_{t,eqm}', 'P_{t,eqm}'},...
+                {'-', '-', '--', '--'}, 'Filling Fraction', tarr, xrange, 0, 0);
 
             subplot(2,1,2);
             dfplot.x2d(sol, x, {n, p, Nt, Pt}, {'n', 'p', 'nt', 'pt'}, ...
@@ -686,7 +691,6 @@ classdef dfplot
             NA = repmat(dev.NA, length(t), 1);
             ND = repmat(dev.ND, length(t), 1);
 
-            Nani = repmat(dev.Nani, length(t), 1);
             Ncat = repmat(dev.Ncat, length(t), 1);
 
             figure('Name', 'ELxnpxacx');

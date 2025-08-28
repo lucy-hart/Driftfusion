@@ -100,7 +100,7 @@ all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
 % order of mag
 j = 1;
 num = 0;
-while any(all_stable) == 0 %&& par.tmax*10^j < 10
+while any(all_stable) == 0 %&& par.tmax*10^j < 1e5
     disp(['increasing equilibration time, tmax = ', num2str(par.tmax*10^j)]);
 
     par.tmax = 10*par.tmax;
@@ -108,7 +108,7 @@ while any(all_stable) == 0 %&& par.tmax*10^j < 10
     try
         sol = df(sol, par);
         all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
-        dfplot.ELnpx(sol, sol.t(end))
+        %dfplot.ELnpx(sol, sol.t(end))
     catch
         warning('Stabilisation failed')
         num = num + 1;
@@ -128,12 +128,15 @@ compare_rec_flux(sol_ic, par.RelTol_vsr, par.AbsTol_vsr, 0);
 soleq.el.par.vsr_check = 1;
 soleq.el.par.taun = par_origin.taun;
 soleq.el.par.taup = par_origin.taup;
+soleq.el.par = refresh_device(soleq.el.par);
 
 disp('Electronic carrier equilibration complete')
 
 if electronic_only == 0 && par_origin.N_ionic_species > 0
     %% Equilibrium solutions with ion mobility switched on
     par.N_ionic_species = par_origin.N_ionic_species;
+    % Uncouple traps from electrostatics
+    par.z_t = 0;
 
     % Create temporary solution for appending initial conditions to
     sol = soleq.el;
@@ -163,13 +166,41 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
     % loop to check ions have reached stable config- if not accelerate ions by
     % order of mag
     num = 0;
-    while any(all_stable) == 0 %&& par.tmax*10^j < 10
+    while any(all_stable) == 0 && par.tmax*10^j < 1e4
         disp(['increasing equilibration time, tmax = ', num2str(par.tmax*10^j)]);
         par.tmax = par.tmax*10;
         par.t0 = par.tmax/1e6;
         try
             sol = df(sol, par);
             all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
+            %dfplot.TrapFilling(sol, sol.t(end))
+        catch
+            warning('Stabilisation failed')
+            num = num + 1;
+            if num <= 2
+                continue
+            else
+                break
+            end
+        end
+    end
+
+    sol.par.z_t = 1;
+
+    sol = df(sol, sol.par);
+    all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
+
+    % loop to check ions have reached stable config- if not accelerate ions by
+    % order of mag
+    num = 0;
+    while any(all_stable) == 0 && par.tmax*10^j < 1e4
+        disp(['increasing equilibration time, tmax = ', num2str(par.tmax*10^j)]);
+        par.tmax = par.tmax*10;
+        par.t0 = par.tmax/1e6;
+        try
+            sol = df(sol, par);
+            all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
+            %dfplot.TrapFilling(sol, sol.t(end))
         catch
             warning('Stabilisation failed')
             num = num + 1;

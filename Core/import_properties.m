@@ -65,20 +65,18 @@ end
 par.Nc = import_single_property(par.Nc, T, {'Nc', 'Ncb', 'NC', 'NCB'}, start_row, end_row);
 % Valence band effective density of states
 par.Nv = import_single_property(par.Nv, T, {'Nv', 'Nvb', 'NV', 'NVB'}, start_row, end_row);
-% Intrinsic anion density
-par.Nani = import_single_property(par.Nani, T, {'Nani'}, start_row, end_row);
+% Intrinsic electron trap density
+par.Ntrap_n = import_single_property(par.Ntrap_n, T, {'Ntrap_n'}, start_row, end_row);
+% Intrinsic hole trap density
+par.Ntrap_p = import_single_property(par.Ntrap_p, T, {'Ntrap_p'}, start_row, end_row);
 % Intrinsic cation density
 par.Ncat = import_single_property(par.Ncat, T, {'Ncat', 'Nion'}, start_row, end_row);
-% Limiting density of anion states
-par.a_max = import_single_property(par.a_max, T, {'a_max', 'amax', 'DOSani'}, start_row, end_row);
 % Limiting density of cation states
 par.c_max = import_single_property(par.c_max, T, {'c_max', 'cmax', 'DOScat'}, start_row, end_row);
 % Electron mobility
 par.mu_n = import_single_property(par.mu_n, T, {'mu_n', 'mun', 'mue', 'mu_e'}, start_row, end_row);
 % Hole mobility
 par.mu_p = import_single_property(par.mu_p, T, {'mu_p', 'mup', 'muh', 'mu_h'}, start_row, end_row);
-% Anion mobility
-par.mu_a = import_single_property(par.mu_a, T, {'mu_a', 'mua',  'mu_ani', 'muani'}, start_row, end_row);
 % Cation mobility
 par.mu_c = import_single_property(par.mu_c, T, {'mu_c', 'muc',  'mu_cat', 'mucat'}, start_row, end_row);
 % Relative dielectric constant

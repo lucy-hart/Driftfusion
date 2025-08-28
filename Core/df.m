@@ -86,6 +86,10 @@ mu_p = device.mu_p;         % Hole mobility
 mu_c = device.mu_c;         % Cation mobility
 Nc = device.Nc;             % Conduction band effective density of states
 Nv = device.Nv;             % Valence band effective density of states
+Ntrap_n = device.Ntrap_n; 
+Ntrap_p = device.Ntrap_p;
+Nt_eqm = device.Nt_eqm;
+Pt_eqm = device.Pt_eqm;
 c_max = device.c_max;       % Cation density upper limit
 gradNc = device.gradNc;     % Conduction band effective density of states gradient
 gradNv = device.gradNv;     % Valence band effective density of states gradient
@@ -105,12 +109,11 @@ NA = device.NA;             % Acceptor doping density
 ND = device.ND;             % Donor doping density
 % Set up counter ion density arrays
 switch N_ionic_species
-    case 0                  % Nani, Ncat, a, and c set to zero for Poisson
+    case 0                 
         Ncat = zeros(1, length(x_sub));
-        Nani = device.Nani;
-    case 1                  % Nani and a both set to zero for Poisson
+    case 1                  
         Ncat = device.Ncat;
-        Nani = device.Nani;
+
 end
 xprime_n = device.xprime_n;         % Translated x co-ordinates for interfaces
 xprime_p = device.xprime_p;         % Translated x co-ordinates for interfaces
@@ -120,7 +123,7 @@ alpha0_xn = device.alpha0_xn;       % alpha0_xn is alpha for F = 0 reference to 
 beta0_xp = device.beta0_xp;         % beta0_xp is beta for F = 0 referenced to xprime_p
 
 z_c = par.z_c;
-z_a = par.z_a;
+z_t = par.z_t;
 n0_l = par.n0_l;
 n0_r = par.n0_r;
 p0_l = par.p0_l;
@@ -292,29 +295,26 @@ end
         % Radiative
         r_rad = radset*B(i)*(n*p - ni(i)^2);
         % Bulk SRH
-        kout_e = taun(i)*nt(i);
-        kout_p = taup(i)*pt(i);
-        %n_empty = Nani(i) - Nt - Pt;
-        % r_srh_n = SRHset*(kout_e*Nt + taun(i)*(ni(i)*Pt_eqm - n*Pt) - taun(i)*n*(Nani(i) - Nt));
-        % r_srh_p = SRHset*(kout_p*Pt + taup(i)*(ni(i)*Nt_eqm - p*Nt) - taup(i)*p*(Nani(i) - Pt));
-        % r_srh_Nt = SRHset*(- Nt*(kout_e + taup(i)*p) + taun(i)*n*(Nani(i) - Nt) ...
-        %             + taup(i)*ni(i)*Nt_eqm);
-        % r_srh_Pt = SRHset*(- Pt*(kout_p + taun(i)*n) + taup(i)*p*(Nani(i) - Pt) ...
-        %             + taun(i)*ni(i)*Pt_eqm);
-        r_srh_n = SRHset*(kout_e*Nt - taun(i)*n*(Nani(i)-Nt));
-        r_srh_p = SRHset*(kout_p*Pt - taup(i)*p*(Nani(i)-Pt));
-        r_srh_Nt = SRHset*(- Nt*kout_e + taun(i)*n*(Nani(i)-Nt));
-        r_srh_Pt = SRHset*(-Pt*kout_p + taup(i)*p*(Nani(i)-Pt));
+        krec_n = 1/(taun(i)*Ntrap_n(i));
+        krec_p = 1/(taup(i)*Ntrap_p(i));
+        kout_n = nt(i)*krec_n;
+        kout_p = pt(i)*krec_p;
+        r_srh_n = SRHset*(kout_n*Nt - krec_n*n*Pt);
+        r_srh_p = SRHset*(kout_p*Pt - krec_p*p*Nt);
+        r_srh_Nt = SRHset*(kout_p*Pt + krec_n*n*Pt ...
+            - krec_p*p*Nt - kout_n*Nt);
+        r_srh_Pt = SRHset*(kout_n*Nt + krec_p*p*Nt ...
+            - krec_n*n*Pt - kout_p*Pt);
         % Volumetric surface recombination
         alpha = (sign_xn(i)*q*dVdx/(kB*T)) + alpha0_xn(i);
         beta = (sign_xp(i)*q*-dVdx/(kB*T)) + beta0_xp(i);
         r_vsr = SRHset*vsr_zone(i)*((n*exp(-alpha*xprime_n(i))*p*exp(-beta*xprime_p(i)) - nt(i)*pt(i))...
             /(taun_vsr(i)*(p*exp(-beta*xprime_p(i)) + pt(i)) + taup_vsr(i)*(n*exp(-alpha*xprime_n(i)) + nt(i))));
         % Source terms
-        Nt_eqm = device.Nani(i)/(1+exp((device.Et(i)-device.EF0(i))/(par.kB*par.T)));
-        Pt_eqm = device.Nani(i)/(1+exp(-(device.Et(i)-device.EF0(i))/(par.kB*par.T)));
+        %I assume that the unfilled trap states are neutral and so become 
+        %negatively charged when they trap an electron
         S_V = (1/(epp_factor*epp0))*((-n + p) - (NA(i) - ND(i)) + (z_c*c) - ...
-            (z_c*Ncat(i)) + z_a*Nani(i)- Nt + Pt - (z_a*Nani(i)-Nt_eqm+Pt_eqm));
+            (z_c*Ncat(i)) - z_t*(Nt + Nt_eqm(i)));
         S_n = g - r_vsr - r_rad + r_srh_n;
         S_p = g - r_vsr - r_rad + r_srh_p;
         S_Nt = r_srh_Nt;
@@ -336,25 +336,22 @@ end
         if x == x_sub(1)
             i = 1;
         end
-      
-        Nt_eqm = dev.Nani(i)/(1+exp((dev.Et(i)-dev.EF0(i))/(par.kB*par.T)));
-        Pt_eqm = dev.Nani(i)/(1+exp(-(dev.Et(i)-dev.EF0(i))/(par.kB*par.T)));
 
         if length(par.dcell) == 1
             % Single layer
             u0_ana = [(x/xmesh(end))*Vbi;
                 n0_l*exp((x*(log(n0_r)-log(n0_l)))/par.dcum0(end));
                 p0_l*exp((x*(log(p0_r)-log(p0_l)))/par.dcum0(end));                
-                Nt_eqm;
-                Pt_eqm;
+                dev.Nt_eqm(i);
+                dev.Pt_eqm(i);
                 dev.Ncat(i);];
         else
             % Multi-layered
             u0_ana = [(x/xmesh(end))*Vbi;
                 dev.n0(i);
                 dev.p0(i);
-                Nt_eqm;
-                Pt_eqm;
+                dev.Nt_eqm(i);
+                dev.Pt_eqm(i);
                 dev.Ncat(i);];
         end
         u0_ana = u0_ana(1:N_variables);

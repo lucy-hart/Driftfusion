@@ -145,22 +145,17 @@ classdef pc
         
         %% Mobile ions        
         N_ionic_species = 1;        
-        Nani = [1e19];                  % Mobile ion defect density [cm-3] - A. Walsh et al. Angewandte Chemie, 2015, 127, 1811.
         Ncat = [1e19];                  % Mobile ion defect density [cm-3] - A. Walsh et al. Angewandte Chemie, 2015, 127, 1811.
         z_c = 1;                        % Integer charge state for cations
-        z_a = -1;                       % Integer charge state for anions
         % Limits the density of ions - Approximate density of iodide sites [cm-3]
-        a_max = [1.21e22];                 % P. Calado thesis
-        c_max = [1.21e22];
+        c_max = [1.21e22];                 % P. Calado thesis
         
-        K_a = 1;                    % Coefficients to easily accelerate ions
-        K_c = 1;                   % Coefficients to easily accelerate ions
+        K_c = 1;                    % Coefficients to easily accelerate ions
         
         %% Mobilities   [cm2V-1s-1]
         mu_n = [1];         % electron mobility
         mu_p = [1];         % hole mobility
         mu_c = [1e-10];
-        mu_a = [1e-12]; 
         % PTPD h+ mobility: https://pubs.rsc.org/en/content/articlehtml/2014/ra/c4ra05564k
         % PEDOT mu_n = 0.01 cm2V-1s-1 https://aip.scitation.org/doi/10.1063/1.4824104
         % TiO2 mu_n = 0.09 cm2V-1s-1 Bak2008
@@ -173,9 +168,12 @@ classdef pc
         % [cm3 s-1] Radiative Recombination coefficient
         B = [3.6e-12];
 
-        %% SRH time constants for each layer [s]
+        %% SRH time constants for each layer [s] and trap densities
         taun = [1e6];           % [s] SRH time constant for electrons
-        taup = [1e6];           % [s] SRH time constant for holes  
+        taup = [1e6];           % [s] SRH time constant for holes
+        Ntrap_n = [1e15];
+        Ntrap_p = [1e15];
+        z_t = 1;
         
         %% Surface recombination and extraction coefficients [cm s-1]
         % Descriptions given in the comments considering that holes are
@@ -271,6 +269,8 @@ classdef pc
         wp
         wscr            % Space charge region width
         x0              % Initial spatial mesh value
+        Nt_eqm
+        Pt_eqm
     end
 
     methods
@@ -305,15 +305,6 @@ classdef pc
             for i = 1:length(par.Et)
                 if par.Et(i) >= par.Phi_EA(i) || par.Et(i) <= par.Phi_IP(i)
                     msg = 'Trap energies must exist within layer band gap.';
-                    error(msg);
-                end
-            end
-
-            % Warn if a_max is set to zero in any layers - leads to
-            % infinite diffusion rate
-            for i = 1:length(par.a_max)
-                if par.a_max(i) <= 0
-                    msg = 'Maximum cation density (a_max) cannot have zero or negative entries- choose a low value rather than zero e.g. 1';
                     error(msg);
                 end
             end
@@ -357,9 +348,6 @@ classdef pc
             elseif length(par.mu_p) ~= length(par.d)
                 msg = 'Hole mobility array (mu_n) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
-            elseif length(par.mu_a) ~= length(par.d)
-                msg = 'Ion mobility array (mu_p) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
-                error(msg);
             elseif length(par.NA) ~= length(par.d)
                 msg = 'Acceptor density array (NA) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
@@ -372,11 +360,8 @@ classdef pc
             elseif length(par.Nv) ~= length(par.d)
                 msg = 'Effective density of states array (Nv) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
-            elseif length(par.Nani) ~= length(par.d)
-                msg = 'Background ion density (Nani) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
-                error(msg);
-            elseif length(par.a_max) ~= length(par.d)
-                msg = 'Ion density of states array (a_max) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
+            elseif length(par.Ncat) ~= length(par.d)
+                msg = 'Background ion density (Ncat) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
             elseif length(par.epp) ~= length(par.d)
                 msg = 'Relative dielectric constant array (epp) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
@@ -651,7 +636,15 @@ classdef pc
         function value = get.pt(par)
             value = distro_fun.pfun(par.Nv, par.Phi_IP, par.Et, par);
         end
-        
+
+        function value = get.Nt_eqm(par)
+            value = par.Ntrap_n./(1+exp((par.Et-par.EF0)/(par.kB*par.T)));
+        end
+
+        function value = get.Pt_eqm(par)
+            value = par.Ntrap_p./(1+exp(-(par.Et-par.EF0)/(par.kB*par.T)));
+        end
+
         %% Thickness and point arrays
         function value = get.dcum(par)
             value = cumsum(par.dcell);

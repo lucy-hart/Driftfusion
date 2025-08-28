@@ -18,7 +18,7 @@ j_surf_rec = dfana.calcj_surf_rec(CVsol);
 %forward sweep
 J_values(:,1) = e*trapz(x, gxt(1,:))';
 J_values(:,2) = 100*e*trapz(x, loss_currents.btb, 2)';
-J_values(:,3) = e*trapz(x, loss_currents.srh, 2)';
+J_values(:,3) = e*trapz(x, loss_currents.srh_n, 2)';
 J_values(:,4) = e*trapz(x(1:num_points), loss_currents.vsr(:,1:num_points), 2)';
 J_values(:,5) = e*trapz(x(num_points:end), loss_currents.vsr(:,num_points:end), 2)';
 J_values(:,6) = e*(j_surf_rec.tot);

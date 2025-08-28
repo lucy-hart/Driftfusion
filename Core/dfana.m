@@ -224,7 +224,7 @@ classdef dfana
             % obtain SOL components for easy referencing
             % MESH_OPTION = "whole" for input mesh or "sub" for subinetrval
             % mesh
-            [u,t,x_input,par,dev,n,p,~,~,~,V] = dfana.splitsol(sol);
+            [u,t,x_input,par,dev,n,p,nt,pt,~,V] = dfana.splitsol(sol);
 
             switch mesh_option
                 case "whole"
@@ -263,12 +263,15 @@ classdef dfana
             % Band-to-band
             r.btb = dev.B.*(n.*p - dev.ni.^2);
             % Bulk SRH
-            k_out_e = dev.taun.*dev.nt;
-            k_out_p = dev.taup.*dev.pt;
-            r.srh_n = srh_zone.*(dev.taun.*n.*pt - k_out_e.*nt);
-            r.srh_p = srh_zone.*(dev.taup.*p.*nt - k_out_p.*pt);
-            % r.srh = srh_zone.*(n.*p - dev.ni.^2)...
-            %     ./(dev.taun.*(p+dev.pt) + dev.taup.*(n+dev.nt));
+            Ntrap_n = dev.Ntrap_n;
+            Ntrap_p = dev.Ntrap_p;
+            k_rec_e = 1./(Ntrap_n.*dev.taun);
+            k_rec_p = 1./(Ntrap_p.*dev.taup);
+            k_out_e = dev.nt.*k_rec_e;
+            k_out_p = dev.pt.*k_rec_p;
+            r.srh_n = srh_zone.*(k_rec_e.*n.*pt - k_out_e.*nt);
+            r.srh_p = srh_zone.*(k_rec_p.*p.*nt - k_out_p.*pt);
+            r.srh = r.srh_n+r.srh_p;
             % Volumetric surface SRH
             ns = n.*exp(-alpha_xn.*xprime_n); % Projected electron surface density
             ps = p.*exp(-beta_xp.*xprime_p);  % Projected hole surface density
@@ -278,7 +281,7 @@ classdef dfana
             % currents
             
             % Total
-            r.tot = r.btb + r.srh_n + r.srh_p + r.vsr;
+            r.tot = r.btb + r.srh_n + r.vsr;
             
         end
         
@@ -431,7 +434,7 @@ classdef dfana
             % Electric field caculation
             % FV = Field calculated from the gradient of the potential
             % Frho = Field calculated from integrated space charge density
-            [u,t,x,par,dev,n,p,~,~,c,V] = dfana.splitsol(sol);
+            [u,t,x_whole,par,dev,n,p,~,~,c,V] = dfana.splitsol(sol);
 
             switch mesh_option
                 case "whole"
