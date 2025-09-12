@@ -44,12 +44,12 @@ dev.Nt_eqm = build_property(par.Nt_eqm, xmesh, par, 'exp_graded', 0);
 dev.Pt_eqm = build_property(par.Pt_eqm, xmesh, par, 'exp_graded', 0);
 dev.Ncat = build_property(par.Ncat, xmesh, par, 'exp_graded', 0);
 dev.c_max = build_property(par.c_max, xmesh, par, 'exp_graded', 0);
+dev.NA = build_property(par.NA, xmesh, par, 'exp_graded', 0);
+dev.ND = build_property(par.ND, xmesh, par, 'exp_graded', 0);
 
 % Properties that are zeroed in the interfaces
 dev.g0 = build_property(par.g0, xmesh, par, 'zeroed', 0);
 dev.B = build_property(par.B, xmesh, par, 'zeroed', 0);
-dev.NA = build_property(par.NA, xmesh, par, 'exp_graded', 0);
-dev.ND = build_property(par.ND, xmesh, par, 'exp_graded', 0);
 
 % Gradient properties
 dev.gradEA = build_property(par.Phi_EA, xmesh, par, 'lin_graded', 1);

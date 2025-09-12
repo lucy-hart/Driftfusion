@@ -16,8 +16,7 @@ function solstruct = df(varargin)
 % n = u(2) = electron density
 % p = u(3) = holes density
 % Vt = u(4) = trapped e- density 
-% Pt = u(5) = trapped h+ density
-% a = u(6) = cation density (optional)
+% a = u(5) = cation density (optional)
 %
 %% Start code
 %% Deal with input arguments
@@ -76,7 +75,7 @@ epp0 = par.epp0;
 
 %% Device parameters
 N_ionic_species = par.N_ionic_species;  % Number of ionic species in this solution
-N_variables = par.N_ionic_species + 5;  % Number of variables in this solution (+5 for V, n, p, nt and pt)
+N_variables = par.N_ionic_species + 4;  % Number of variables in this solution (+5 for V, n, p, nt)
 N_max_variables = par.N_max_variables;  % Maximum number of variables in this version
 
 device = par.dev_sub;
@@ -87,9 +86,7 @@ mu_c = device.mu_c;         % Cation mobility
 Nc = device.Nc;             % Conduction band effective density of states
 Nv = device.Nv;             % Valence band effective density of states
 Ntrap_n = device.Ntrap_n; 
-Ntrap_p = device.Ntrap_p;
 Nt_eqm = device.Nt_eqm;
-Pt_eqm = device.Pt_eqm;
 c_max = device.c_max;       % Cation density upper limit
 gradNc = device.gradNc;     % Conduction band effective density of states gradient
 gradNv = device.gradNv;     % Valence band effective density of states gradient
@@ -141,6 +138,7 @@ mobseti = par.mobseti;      % Ionic carrier transport switch
 K_c = par.K_c;              % Cation transport rate multiplier
 radset = par.radset;        % Radiative recombination switch
 SRHset = par.SRHset;        % SRH recombination switch
+kineticset = par.kineticset;
 vsr_zone = device.vsr_zone;
 srh_zone = device.srh_zone;
 Rs_initial = par.Rs_initial;
@@ -187,11 +185,11 @@ J = 0;
 
 %% Solver variables
 i = 1;
-V = 0; n = 0; p = 0; Nt = 0; Pt = 0; c = 0;
-dVdx = 0; dndx = 0; dpdx = 0; dNtdx = 0; dPtdx = 0; dcdx = 0;
-F_V = 0; F_n = 0; F_p = 0; F_Nt = 0; F_Pt = 0; F_c = 0;
-S_V = 0; S_n = 0; S_p = 0; S_Nt = 0; S_Pt = 0; S_c = 0;
-r_rad = 0; r_srh_n = 0; r_srh_p = 0; r_srh_Nt = 0; r_srh_Pt = 0; r_vsr = 0; 
+V = 0; n = 0; p = 0; Nt = 0; c = 0;
+dVdx = 0; dndx = 0; dpdx = 0; dNtdx = 0; dcdx = 0;
+F_V = 0; F_n = 0; F_p = 0; F_Nt = 0; F_c = 0;
+S_V = 0; S_n = 0; S_p = 0; S_Nt = 0; S_c = 0;
+r_rad = 0; r_srh_n = 0; r_srh_p = 0; r_srh_Nt = 0; r_vsr = 0; 
 alpha = 0; beta = 0;
 G_n = 1;    % Diffusion enhancement prefactor electrons
 G_p = 1;    % Diffusion enhancement prefactor holes
@@ -257,14 +255,13 @@ end
         n = u_maxvar(2);
         p = u_maxvar(3);
         Nt = u_maxvar(4);
-        Pt = u_maxvar(5);
-        c = u_maxvar(6);
+        c = u_maxvar(5);
+
         dVdx = dudx_maxvar(1);
         dndx = dudx_maxvar(2);
         dpdx = dudx_maxvar(3);
         dNtdx = dudx_maxvar(4);
-        dPtdx = dudx_maxvar(5);
-        dcdx = dudx_maxvar(6);
+        dcdx = dudx_maxvar(5);
         
         % Diffusion enhancement prefactors (gamma = 0 for Boltz)
         G_n = Nc(i)/(Nc(i) - gamma*n);
@@ -277,9 +274,8 @@ end
         C_n = 1;
         C_p = 1;
         C_Nt = 1;
-        C_Pt = 1;
         C_c = 1;
-        C = [C_V; C_n; C_p; C_Nt; C_Pt; C_c];
+        C = [C_V; C_n; C_p; C_Nt; C_c];
         
         % Flux terms
         F_V = (epp(i)/epp_factor)*dVdx;
@@ -288,39 +284,45 @@ end
         F_c = mu_c(i)*(z_c*c*dVdx + kB*T*(dcdx + (c*(dcdx/(c_max(i) - c)))));
         %Immobile traps
         F_Nt = 0;
-        F_Pt = 0;
-        F = [F_V; mobset*F_n; mobset*F_p; F_Nt; F_Pt; mobseti*K_c*F_c];
+        F = [F_V; mobset*F_n; mobset*F_p; F_Nt; mobseti*K_c*F_c];
         
         % Electron and hole recombination
         % Radiative
         r_rad = radset*B(i)*(n*p - ni(i)^2);
         % Bulk SRH
         krec_n = 1/(taun(i)*Ntrap_n(i));
-        krec_p = 1/(taup(i)*Ntrap_p(i));
+        krec_p = 1/(taup(i)*Ntrap_n(i));
         kout_n = nt(i)*krec_n;
         kout_p = pt(i)*krec_p;
-        r_srh_n = SRHset*(kout_n*Nt - krec_n*n*Pt);
-        r_srh_p = SRHset*(kout_p*Pt - krec_p*p*Nt);
-        r_srh_Nt = SRHset*(kout_p*Pt + krec_n*n*Pt ...
-            - krec_p*p*Nt - kout_n*Nt);
-        r_srh_Pt = SRHset*(kout_n*Nt + krec_p*p*Nt ...
-            - krec_n*n*Pt - kout_p*Pt);
+        if kineticset == 1
+            r_srh_n = SRHset*(kout_n*Nt - krec_n*n*(Ntrap_n(i)-Nt));
+            r_srh_p = SRHset*(kout_p*(Ntrap_n(i)-Nt) - krec_p*p*Nt);
+            r_srh_Nt = SRHset*(kout_p*(Ntrap_n(i)-Nt) + krec_n*n*(Ntrap_n(i)-Nt) ...
+                - krec_p*p*Nt - kout_n*Nt);
+            Nt_coulomb = Nt;
+        elseif kineticset == 0
+            r_srh_n = -SRHset*((n*p - nt(i)*pt(i))/(taun(i)*(p+pt(i))+taup(i)*(n+nt(i))));
+            r_srh_p = r_srh_n;
+            r_srh_Nt = 0;
+            Nt_coulomb = Ntrap_n(i)*((krec_n*n+kout_p)/(krec_n*(p+pt(i))+krec_p*(n+nt(i))));
+        end 
+
         % Volumetric surface recombination
         alpha = (sign_xn(i)*q*dVdx/(kB*T)) + alpha0_xn(i);
         beta = (sign_xp(i)*q*-dVdx/(kB*T)) + beta0_xp(i);
         r_vsr = SRHset*vsr_zone(i)*((n*exp(-alpha*xprime_n(i))*p*exp(-beta*xprime_p(i)) - nt(i)*pt(i))...
             /(taun_vsr(i)*(p*exp(-beta*xprime_p(i)) + pt(i)) + taup_vsr(i)*(n*exp(-alpha*xprime_n(i)) + nt(i))));
+
         % Source terms
         %I assume that the unfilled trap states are neutral and so become 
         %negatively charged when they trap an electron
         S_V = (1/(epp_factor*epp0))*((-n + p) - (NA(i) - ND(i)) + (z_c*c) - ...
-            (z_c*Ncat(i)) - z_t*(Nt + Nt_eqm(i)));
+            (z_c*Ncat(i)) - z_t*(Nt_coulomb - Nt_eqm(i)));
         S_n = g - r_vsr - r_rad + r_srh_n;
         S_p = g - r_vsr - r_rad + r_srh_p;
         S_Nt = r_srh_Nt;
-        S_Pt = r_srh_Pt;
         S_c = 0;        
-        S = [S_V; S_n; S_p; S_Nt; S_Pt; S_c];
+        S = [S_V; S_n; S_p; S_Nt; S_c];
         
         % Remove unused variables - faster and tidier than using conditional
         % statements
@@ -337,13 +339,18 @@ end
             i = 1;
         end
 
+        % if kineticset == 0
+        %     IC_Nt = dev.Nt_eqm(i);
+        % else
+        %     IC_Nt = dev.Nt_IC(i);
+        % end
+
         if length(par.dcell) == 1
             % Single layer
             u0_ana = [(x/xmesh(end))*Vbi;
                 n0_l*exp((x*(log(n0_r)-log(n0_l)))/par.dcum0(end));
                 p0_l*exp((x*(log(p0_r)-log(p0_l)))/par.dcum0(end));                
                 dev.Nt_eqm(i);
-                dev.Pt_eqm(i);
                 dev.Ncat(i);];
         else
             % Multi-layered
@@ -351,7 +358,6 @@ end
                 dev.n0(i);
                 dev.p0(i);
                 dev.Nt_eqm(i);
-                dev.Pt_eqm(i);
                 dev.Ncat(i);];
         end
         u0_ana = u0_ana(1:N_variables);
@@ -417,11 +423,9 @@ end
             mobset*(-sn_l*(n_l - n0_l));
             mobset*(-sp_l*(p_l - p0_l));
             0;
-            0;
             0;];
         
         Ql = [0;
-            1;
             1;
             1;
             1;
@@ -431,11 +435,9 @@ end
             mobset*(sn_r*(n_r - n0_r));
             mobset*(sp_r*(p_r - p0_r));
             0;
-            0;
             0;];
         
         Qr = [0;
-            1;
             1;
             1;
             1;

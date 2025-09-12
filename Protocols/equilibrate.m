@@ -46,10 +46,6 @@ par.N_ionic_species = 0;
 % Switch off volumetric surface recombination check
 par.vsr_check = 0;
 
-active = par.active_layer;
-xstart = par.pcum0(active);
-xstop = par.pcum0(active+1);
-
 %% General initial parameters
 % Set applied bias to zero
 par.V_fun_type = 'constant';
@@ -71,6 +67,7 @@ par.Rs = 0;
 %% Switch off mobilities
 par.mobset = 0;
 par.mobseti = 0;
+par.kineticset = 0;
 
 %% Initial solution with zero mobility
 disp('Initial solution, zero mobility')
@@ -84,9 +81,6 @@ par.SRHset = 1;
 
 % Characteristic diffusion time
 t_diff = (par.dcum0(end)^2)/(2*par.kB*par.T*min(min(par.mu_n), min(par.mu_p)));
-% t_trap_eqm = (min(min(par.Nani.*par.taup), min(par.Nani.*par.taun)))^-1;
-% t_upper = max(t_diff, t_trap_eqm);
-% disp(num2str(t_diff) + " " + num2str(t_trap_eqm))
 par.tmax = 100*t_diff;
 par.t0 = par.tmax/1e6;
 
@@ -94,21 +88,17 @@ par.t0 = par.tmax/1e6;
 disp('Solution with mobility switched on')
 sol = df(sol, par);
 
-all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
+all_stable = verifyStabilization(sol.u(:,:,:), sol.t, 0.7);
 
-% loop to check electrons have reached stable config- if not accelerate ions by
-% order of mag
-j = 1;
+% loop to check electrons have reached stable config
 num = 0;
-while any(all_stable) == 0 %&& par.tmax*10^j < 1e5
-    disp(['increasing equilibration time, tmax = ', num2str(par.tmax*10^j)]);
-
+while any(all_stable) == 0 
+    disp(['increasing equilibration time, tmax = ', num2str(par.tmax*10)]);
     par.tmax = 10*par.tmax;
     par.t0 = par.tmax/1e6;
     try
         sol = df(sol, par);
         all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
-        %dfplot.ELnpx(sol, sol.t(end))
     catch
         warning('Stabilisation failed')
         num = num + 1;
@@ -120,14 +110,56 @@ while any(all_stable) == 0 %&& par.tmax*10^j < 1e5
     end    
 end
 
+% Nt_guess = get_Nt_guess(sol);
+% sol.u(end,:,4) = Nt_guess;
+% sol.par.kineticset = 1;
+% sol.par.tmax = 1e5;
+% 
+% disp('Solution with mobility switched on and kinetic traps')
+% sol = df(sol);
+% 
+% all_stable = 0;
+% num = 0;
+% while any(all_stable) == 0 
+%     if num ~= 0
+%         disp(['increasing equilibration time, tmax = ', num2str(sol.par.tmax*10)]);
+%     end
+%     sol.par.tmax = 10*sol.par.tmax;
+%     sol.par.t0 = sol.par.tmax/1e6;
+%     try
+%         sol = df(sol);
+%         all_stable = verifyStabilization(sol.u(:,:,:), sol.t, 0.7);
+%         rec = dfana.calcr(sol, "sub") ;        
+%         rec_n = rec.srh_n(end,:);
+%         rec_p = rec.srh_p(end,:);
+%         max_diff = max(abs(rec_n-rec_p));
+%         max_rec = max(abs([rec_n,rec_p]));
+%         if max_rec == 0
+%             max_rec = 1e-20;
+%         end
+%         if max_diff/max_rec > 1e-3 && max_rec > 1
+%             all_stable = 0.*all_stable;
+%         end
+%         num = num + 1;
+%     catch
+%         warning('Stabilisation failed')
+%         num = num + 1;
+%         if num <= 2
+%             continue
+%         else
+%             break
+%         end
+%     end    
+% end
+
 soleq.el = sol;
 % Manually check final section of solution for VSR self-consitency
 sol_ic = extract_IC(soleq.el, [soleq.el.t(end)*0.7, soleq.el.t(end)]);
 compare_rec_flux(sol_ic, par.RelTol_vsr, par.AbsTol_vsr, 0);
 % Switch VSR check on for future use
 soleq.el.par.vsr_check = 1;
-soleq.el.par.taun = par_origin.taun;
-soleq.el.par.taup = par_origin.taup;
+%Make sure kinetic traps turned on
+soleq.el.par.kineticset = 1;
 soleq.el.par = refresh_device(soleq.el.par);
 
 disp('Electronic carrier equilibration complete')
@@ -135,8 +167,6 @@ disp('Electronic carrier equilibration complete')
 if electronic_only == 0 && par_origin.N_ionic_species > 0
     %% Equilibrium solutions with ion mobility switched on
     par.N_ionic_species = par_origin.N_ionic_species;
-    % Uncouple traps from electrostatics
-    par.z_t = 0;
 
     % Create temporary solution for appending initial conditions to
     sol = soleq.el;
@@ -159,21 +189,21 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
     par.K_c = rat_cation;
     par.tmax = 1e4*t_diff;
     par.t0 = par.tmax/1e3;
+    par.kineticset = 0;
 
     sol = df(sol, par);
-    all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
+    all_stable = verifyStabilization(sol.u(:,:,:), sol.t, 0.7);
 
     % loop to check ions have reached stable config- if not accelerate ions by
     % order of mag
     num = 0;
-    while any(all_stable) == 0 && par.tmax*10^j < 1e4
-        disp(['increasing equilibration time, tmax = ', num2str(par.tmax*10^j)]);
+    while any(all_stable) == 0 
+        disp(['increasing equilibration time, tmax = ', num2str(par.tmax*10)]);
         par.tmax = par.tmax*10;
         par.t0 = par.tmax/1e6;
         try
             sol = df(sol, par);
-            all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
-            %dfplot.TrapFilling(sol, sol.t(end))
+            all_stable = verifyStabilization(sol.u(:,:,:), sol.t, 0.7);
         catch
             warning('Stabilisation failed')
             num = num + 1;
@@ -184,23 +214,37 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
             end
         end
     end
+    
+    Nt_guess = get_Nt_guess(sol);
+    sol.u(end,:,4) = Nt_guess;
+    sol.par.kineticset = 1;
+    sol.par.tmax = 1e4*t_diff;
+    sol.par.t0 = par.tmax/1e3;
 
-    sol.par.z_t = 1;
+    disp('Closed circuit equilibrium with ions and kinetic traps')
 
-    sol = df(sol, sol.par);
-    all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
-
-    % loop to check ions have reached stable config- if not accelerate ions by
-    % order of mag
+    sol = df(sol);
+    all_stable = 0;
     num = 0;
-    while any(all_stable) == 0 && par.tmax*10^j < 1e4
-        disp(['increasing equilibration time, tmax = ', num2str(par.tmax*10^j)]);
-        par.tmax = par.tmax*10;
-        par.t0 = par.tmax/1e6;
+    while any(all_stable) == 0 && sol.par.tmax*10 < 1e5
+        disp(['increasing equilibration time, tmax = ', num2str(sol.par.tmax*10)]);
+        sol.par.tmax = 10*sol.par.tmax;
+        sol.par.t0 = sol.par.tmax/1e6;
         try
-            sol = df(sol, par);
-            all_stable = verifyStabilization(sol.u(:,xstart:xstop,:), sol.t, 0.7);
-            %dfplot.TrapFilling(sol, sol.t(end))
+            sol = df(sol);
+            all_stable = verifyStabilization(sol.u(:,:,:), sol.t, 0.8);
+            dfplot.rx(sol, sol.t(end))
+            rec = dfana.calcr(sol, "sub") ;
+            rec_n = rec.srh_n(end,:);
+            rec_p = rec.srh_p(end,:);
+            max_diff = max(abs(rec_n-rec_p)) ;
+            max_rec = max(abs([rec_n,rec_p]) ) ;
+            if max_rec == 0
+                max_rec = 1e-20;
+            end
+            if max_diff/max_rec > 1e-2 && max_rec > 1
+                all_stable = 0.*all_stable;
+            end
         catch
             warning('Stabilisation failed')
             num = num + 1;
@@ -220,7 +264,7 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
     % Reset switches
     soleq.ion.par.vsr_check = 1;
     soleq.ion.par.mobseti = 1;
-    % soleq.ion.par.K_a = 1;
+    % soleq.ion.par.kineticset = 1;
     soleq.ion.par.K_c = 1;
 
     disp('Ionic carrier equilibration complete')

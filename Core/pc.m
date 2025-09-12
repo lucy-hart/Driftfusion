@@ -81,6 +81,7 @@ classdef pc
         mobseti = 1;                        % Switch on/off ionic carrier mobility- MUST BE SET TO ZERO FOR INITIAL SOLUTION
         SRHset = 1;                         % Switch on/off SRH recombination - recommend setting to zero for initial solution
         radset = 1;                         % Switch on/off band-to-band recombination
+        kineticset = 1;                     % Switch on/off kinetic traps
         N_max_variables = 6;                % Total number of allowable variables in this version of Driftfusion
         prob_distro_function = 'Blakemore'; % 'Fermi' = Fermi-Dirac, 'Blakemore' = Blakemore aproximation, 'Boltz' = Boltzmann statistics
         gamma_Blakemore = 0.27;                       % Blakemore coefficient    
