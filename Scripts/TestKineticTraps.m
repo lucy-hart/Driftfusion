@@ -3,14 +3,21 @@ par.vsr_mode = 0;
 par.Rs = 1e6;
 par = refresh_device(par);
 eqm = equilibrate(par,0,1);
+doJV = 0;
 
 %%
-t_stop = 1e-6;
+if doJV == 1
+    JVsol = doCV(eqm.ionstatic, 1, -0.2, 1.2, -0.2, 1e-3, 1, 281);
+    Plot_Current_Contributions(JVsol)
+end
+
+%%
+t_stop = 1e-3;
 %As a percentage
-duty = 0.05;
+duty = 0.0005;
 power = 0.1;
 
-eqm.ionstatic.par.laser_lambda2 = 405;
+eqm.ionstatic.par.laser_lambda2 = 605;
 eqm.ionstatic.par.g2_fun_type = 'square';
 eqm.ionstatic.par.g2_fun_arg = [0 power t_stop duty];
 eqm.ionstatic.par.g1_fun_arg = [0];
@@ -24,8 +31,8 @@ pulse_sol = df(eqm.ionstatic);
 
 t_eqm = pulse_sol.t;
 PL_eqm = dfana.calcPLt(pulse_sol);
-%%
-eqm.ion.par.laser_lambda2 = 405;
+
+eqm.ion.par.laser_lambda2 = 605;
 eqm.ion.par.g2_fun_type = 'square';
 eqm.ion.par.g2_fun_arg = [0 power t_stop duty];
 eqm.ion.par.g1_fun_arg = [0];
@@ -52,7 +59,7 @@ hold off
 
 xlabel('Time (s)')
 ylabel('PL (norm.)')
-%ylim([5e-4 1.1])
+ylim([5e-4 1.1])
 xlim([0 t_stop])
 set(gca, 'YScale', 'log')
 %set(gca, 'XScale', 'log')
@@ -67,4 +74,21 @@ hold off
 
 xlabel('Time (s)')
 ylabel('PL')
+% set(gca, 'YScale', 'log')
+% set(gca, 'XScale', 'log')
+
+
+%%
+figure('Name', 'ComparePL')
+
+hold on
+plot(t_eqm, PL_eqm./PL_kinetic, 'Color', 'Blue')
+%plot(t_kinetic, PL_kinetic, 'Color', 'Blue')
+hold off
+
+xlabel('Time (s)')
+ylabel('PL')
+ylim([0 1.1])
+%set(gca, 'YScale', 'log')
+set(gca, 'XScale', 'log')
 

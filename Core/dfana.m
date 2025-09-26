@@ -584,7 +584,8 @@ classdef dfana
             [u,t,x,par,dev,n,p,~,c,V] = dfana.splitsol(sol);
 
             Bmat = dev.B;
-            value = trapz(x,(dev.B.*(n.*p-dev.ni.^2)),2);
+            %value = trapz(x,(dev.B.*(n.*p-dev.ni.^2)),2);
+            value = trapz(x,(dev.B.*(n.*p)),2);
         end
 
         function DeltaQFL = calcDeltaQFL(sol)
