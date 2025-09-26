@@ -79,8 +79,8 @@ classdef dfplot
             ppos = getpointpos(xpos, xmesh);
 
             figure(2);
-            plot(t, J.n(:, ppos),t, J.p(:, ppos),t, J.a(:, ppos),t, J.c(:, ppos), t, J.disp(:,ppos), t, J.tot(:, ppos));
-            legend('Jn', 'Jp', 'Ja', 'Jc', 'Jdisp', 'Jtotal')
+            plot(t, J.n(:, ppos),t, J.p(:, ppos), t, J.c(:, ppos), t, J.disp(:,ppos), t, J.tot(:, ppos));
+            legend('Jn', 'Jp', 'Jc', 'Jdisp', 'Jtotal')
             xlabel('time [s]');
             ylabel('J [A cm^{-2}]');
             set(legend,'FontSize',16);
@@ -178,7 +178,7 @@ classdef dfplot
         function PLt(sol)
             [~,t,~,~,~,~,~,~,~,~] = dfana.splitsol(sol);
             PL = dfana.calcPLt(sol);
-            figure(7)
+            figure('Name', 'PLt')
             plot(t, PL)
             xlabel('Time [s]')
             ylabel('PL [cm-2s-1]')
@@ -323,7 +323,9 @@ classdef dfplot
             % Carrier densities as a function of position
             [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
             [u,t,x,par,dev,n,p,Nt,c,V] = dfana.splitsol(sol);
-
+            if par.kineticset == 0
+                Nt = dfana.calc_Nt_eqm(sol);
+            end
             figure('Name', 'npx');
             dfplot.x2d(sol, x, {n, p, Nt}, {'n', 'p', 'nt'}, {'-','-', '-'},'Carrier density [cm-3]', tarr, xrange, 0, 1)
         end
@@ -675,7 +677,7 @@ classdef dfplot
 
             subplot(2,1,2);
             dfplot.x2d(sol, x, {Nt}, {'nt'}, ...
-                {'-'}, 'El carrier density [cm-3]', tarr, xrange, 0, 0);
+                {'-'}, 'El carrier density [cm-3]', tarr, xrange, 0, 1);
         end
         function ELxnpxacx(varargin)
             % Energy Level diagram, and charge densities plotter

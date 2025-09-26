@@ -277,6 +277,14 @@ classdef dfana
             
         end
         
+        function Nt_eqm = calc_Nt_eqm(sol)
+            [~,t,x,~,~,~,~,~,~,~] = dfana.splitsol(sol);
+            Nt_eqm = zeros(length(t), length(x));
+            for i = 1:length(t)
+                Nt_eqm(i,:) = get_Nt_guess(sol,i);
+            end
+        end 
+
         function j_surf_rec = calcj_surf_rec(sol)
             % Calculates the absolute surface recombination flux for system
             % boundaries.

@@ -83,6 +83,7 @@ T = par.T;
 mu_n = device.mu_n;         % Electron mobility
 mu_p = device.mu_p;         % Hole mobility
 mu_c = device.mu_c;         % Cation mobility
+%mu_trap = device.mu_trap;
 Nc = device.Nc;             % Conduction band effective density of states
 Nv = device.Nv;             % Valence band effective density of states
 Ntrap_n = device.Ntrap_n; 
@@ -135,6 +136,7 @@ gamma = par.gamma;          % Blakemore approximation coefficient, 0 for Boltzma
 %% Switches and accelerator coefficients
 mobset = par.mobset;        % Electronic carrier transport switch
 mobseti = par.mobseti;      % Ionic carrier transport switch
+mobsettrap = par.mobsettrap;
 K_c = par.K_c;              % Cation transport rate multiplier
 radset = par.radset;        % Radiative recombination switch
 SRHset = par.SRHset;        % SRH recombination switch
@@ -142,7 +144,6 @@ kineticset = par.kineticset;
 vsr_zone = device.vsr_zone;
 srh_zone = device.srh_zone;
 Rs_initial = par.Rs_initial;
-Field_switch = dev.Field_switch;
 
 %% Generation
 g1_fun = fun_gen(par.g1_fun_type);
@@ -283,8 +284,10 @@ end
         F_p = mu_p(i)*p*(dVdx - gradIP(i)) + (G_p*mu_p(i)*kB*T*(dpdx - ((p/Nv(i))*gradNv(i))));
         F_c = mu_c(i)*(z_c*c*dVdx + kB*T*(dcdx + (c*(dcdx/(c_max(i) - c)))));
         %Immobile traps
+        %F_Nt = mu_trap(i)*Nt*(z_t*dVdx + gradEt(i)) + (mu_trap(i)*kB*T*(dNtdx - ((Nt/Ntrap_n(i))*gradNtrap_n(i))));
+        %F_Nt = (mu_trap(i)*kB*T*(dNtdx - ((Nt/Ntrap_n(i))*gradNtrap_n(i))));
         F_Nt = 0;
-        F = [F_V; mobset*F_n; mobset*F_p; F_Nt; mobseti*K_c*F_c];
+        F = [F_V; mobset*F_n; mobset*F_p; mobsettrap*F_Nt; mobseti*K_c*F_c];
         
         % Electron and hole recombination
         % Radiative
@@ -317,7 +320,7 @@ end
         %I assume that the unfilled trap states are neutral and so become 
         %negatively charged when they trap an electron
         S_V = (1/(epp_factor*epp0))*((-n + p) - (NA(i) - ND(i)) + (z_c*c) - ...
-            (z_c*Ncat(i)) - z_t*(Nt_coulomb - Nt_eqm(i)));
+            (z_c*Ncat(i)) + z_t*(Nt_coulomb - Nt_eqm(i)));
         S_n = g - r_vsr - r_rad + r_srh_n;
         S_p = g - r_vsr - r_rad + r_srh_p;
         S_Nt = r_srh_Nt;

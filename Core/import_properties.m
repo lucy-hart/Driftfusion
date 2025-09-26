@@ -77,6 +77,8 @@ par.c_max = import_single_property(par.c_max, T, {'c_max', 'cmax', 'DOScat'}, st
 par.mu_n = import_single_property(par.mu_n, T, {'mu_n', 'mun', 'mue', 'mu_e'}, start_row, end_row);
 % Hole mobility
 par.mu_p = import_single_property(par.mu_p, T, {'mu_p', 'mup', 'muh', 'mu_h'}, start_row, end_row);
+% Trap mobility
+% par.mu_trap = import_single_property(par.mu_trap, T, {'mu_trap'}, start_row, end_row);
 % Cation mobility
 par.mu_c = import_single_property(par.mu_c, T, {'mu_c', 'muc',  'mu_cat', 'mucat'}, start_row, end_row);
 % Relative dielectric constant

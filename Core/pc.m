@@ -79,6 +79,7 @@ classdef pc
         %% GENERAL CONTROL PARAMETERS
         mobset = 1;                         % Switch on/off electron hole mobility- MUST BE SET TO ZERO FOR INITIAL SOLUTION
         mobseti = 1;                        % Switch on/off ionic carrier mobility- MUST BE SET TO ZERO FOR INITIAL SOLUTION
+        mobsettrap = 0;                     % Switch on/off trapped charge mobility- MUST BE SET TO ZERO FOR INITIAL SOLUTION
         SRHset = 1;                         % Switch on/off SRH recombination - recommend setting to zero for initial solution
         radset = 1;                         % Switch on/off band-to-band recombination
         kineticset = 1;                     % Switch on/off kinetic traps
@@ -157,6 +158,7 @@ classdef pc
         mu_n = [1];         % electron mobility
         mu_p = [1];         % hole mobility
         mu_c = [1e-10];
+        % mu_trap = [1];
         % PTPD h+ mobility: https://pubs.rsc.org/en/content/articlehtml/2014/ra/c4ra05564k
         % PEDOT mu_n = 0.01 cm2V-1s-1 https://aip.scitation.org/doi/10.1063/1.4824104
         % TiO2 mu_n = 0.09 cm2V-1s-1 Bak2008
@@ -174,7 +176,7 @@ classdef pc
         taup = [1e6];           % [s] SRH time constant for holes
         Ntrap_n = [1e15];
         Ntrap_p = [1e15];
-        z_t = 1;
+        z_t = -1;               % Assume electron traps 
         
         %% Surface recombination and extraction coefficients [cm s-1]
         % Descriptions given in the comments considering that holes are
@@ -243,8 +245,10 @@ classdef pc
         d_midactive
         dEAdx
         dIPdx
+        dEtdx
         dNcdx
         dNvdx
+        dNtrap_ndx
         gamma
         int_switch
         Dn
