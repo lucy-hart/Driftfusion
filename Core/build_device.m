@@ -18,13 +18,21 @@ switch meshoption
         xmesh = par.x_sub;
 end
 
+if par.N_ionic_species ~= length(par.z_ion)
+    N_loop = length(par.z_ion);
+else
+    N_loop = par.N_ionic_species;
+end
 % Constant properties
-dev.mu_c = build_property(par.mu_c, xmesh, par, 'constant', 0);
+mu_ion_values = zeros(N_loop, length(xmesh));
+for i = 1:N_loop
+    mu_ion_values(i,:) = build_property(par.mu_ion(:,i), xmesh, par, 'constant', 0);
+end
+dev.mu_ion = mu_ion_values;
 dev.sn = build_property(par.sn, xmesh, par, 'constant', 1);
 dev.sp = build_property(par.sp, xmesh, par, 'constant', 1);
 dev.mu_n = build_property(par.mu_n, xmesh, par, 'constant', 0);
 dev.mu_p = build_property(par.mu_p, xmesh, par, 'constant', 0);
-%dev.mu_trap = build_property(par.mu_trap, xmesh, par, 'constant', 0);
     
 % Linearly graded properties
 dev.Phi_EA = build_property(par.Phi_EA, xmesh, par, 'lin_graded', 0);
@@ -38,14 +46,19 @@ dev.Nc = build_property(par.Nc, xmesh, par, 'exp_graded', 0);
 dev.Nv = build_property(par.Nv, xmesh, par, 'exp_graded', 0);
 dev.n0 = build_property(par.n0, xmesh, par, 'exp_graded', 0);
 dev.p0 = build_property(par.p0, xmesh, par, 'exp_graded', 0);
-dev.Ntrap_n = build_property(par.Ntrap_n, xmesh, par, 'exp_graded', 0);
-dev.Ntrap_p = build_property(par.Ntrap_p, xmesh, par, 'exp_graded', 0);
+dev.Ntrap = build_property(par.Ntrap, xmesh, par, 'exp_graded', 0);
 dev.Nt_eqm = build_property(par.Nt_eqm, xmesh, par, 'exp_graded', 0);
-dev.Pt_eqm = build_property(par.Pt_eqm, xmesh, par, 'exp_graded', 0);
-dev.Ncat = build_property(par.Ncat, xmesh, par, 'exp_graded', 0);
-dev.c_max = build_property(par.c_max, xmesh, par, 'exp_graded', 0);
 dev.NA = build_property(par.NA, xmesh, par, 'exp_graded', 0);
 dev.ND = build_property(par.ND, xmesh, par, 'exp_graded', 0);
+
+Nion_values = zeros(N_loop, length(xmesh));
+Nion_max_values = zeros(N_loop, length(xmesh));
+for i = 1:N_loop
+    Nion_values(i,:) = build_property(par.Nion(:,i), xmesh, par, 'exp_graded', 0);
+    Nion_max_values(i,:) = build_property(par.Nion_max(:,i), xmesh, par, 'exp_graded', 0);
+end
+dev.Nion = Nion_values;
+dev.Nion_max = Nion_max_values;
 
 % Properties that are zeroed in the interfaces
 dev.g0 = build_property(par.g0, xmesh, par, 'zeroed', 0);
@@ -56,9 +69,6 @@ dev.gradEA = build_property(par.Phi_EA, xmesh, par, 'lin_graded', 1);
 dev.gradIP = build_property(par.Phi_IP, xmesh, par, 'lin_graded', 1);
 dev.gradNc = build_property(par.Nc, xmesh, par, 'exp_graded', 1);
 dev.gradNv = build_property(par.Nv, xmesh, par, 'exp_graded', 1);
-% dev.gradEt = build_property(par.Et, xmesh, par, 'lin_graded', 1);
-% dev.gradNtrap_n = build_property(par.Ntrap_n, xmesh, par, 'exp_graded', 1);
-% dev.gradNtrap_p = build_property(par.Ntrap_p, xmesh, par, 'exp_graded', 1);
 
 % Surface recombination velocity equivalence schemes
 dev.taun_vsr = build_property(par.taun, xmesh, par, 'taun_vsr', 0);

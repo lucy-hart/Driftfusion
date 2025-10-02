@@ -4,17 +4,16 @@ par.Rs = 1e6;
 par = refresh_device(par);
 eqm = equilibrate(par,0,1);
 doJV = 0;
-
 %%
 if doJV == 1
-    JVsol = doCV(eqm.ionstatic, 1, -0.2, 1.2, -0.2, 1e-3, 1, 281);
-    Plot_Current_Contributions(JVsol)
+    JVsol = doCV(eqm.ion, 1, -0.2, 1.2, -0.2, 1e-3, 1, 281);
+    %Plot_Current_Contributions(JVsol)
 end
 
 %%
 t_stop = 1e-3;
 %As a percentage
-duty = 0.0005;
+duty = 0.00005;
 power = 0.1;
 
 eqm.ionstatic.par.laser_lambda2 = 605;

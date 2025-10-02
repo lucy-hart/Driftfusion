@@ -14,5 +14,5 @@ function var_sub = getvar_sub(var)
 assert(isnumeric(var) && size(var,2) > 1, [mfilename ' - The input ' inputname(1)...
     ' has to be provided as a row vector or as a matrix'])
 
-var_sub = (var(:,1:(end-1)) + var(:,2:end)) / 2;
+var_sub = (var(:,1:(end-1)) + var(:,2:end)) ./ 2;
 end

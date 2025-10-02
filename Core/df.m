@@ -74,21 +74,21 @@ e = par.e;
 epp0 = par.epp0;
 
 %% Device parameters
-N_ionic_species = par.N_ionic_species;  % Number of ionic species in this solution
-N_variables = par.N_ionic_species + 4;  % Number of variables in this solution (+5 for V, n, p, nt)
+eqm = par.eqm;
+N_ionic_species = (1-eqm)*par.N_ionic_species;  % Number of ionic species in this solution
+N_variables = N_ionic_species + 4;  % Number of variables in this solution (+4 for V, n, p, nt)
 N_max_variables = par.N_max_variables;  % Maximum number of variables in this version
 
 device = par.dev_sub;
 T = par.T;
 mu_n = device.mu_n;         % Electron mobility
 mu_p = device.mu_p;         % Hole mobility
-mu_c = device.mu_c;         % Cation mobility
-%mu_trap = device.mu_trap;
+mu_ion = device.mu_ion;     % Ionic mobility
 Nc = device.Nc;             % Conduction band effective density of states
 Nv = device.Nv;             % Valence band effective density of states
-Ntrap_n = device.Ntrap_n; 
+Ntrap = device.Ntrap; 
 Nt_eqm = device.Nt_eqm;
-c_max = device.c_max;       % Cation density upper limit
+Nion_max = device.Nion_max; % Ion density upper limit
 gradNc = device.gradNc;     % Conduction band effective density of states gradient
 gradNv = device.gradNv;     % Valence band effective density of states gradient
 gradEA = device.gradEA;     % Electron Affinity gradient
@@ -108,11 +108,11 @@ ND = device.ND;             % Donor doping density
 % Set up counter ion density arrays
 switch N_ionic_species
     case 0                 
-        Ncat = zeros(1, length(x_sub));
-    case 1                  
-        Ncat = device.Ncat;
-
+        Nion = zeros(length(Nion_max(:,1)), length(x_sub));
+    otherwise                 
+        Nion = device.Nion;
 end
+
 xprime_n = device.xprime_n;         % Translated x co-ordinates for interfaces
 xprime_p = device.xprime_p;         % Translated x co-ordinates for interfaces
 sign_xn = device.sign_xn;           % 1 if xn increasing, -1 if decreasing wrt x
@@ -120,7 +120,7 @@ sign_xp = device.sign_xp;           % 1 if xp increasing, -1 if decreasing wrt x
 alpha0_xn = device.alpha0_xn;       % alpha0_xn is alpha for F = 0 reference to xprime_n
 beta0_xp = device.beta0_xp;         % beta0_xp is beta for F = 0 referenced to xprime_p
 
-z_c = par.z_c;
+z_ion = par.z_ion;
 z_t = par.z_t;
 n0_l = par.n0_l;
 n0_r = par.n0_r;
@@ -131,19 +131,21 @@ sp_l = par.sp_l;
 sn_r = par.sn_r;
 sp_r = par.sp_r;
 Rs = par.Rs;
-gamma = par.gamma;          % Blakemore approximation coefficient, 0 for Boltzmann stats
+gamma = par.gamma_Blakemore;          % Blakemore approximation coefficient, 0 for Boltzmann stats
 
 %% Switches and accelerator coefficients
 mobset = par.mobset;        % Electronic carrier transport switch
 mobseti = par.mobseti;      % Ionic carrier transport switch
-mobsettrap = par.mobsettrap;
-K_c = par.K_c;              % Cation transport rate multiplier
+K_ion = par.K_ion;          % Cation transport rate multiplier
 radset = par.radset;        % Radiative recombination switch
 SRHset = par.SRHset;        % SRH recombination switch
 kineticset = par.kineticset;
 vsr_zone = device.vsr_zone;
 srh_zone = device.srh_zone;
 Rs_initial = par.Rs_initial;
+if kineticset == 1 && par.vsr_mode == 1
+    error('Kinetic trpping and the volumetric surface recombination model are incompatible. Ensure either of kineticset or vsr_mode equal 0.')
+end
 
 %% Generation
 g1_fun = fun_gen(par.g1_fun_type);
@@ -159,6 +161,9 @@ g1_fun_type = par.g1_fun_type;
 g2_fun_type = par.g2_fun_type;
 g1_fun_arg = par.g1_fun_arg;
 g2_fun_arg = par.g2_fun_arg;
+
+PPP = par.PPP;
+PPP_args = par.PPP_args;
 
 % Illumination type g1_fun_type and g2_fun_type - convert to Boolean for
 % faster execution in PDEPE
@@ -186,10 +191,10 @@ J = 0;
 
 %% Solver variables
 i = 1;
-V = 0; n = 0; p = 0; Nt = 0; c = 0;
-dVdx = 0; dndx = 0; dpdx = 0; dNtdx = 0; dcdx = 0;
-F_V = 0; F_n = 0; F_p = 0; F_Nt = 0; F_c = 0;
-S_V = 0; S_n = 0; S_p = 0; S_Nt = 0; S_c = 0;
+V = 0; n = 0; p = 0; Nt = 0; nion = zeros(N_ionic_species,1);
+dVdx = 0; dndx = 0; dpdx = 0; dNtdx = 0; dniondx = zeros(N_ionic_species,1);
+F_V = 0; F_n = 0; F_p = 0; F_Nt = 0; F_ion = zeros(N_ionic_species,1);
+S_V = 0; S_n = 0; S_p = 0; S_Nt = 0; S_ion = zeros(N_ionic_species,1);
 r_rad = 0; r_srh_n = 0; r_srh_p = 0; r_srh_Nt = 0; r_vsr = 0; 
 alpha = 0; beta = 0;
 G_n = 1;    % Diffusion enhancement prefactor electrons
@@ -256,13 +261,13 @@ end
         n = u_maxvar(2);
         p = u_maxvar(3);
         Nt = u_maxvar(4);
-        c = u_maxvar(5);
+        nion = u_maxvar(5:5+par.N_ionic_species-1);
 
         dVdx = dudx_maxvar(1);
         dndx = dudx_maxvar(2);
         dpdx = dudx_maxvar(3);
         dNtdx = dudx_maxvar(4);
-        dcdx = dudx_maxvar(5);
+        dniondx = dudx_maxvar(5:5+par.N_ionic_species-1);
         
         % Diffusion enhancement prefactors (gamma = 0 for Boltz)
         G_n = Nc(i)/(Nc(i) - gamma*n);
@@ -275,39 +280,43 @@ end
         C_n = 1;
         C_p = 1;
         C_Nt = 1;
-        C_c = 1;
-        C = [C_V; C_n; C_p; C_Nt; C_c];
+        C_ion = ones(N_ionic_species,1);
+        C = [C_V; C_n; C_p; C_Nt; C_ion];
         
         % Flux terms
         F_V = (epp(i)/epp_factor)*dVdx;
         F_n = mu_n(i)*n*(-dVdx + gradEA(i)) + (G_n*mu_n(i)*kB*T*(dndx - ((n/Nc(i))*gradNc(i))));
         F_p = mu_p(i)*p*(dVdx - gradIP(i)) + (G_p*mu_p(i)*kB*T*(dpdx - ((p/Nv(i))*gradNv(i))));
-        F_c = mu_c(i)*(z_c*c*dVdx + kB*T*(dcdx + (c*(dcdx/(c_max(i) - c)))));
+        F_ion = mu_ion(:,i).*(z_ion'.*nion*dVdx + kB*T*(dniondx + (nion.*(dniondx./(Nion_max(:,i) - nion)))));
         %Immobile traps
-        %F_Nt = mu_trap(i)*Nt*(z_t*dVdx + gradEt(i)) + (mu_trap(i)*kB*T*(dNtdx - ((Nt/Ntrap_n(i))*gradNtrap_n(i))));
-        %F_Nt = (mu_trap(i)*kB*T*(dNtdx - ((Nt/Ntrap_n(i))*gradNtrap_n(i))));
         F_Nt = 0;
-        F = [F_V; mobset*F_n; mobset*F_p; mobsettrap*F_Nt; mobseti*K_c*F_c];
+        F = [F_V; mobset*F_n; mobset*F_p; F_Nt; mobseti*K_ion.*F_ion];
         
         % Electron and hole recombination
         % Radiative
         r_rad = radset*B(i)*(n*p - ni(i)^2);
         % Bulk SRH
-        krec_n = 1/(taun(i)*Ntrap_n(i));
-        krec_p = 1/(taup(i)*Ntrap_n(i));
+        krec_n = 1/(taun(i)*Ntrap(i));
+        krec_p = 1/(taup(i)*Ntrap(i));
         kout_n = nt(i)*krec_n;
         kout_p = pt(i)*krec_p;
         if kineticset == 1
-            r_srh_n = SRHset*(kout_n*Nt - krec_n*n*(Ntrap_n(i)-Nt));
-            r_srh_p = SRHset*(kout_p*(Ntrap_n(i)-Nt) - krec_p*p*Nt);
-            r_srh_Nt = SRHset*(kout_p*(Ntrap_n(i)-Nt) + krec_n*n*(Ntrap_n(i)-Nt) ...
+            r_srh_n = SRHset*(kout_n*Nt - krec_n*n*(Ntrap(i)-Nt));
+            r_srh_p = SRHset*(kout_p*(Ntrap(i)-Nt) - krec_p*p*Nt);
+            r_srh_Nt = SRHset*(kout_p*(Ntrap(i)-Nt) + krec_n*n*(Ntrap(i)-Nt) ...
                 - krec_p*p*Nt - kout_n*Nt);
             Nt_coulomb = Nt;
+            PPP_gen = 0;
+            if PPP == 1
+                laser_shape = PPP_args(1) + (PPP_args(2)-PPP_args(1))*gt(mod(t,PPP_args(3))*1/PPP_args(3),PPP_args(4)/100);
+                PPP_gen = SRHset*Nt*laser_shape;
+            end
         elseif kineticset == 0
             r_srh_n = -SRHset*((n*p - nt(i)*pt(i))/(taun(i)*(p+pt(i))+taup(i)*(n+nt(i))));
             r_srh_p = r_srh_n;
             r_srh_Nt = 0;
-            Nt_coulomb = Ntrap_n(i)*((krec_n*n+kout_p)/(krec_n*(p+pt(i))+krec_p*(n+nt(i))));
+            Nt_coulomb = Ntrap(i)*((krec_n*n+kout_p)/(krec_n*(p+pt(i))+krec_p*(n+nt(i))));
+            PPP_gen = 0;
         end 
 
         % Volumetric surface recombination
@@ -319,12 +328,12 @@ end
         % Source terms
         %I assume that the unfilled trap states are neutral and so become 
         %negatively charged when they trap an electron
-        S_V = (1/(epp_factor*epp0))*((-n + p) - (NA(i) - ND(i)) + (z_c*c) - ...
-            (z_c*Ncat(i)) + z_t*(Nt_coulomb - Nt_eqm(i)));
-        S_n = g - r_vsr - r_rad + r_srh_n;
+        S_V = (1/(epp_factor*epp0))*((-n + p) - (NA(i) - ND(i)) + (z_ion*nion) - ...
+            (z_ion*Nion(:,i)) + z_t*(Nt_coulomb - Nt_eqm(i)));
+        S_n = g - r_vsr - r_rad + r_srh_n + PPP_gen;
         S_p = g - r_vsr - r_rad + r_srh_p;
-        S_Nt = r_srh_Nt;
-        S_c = 0;        
+        S_Nt = r_srh_Nt - PPP_gen;
+        S_c = zeros(N_ionic_species,1);        
         S = [S_V; S_n; S_p; S_Nt; S_c];
         
         % Remove unused variables - faster and tidier than using conditional
@@ -342,26 +351,20 @@ end
             i = 1;
         end
 
-        % if kineticset == 0
-        %     IC_Nt = dev.Nt_eqm(i);
-        % else
-        %     IC_Nt = dev.Nt_IC(i);
-        % end
-
         if length(par.dcell) == 1
             % Single layer
             u0_ana = [(x/xmesh(end))*Vbi;
                 n0_l*exp((x*(log(n0_r)-log(n0_l)))/par.dcum0(end));
                 p0_l*exp((x*(log(p0_r)-log(p0_l)))/par.dcum0(end));                
                 dev.Nt_eqm(i);
-                dev.Ncat(i);];
+                dev.Nion(:,i);];
         else
             % Multi-layered
             u0_ana = [(x/xmesh(end))*Vbi;
                 dev.n0(i);
                 dev.p0(i);
                 dev.Nt_eqm(i);
-                dev.Ncat(i);];
+                dev.Nion(:,i);];
         end
         u0_ana = u0_ana(1:N_variables);
         
@@ -399,8 +402,6 @@ end
         n_r = ur_maxvar(2);
         p_l = ul_maxvar(3);
         p_r = ur_maxvar(3);
-        c_l = ul_maxvar(6);
-        c_r = ur_maxvar(6);
         
         switch par.V_fun_type
             case 'constant'
@@ -426,25 +427,25 @@ end
             mobset*(-sn_l*(n_l - n0_l));
             mobset*(-sp_l*(p_l - p0_l));
             0;
-            0;];
+            zeros(N_ionic_species,1);];
         
         Ql = [0;
             1;
             1;
             1;
-            1;];
+            ones(N_ionic_species,1);];
         
         Pr = [-V_r+Vbi-Vapp-Vres;
             mobset*(sn_r*(n_r - n0_r));
             mobset*(sp_r*(p_r - p0_r));
             0;
-            0;];
+            zeros(N_ionic_species,1);];
         
         Qr = [0;
             1;
             1;
             1;
-            1;];
+            ones(N_ionic_species,1);];
         
         % Remove unused entries
         Pl = Pl(1:N_variables);

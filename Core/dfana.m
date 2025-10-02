@@ -29,11 +29,11 @@ classdef dfana
             switch par.N_ionic_species
                 case 0
                     c = zeros(length(t), length(x));
-                    dev.Ncat = zeros(1, length(x));
-                    par.dev.Ncat = zeros(1, length(x));
-                    par.dev_sub.Ncat = zeros(1, length(x) - 1);
-                case 1
-                    c = u(:,:,5);
+                    dev.Nion = zeros(1, length(x));
+                    par.dev.Nion = zeros(1, length(x));
+                    par.dev_sub.Nion = zeros(1, length(x) - 1);
+                otherwise
+                    c = u(:,:,5:end);
             end
         end
 
@@ -76,7 +76,7 @@ classdef dfana
             [u,t,x,par,dev,n,p,Nt,~,V] = dfana.splitsol(sol);
 
             Et = dev.Et-V;                                                          % Trap State Energy                                
-            EfNt = real(Et - (par.kB*par.T/par.q)*log(Nt./dev.Ntrap_n - 1));        % Trap State quasi-Fermi level
+            EfNt = real(Et - (par.kB*par.T/par.q)*log(Nt./dev.Ntrap - 1));        % Trap State quasi-Fermi level
             % end
 
         end
@@ -84,29 +84,48 @@ classdef dfana
         function [J, j, x] = calcJ(sol)
             % Current, J and flux, j calculation from continuity equations
             % obtain SOL components for easy referencing
-            [u,t,x,par,dev,n,p,~,c,V] = dfana.splitsol(sol);
+            [u,t,x,par,dev,n,p,Nt,c,V] = dfana.splitsol(sol);
+            
+            N_ionic_species = par.N_ionic_species;
+            len_t = length(t);
+            len_x = length(x);
 
             n_sub = getvar_sub(n);
             p_sub = getvar_sub(p);
-            c_sub = getvar_sub(c);
+            c_sub = zeros(len_t, len_x -1 ,N_ionic_species);
+            for i = 1:N_ionic_species
+                c_sub(:,:,i) = getvar_sub(c(:,:,i));
+            end
 
             x = par.x_sub;
             [~,~,g] = dfana.calcg(sol);
 
+            if par.PPP == 1
+                PPP_args = par.PPP_args;
+                laser_shape = PPP_args(1) + (PPP_args(2)-PPP_args(1))*gt(mod(t,PPP_args(3))*1/PPP_args(3),PPP_args(4)/100);
+                PPP_gen = laser_shape'.*Nt;
+            end
+
             [~, dndt] = gradient(n_sub, x, t);
             [~, dpdt] = gradient(p_sub, x, t);
-            [~, dcdt] = gradient(c_sub, x, t);
+            dcdt = zeros(size(c_sub));
+            for i = 1:N_ionic_species
+                [~, dcdt(:,:,i)] = gradient(c_sub(:,:,i), x, t);
+            end
 
             % Recombination
             r = dfana.calcr(sol, "sub");
 
-            djndx = -dndt + g - r.tot;
-            djpdx = -dpdt + g - r.tot;
+            djndx = -dndt + g + PPP_gen - (r.btb + r.srh_n + r.vsr);
+            djpdx = -dpdt + g - (r.btb + r.srh_p + r.vsr);
             djcdx = -dcdt;                  % Add source terms as necessary
 
             deltajn = cumtrapz(x, djndx, 2);
             deltajp = cumtrapz(x, djpdx, 2);
-            deltajc = cumtrapz(x, djcdx, 2);
+            deltajc = zeros(len_t, len_x - 1, N_ionic_species);
+            for i = 1:N_ionic_species
+                deltajc(:,:,i) = cumtrapz(x, djcdx(:,:,i), 2);
+            end
 
             %% Currents from the boundaries
             jn_l = -par.sn_l*(n(:, 1) - par.n0_l);
@@ -154,7 +173,9 @@ classdef dfana
             % Apply switches and accelerators
             j.n = par.mobset*j.n;
             j.p = par.mobset*j.p;
-            j.c = par.mobseti*par.K_c*j.c;
+            for i = 1:N_ionic_species
+                j.c(:,:,i) = par.mobseti*par.K_ion(i)*j.c(:,:,i);
+            end
 
             % displacement flux
             FV_sub = dfana.calcF(sol, "sub");
@@ -164,11 +185,14 @@ classdef dfana
 
             J.n = j.n*-par.e;
             J.p = j.p*par.e;
-            J.c = j.c*par.z_c*par.e;
+            J.c = zeros(size(j.c));
+            for i = 1:N_ionic_species
+                J.c(:,:,i) = j.c(:,:,i)*par.z_ion(i)*par.e;
+            end
             J.disp = j.disp*par.e;
 
             % Total current
-            J.tot = J.n + J.p + J.c + J.disp;
+            J.tot = J.n + J.p + sum(J.c,3) + J.disp;
         end
 
         function [g1, g2, g] = calcg(sol)
@@ -251,13 +275,13 @@ classdef dfana
             r.btb = dev.B.*(n.*p - dev.ni.^2);
             % Bulk SRH
             if par.kineticset == 1
-                Ntrap_n = dev.Ntrap_n;
-                k_rec_e = 1./(Ntrap_n.*dev.taun);
-                k_rec_p = 1./(Ntrap_n.*dev.taup);
+                Ntrap = dev.Ntrap;
+                k_rec_e = 1./(Ntrap.*dev.taun);
+                k_rec_p = 1./(Ntrap.*dev.taup);
                 k_out_e = dev.nt.*k_rec_e;
                 k_out_p = dev.pt.*k_rec_p;
-                r.srh_n = srh_zone.*(k_rec_e.*n.*(Ntrap_n-nt) - k_out_e.*nt);
-                r.srh_p = srh_zone.*(k_rec_p.*p.*nt - k_out_p.*(Ntrap_n-nt));
+                r.srh_n = srh_zone.*(k_rec_e.*n.*(Ntrap-nt) - k_out_e.*nt);
+                r.srh_p = srh_zone.*(k_rec_p.*p.*nt - k_out_p.*(Ntrap-nt));
             else
                 nt = repmat(dev.nt, length(t), 1);
                 pt = repmat(dev.pt, length(t), 1);
@@ -273,7 +297,7 @@ classdef dfana
             % currents
             
             % Total
-            r.tot = r.btb + (r.srh_n + r.srh_p)./2 + r.vsr;
+            r.tot = r.btb + min(r.srh_n,r.srh_p) + r.vsr;
             
         end
         
@@ -335,11 +359,13 @@ classdef dfana
             xout = par.x_sub;
             dev = par.dev_sub;
 
+            N_ionic_species = par.N_ionic_species;
+
             % Property matrices
             eppmat = dev.epp;
             mu_n_mat = dev.mu_n;
             mu_p_mat = dev.mu_p;
-            mu_cat = dev.mu_c;
+            mu_ion = dev.mu_ion;
             gradEA_mat = dev.gradEA;
             gradIP_mat = dev.gradIP;
             gradNc_mat = dev.gradNc;
@@ -350,12 +376,12 @@ classdef dfana
             V_sub = zeros(length(t), length(xout));
             n_sub = zeros(length(t), length(xout));
             p_sub = zeros(length(t), length(xout));
-            c_sub = zeros(length(t), length(xout));
+            c_sub = zeros(length(t), length(xout), N_ionic_species);
 
             dVdx = zeros(length(t), length(xout));
             dndx = zeros(length(t), length(xout));
             dpdx = zeros(length(t), length(xout));
-            dcdx = zeros(length(t), length(xout));
+            dcdx = zeros(length(t), length(xout), N_ionic_species);
 
             %% Avoid PDEVAL for faster calculation
             % Obtain variables and gradients on sub-interval mesh
@@ -363,12 +389,16 @@ classdef dfana
                 V_sub(i,:) = 0.5*(V(i, 2:end) + V(i, 1:end-1));
                 n_sub(i,:) = 0.5*(n(i, 2:end) + n(i, 1:end-1));
                 p_sub(i,:) = 0.5*(p(i, 2:end) + p(i, 1:end-1));
-                c_sub(i,:) = 0.5*(c(i, 2:end) + c(i, 1:end-1));
+                for j = 1:N_ionic_species
+                    c_sub(i,:,j) = 0.5*(c(i, 2:end, j) + c(i, 1:end-1, j));
+                end
 
                 dVdx(i,:) = (V(i, 2:end) - V(i, 1:end-1))./(x(2:end) - x(1:end-1));
                 dndx(i,:) = (n(i, 2:end) - n(i, 1:end-1))./(x(2:end) - x(1:end-1));
                 dpdx(i,:) = (p(i, 2:end) - p(i, 1:end-1))./(x(2:end) - x(1:end-1));
-                dcdx(i,:) = (c(i, 2:end) - c(i, 1:end-1))./(x(2:end) - x(1:end-1));
+                for j = 1:N_ionic_species
+                    dcdx(i,:,j) = (c(i, 2:end, j) - c(i, 1:end-1, j))./(x(2:end) - x(1:end-1));
+                end
             end
 
             % Diffusion coefficients
@@ -398,9 +428,13 @@ classdef dfana
                 case 0
                     jdd.cdrift = zeros(length(t), length(xout));
                     jdd.cdiff = zeros(length(t), length(xout));
-                case 1
-                    jdd.cdrift = mu_cat.*c_sub.*-dVdx;
-                    jdd.cdiff = -mu_cat.*par.kB*par.T.*dcdx;
+                otherwise
+                    jdd.cdrift = zeros(length(t), length(xout), N_ionic_species);
+                    jdd.cdiff = zeros(length(t), length(xout), N_ionic_species);
+                    for i = 1:N_ionic_species
+                        jdd.cdrift(:,:,i) = z_ion(i)*mu_ion(i).*c_sub(:,:,i).*-dVdx;
+                        jdd.cdiff(:,:,i) = -mu_ion(i).*par.kB*par.T.*dcdx(:,:,i);
+                    end
             end
 
             % Note these have a negative sign compared with the expressions in DFPDE
@@ -414,7 +448,7 @@ classdef dfana
 
             jdd.disp = j.disp;
             % The total flux here includes the sign of the carrier
-            jdd.tot = -jdd.n + jdd.p - jdd.a + jdd.c + jdd.disp;
+            jdd.tot = -jdd.n + jdd.p - jdd.a + sum(jdd.c,3) + jdd.disp;
 
             Jdd.ndrift = jdd.ndrift*par.e;
             Jdd.ndiff = jdd.ndiff*par.e;
@@ -457,6 +491,9 @@ classdef dfana
         function rho = calcrho(sol, mesh_option)
             % Calculates the space charge density
             [u,t,x,par,dev,n_whole,p_whole,Nt_whole,c_whole,V_whole] = dfana.splitsol(sol);
+            len_t = length(t);
+            len_x = length(x);
+            N_ionic_species = par.N_ionic_species;
 
             switch mesh_option
                 case "whole"
@@ -470,16 +507,24 @@ classdef dfana
                     n = getvar_sub(n_whole);
                     p = getvar_sub(p_whole);
                     Nt = getvar_sub(Nt_whole);
-                    c = getvar_sub(c_whole);
+                    c = zeros(len_t, len_x-1, N_ionic_species);
+                    for i = 1:N_ionic_species
+                        c(:,:,i) = getvar_sub(c_whole(:,:,i));
+                    end
             end
 
             NA = repmat(dev.NA, length(t), 1);
             ND = repmat(dev.ND, length(t), 1);
             Nt_eqm = repmat(dev.Nt_eqm, length(t), 1);
-            Nani = repmat(dev.Nani, length(t), 1);
-            Ncat = repmat(dev.Ncat, length(t), 1);
+            ion_charge = zeros(size(n));
+            ion_fixed_charge = zeros(size(n));
+            for i = 1:N_ionic_species
+                Nfixed = repmat(dev.Nion(:,:,i), length(t), 1);
+                ion_charge = ion_charge + par.z_ion(i)*c(:,:,i);
+                ion_fixed_charge = ion_fixed_charge - par.z_ion(i)*Nfixed;
+            end
             % charge density
-            rho = -n + p - NA + ND  + par.z_c*c  - par.z_c*Ncat + par.z_a*Nani - par.z_t*(Nt-Nt_eqm);
+            rho = -n + p - NA + ND  + ion_charge + ion_fixed_charge  + par.z_t*(Nt-Nt_eqm);
         end
 
         function Vapp = calcVapp(sol)
@@ -621,23 +666,36 @@ classdef dfana
         function sigma_ion = calcsigma_ion(sol)
             % calculates the integrated space charge density
             [u,t,x,par,dev,n,p,~,c,V] = dfana.splitsol(sol);
+            len_t = length(t);
+            N_ionic_species = par.N_ionic_species;
             rho_ion = c;
-            sigma_ion = trapz(x, rho_ion, 2);
+            sigma_ion = zeros(len_t, N_ionic_species);
+            for i = 1:N_ionic_species
+                sigma_ion(:,i) = trapz(x, rho_ion(:,:,i), 2);
+            end
         end
 
         function Fion = calcFion(sol)
            [u,t,x,par,dev,n,p,~,c,V] = dfana.splitsol(sol);
-
-           rhoion = c - dev.Ncat;
-           Fion = cumtrapz(x, rhoion, 2)./(dev.epp*par.epp0);
+           len_t = length(t);
+           len_x = length(x);
+           N_ionic_species = par.N_ionic_species;
+           rhoion = c - dev.Nion;
+           Fion = zeros(len_t,len_x,N_ionic_species);
+           for i = 1:N_ionic_species
+                Fion(:,:,i) = cumtrapz(x, rhoion(:,:,i), 2)./(dev.epp*par.epp0);
+           end
 
         end
 
         function Vion = calcVion(sol)
             [u,t,x,par,dev,n,p,~,c,V] = dfana.splitsol(sol);
-
+            N_ionic_species = par.N_ionic_species;
             Fion = dfana.calcFion(sol);
-            Vion = -cumtrapz(x, Fion,2);
+            Vion = zeros(size(Fion));
+            for i = 1:N_ionic_species
+                Vion(:,:,i) = -cumtrapz(x, Fion(:,:,i), 2);
+            end
         end
 
         function [U,Ux] = pdentrp(singular,m,xL,uL,xR,uR,xout)

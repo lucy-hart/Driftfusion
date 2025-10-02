@@ -33,6 +33,7 @@ elseif length(varargin) == 3
 else
     par = pc;
     electronic_only = 0;
+    store_eqm_traps = 0;
 end
 
 tic;    % Start stopwatch
@@ -49,7 +50,7 @@ par.SRHset = 0;
 % Radiative rec could initially be set to zero in addition if required
 par.radset = 1;
 % Start with no ionic carriers
-par.N_ionic_species = 0;
+par.eqm = 1;
 % Switch off volumetric surface recombination check
 par.vsr_check = 0;
 
@@ -101,7 +102,7 @@ par.t0 = par.tmax/1e6;
 disp('Solution with mobility switched on')
 sol = df(sol, par);
 
-all_stable = verifyStabilization(sol.u(:,:,:), sol.t, 0.7);
+all_stable = verifyStabilization(sol.u, sol.t, 0.7);
 
 % loop to check electrons have reached stable config
 num = 0;
@@ -111,7 +112,7 @@ while any(all_stable) == 0
     par.t0 = par.tmax/1e6;
     try
         sol = df(sol, par);
-        all_stable = verifyStabilization(sol.u(:,:,:), sol.t, 0.7);
+        all_stable = verifyStabilization(sol.u, sol.t, 0.7);
     catch
         warning('Stabilisation failed')
         num = num + 1;
@@ -129,10 +130,10 @@ disp("Stabilisation verified");
 
 Nt_guess = get_Nt_guess(sol);
 sol.u(end,:,4) = Nt_guess;
-sol.par.kineticset = 1;
 sol.par.taun(:) = 1;
 sol.par.taup(:) = 1;
-sol.par.tmax = min([1e-5*exp(min((par.Phi_EA-par.Et))/(par.kB*par.T)) 1e5]);
+sol.par.kineticset = 1;
+sol.par.tmax = 100*t_diff;
 sol.par.t0 = sol.par.tmax/1e3;
 sol.par = refresh_device(sol.par);
 disp('Solution with mobility switched on and kinetic traps')
@@ -150,14 +151,14 @@ while any(all_stable) == 0
         sol = df(sol);
         all_stable = verifyStabilization(sol.u(:,:,:), sol.t, 0.7);
         rec = dfana.calcr(sol, "sub") ;        
-        rec_n = rec.srh_n(end,xstart:xstop);
-        rec_p = rec.srh_p(end,xstart:xstop);
+        rec_n = rec.srh_n(end,:);
+        rec_p = rec.srh_p(end,:);
         [max_diff, arg_max_diff] = max(abs(rec_n-rec_p));
         max_rec = max(abs([rec_n(arg_max_diff),rec_p(arg_max_diff)]));
         if max_rec == 0
             max_rec = 1e-20;
         end
-        if max_diff/max_rec > 1e-3 && max_rec > 1e8
+        if max_diff/max_rec > 1e-3 && max_rec > 1e2
             all_stable = 0.*all_stable;
         end
         num = num + 1;
@@ -178,11 +179,6 @@ sol.par.taun(:) = par_origin.taun(:);
 sol.par.taup(:) = par_origin.taup(:);
 sol.par = refresh_device(sol.par);
 soleq.el = sol;
-% % Manually check final section of solution for VSR self-consitency
-% sol_ic = extract_IC(soleq.el, [soleq.el.t(end)*0.7, soleq.el.t(end)]);
-% compare_rec_flux(sol_ic, par.RelTol_vsr, par.AbsTol_vsr, 0);
-% % Switch VSR check on for future use
-% soleq.el.par.vsr_check = 1;
 %Make sure kinetic traps turned on
 soleq.el.par.kineticset = 1;
 soleq.el.par = refresh_device(soleq.el.par);
@@ -191,7 +187,7 @@ disp('Electronic carrier equilibration complete')
 
 if electronic_only == 0 && par_origin.N_ionic_species > 0
     %% Equilibrium solutions with ion mobility switched on
-    par.N_ionic_species = par_origin.N_ionic_species;
+    par.eqm = 0;
 
     % Create temporary solution for appending initial conditions to
     sol = soleq.el;
@@ -203,15 +199,17 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
     % disp('Closed circuit equilibrium with ions')
 
     % Take ratio of electron and ion mobilities in the active layer
-    rat_cation = par.mu_n(par.active_layer)/par.mu_c(par.active_layer);
-
-    if isnan(rat_cation) || isinf(rat_cation)
-        rat_cation = 0;
+    rat_cation = par.mu_n(par.active_layer)./par.mu_ion(par.active_layer,:);
+    
+    for i = 1:length(rat_cation)
+        if isnan(rat_cation(i)) || isinf(rat_cation(i))
+            rat_cation(i) = 0;
+        end
     end
 
     par.mobset = 1;
     par.mobseti = 1;           % Ions are accelerated to reach equilibrium
-    par.K_c = rat_cation;
+    par.K_ion = rat_cation';
     par.tmax = 1e4*t_diff;
     par.t0 = par.tmax/1e3;
     par.kineticset = 0;
@@ -246,7 +244,7 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
     if store_eqm_traps
         soleq.ionstatic = sol;
         soleq.ionstatic.par.mobseti = 1;
-        soleq.ionstatic.par.K_c = 1;
+        soleq.ionstatic.par.K_ion = ones(par.N_ionic_species,1);
     end
     disp("Stabilisation verified");
     
@@ -255,9 +253,9 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
     sol.par.kineticset = 1;
     sol.par.taun(:) = 1;
     sol.par.taup(:) = 1;
-    sol.par.tmax = min([1e-5*exp(min((par.Phi_EA-par.Et))/(par.kB*par.T)) 1e5]);
+    sol.par.tmax = 1e4*t_diff;
     sol.par.t0 = sol.par.tmax/1e3;
-    sol.par.K_c = 1;
+    sol.par.K_ion = ones(par.N_ionic_species,1);
     sol.par = refresh_device(sol.par);
 
     disp('Closed circuit equilibrium with ions and kinetic traps')
@@ -273,14 +271,14 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
             sol = df(sol);
             all_stable = verifyStabilization(sol.u(:,:,:), sol.t, 0.7);
             rec = dfana.calcr(sol, "sub") ;
-            rec_n = rec.srh_n(end,xstart:xstop);
-            rec_p = rec.srh_p(end,xstart:xstop);
+            rec_n = rec.srh_n(end,:);
+            rec_p = rec.srh_p(end,:);
             [max_diff, arg_max_diff] = max(abs(rec_n-rec_p));
-            max_rec = max(abs([rec_n(arg_max_diff),rec_p(arg_max_diff)]) ) ;
+            max_rec = max(abs([rec_n(arg_max_diff),rec_p(arg_max_diff)])) ;
             if max_rec == 0
                 max_rec = 1e-20;
             end
-            if max_diff/max_rec > 1e-3 && max_rec > 1e8
+            if max_diff/max_rec > 1e-4 && max_rec > 1e2
                 all_stable = 0.*all_stable;
             end
         catch
@@ -301,14 +299,9 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
     sol.par = refresh_device(sol.par);
     % write solution
     soleq.ion = sol;
-    % Manually check solution for VSR self-consitency
-    % sol_ic = extract_IC(soleq.ion, [soleq.ion.t(end)*0.7, soleq.ion.t(end)]);
-    % compare_rec_flux(sol_ic, par.RelTol_vsr, par.AbsTol_vsr, 0);
-    % % Reset switches
-    % soleq.ion.par.vsr_check = 1;
     soleq.ion.par.mobseti = 1;
     soleq.ion.par.kineticset = 1;
-    soleq.ion.par.K_c = 1;
+    soleq.ion.par.K_ion = ones(par.N_ionic_species,1);
 
     disp('Ionic carrier equilibration complete')
 end

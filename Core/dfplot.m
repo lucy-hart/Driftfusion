@@ -156,7 +156,6 @@ classdef dfplot
         function Jddx(varargin)
             % drift and diffusion currents as a function of position
             [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
-            [u,t,x,par,dev,n,p,nT,c,V] = dfana.splitsol(sol);
             [Jdd, ~, x] = dfana.calcJdd(sol);
 
             figure(301);
@@ -348,11 +347,27 @@ classdef dfplot
             % Ionic carrier densities as a function of position
             [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
             [u,t,x,par,dev,n,p,Nt,c,V] = dfana.splitsol(sol);
-            Ncat = repmat(dev.Ncat, length(t), 1);
+
+            Nion = zeros(size(c));
+            for i = par.N_ionic_species
+                Nion(:,:,i) = repmat(dev.Nion(i,:), length(t), 1);
+            end
+            
+            ions_to_plot = cell(1,2*par.N_ionic_species);
+            labels_to_plot = cell(1,2*par.N_ionic_species);
+            lines_to_plot = cell(1,2*par.N_ionic_species);
+            for i = 1:par.N_ionic_species
+                ions_to_plot{2*i-1} = c(:,:,i);
+                ions_to_plot{2*i} = Nion(:,:,i);
+                labels_to_plot{2*i-1} = ['ion ' num2str(i)];
+                labels_to_plot{2*i} = ['static ion ' num2str(i)];
+                lines_to_plot{2*i-1} = '-';
+                lines_to_plot{2*i} = '--';
+            end
 
             figure('Name', 'acx')
-            dfplot.x2d(sol, x, {c,Ncat},{'cation','static cation'}, {'-','--',},...
-                'Ionic carrier density [cm-3]', tarr, xrange, 0, 0);
+            dfplot.x2d(sol, x, ions_to_plot, labels_to_plot, lines_to_plot,...
+                    'Density [cm-3]', tarr, xrange, 0, 0);
         end
 
         function gx(varargin)
@@ -398,7 +413,7 @@ classdef dfplot
             x = par.x_sub;
             r = dfana.calcr(sol, "sub");
 
-            figure(171)
+            figure('Name', 'rsrhx')
             dfplot.x2d(sol, x, {r.srh_n, r.srh_p},{'srh_n','srh_p'},...
                 {'-', '-'}, 'SRH recombination rate [cm-3s-1]', tarr, xrange, 0, 0);
         end
@@ -665,10 +680,10 @@ classdef dfplot
             % XRANGE = 2 element array with [xmin, xmax]
             [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
             [u,t,x,par,dev,n,p,Nt,c,V] = dfana.splitsol(sol);
-            Ntrap_n = repmat(dev.Ntrap_n, length(t), 1);
+            Ntrap = repmat(dev.Ntrap, length(t), 1);
             Nt_eqm = repmat(dev.Nt_eqm, length(t), 1);
-            N_frac = Nt./Ntrap_n;
-            N_frac_eqm = Nt_eqm./Ntrap_n;
+            N_frac = Nt./Ntrap;
+            N_frac_eqm = Nt_eqm./Ntrap;
 
             figure('Name', 'TrapFilling')
             subplot(2,1,1);
@@ -679,18 +694,34 @@ classdef dfplot
             dfplot.x2d(sol, x, {Nt}, {'nt'}, ...
                 {'-'}, 'El carrier density [cm-3]', tarr, xrange, 0, 1);
         end
+
         function ELxnpxacx(varargin)
             % Energy Level diagram, and charge densities plotter
             % SOL = the solution structure
             % TARR = An array containing the times that you wish to plot
             % XRANGE = 2 element array with [xmin, xmax]
             [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
-            [u,t,x,par,dev,n,p,Nt,c,V] = dfana.splitsol(sol);
+            [~,t,x,par,dev,n,p,~,c,~] = dfana.splitsol(sol);
             [Ecb, Evb, Efn, Efp] = dfana.calcEnergies(sol);
             NA = repmat(dev.NA, length(t), 1);
             ND = repmat(dev.ND, length(t), 1);
-
-            Ncat = repmat(dev.Ncat, length(t), 1);
+            
+            Nion = zeros(size(c));
+            for i = par.N_ionic_species
+                Nion(:,:,i) = repmat(dev.Nion(i,:), length(t), 1);
+            end
+            
+            ions_to_plot = cell(1,2*par.N_ionic_species);
+            labels_to_plot = cell(1,2*par.N_ionic_species);
+            lines_to_plot = cell(1,2*par.N_ionic_species);
+            for i = 1:par.N_ionic_species
+                ions_to_plot{2*i-1} = c(:,:,i);
+                ions_to_plot{2*i} = Nion(:,:,i);
+                labels_to_plot{2*i-1} = ['ion ' num2str(i)];
+                labels_to_plot{2*i} = ['static ion ' num2str(i)];
+                lines_to_plot{2*i-1} = '-';
+                lines_to_plot{2*i} = '--';
+            end
 
             figure('Name', 'ELxnpxacx');
             subplot(3,1,1);
@@ -700,16 +731,31 @@ classdef dfplot
             dfplot.x2d(sol, x, {n, p}, {'electrons, \it{n}', 'holes, \it{p}'}, {'-', '-'}, 'Density [cm-3]', tarr, xrange, 0, 1)
 
             subplot(3,1,3);
-            dfplot.x2d(sol, x, {c,Ncat},{'cation','static cation'}, {'-','--'},...
-                'Density [cm-3]', tarr, xrange, 0, 0);
+            dfplot.x2d(sol, x, ions_to_plot, labels_to_plot, lines_to_plot,...
+                    'Density [cm-3]', tarr, xrange, 0, 0);
         end
 
         function Vxacx(varargin)
             % Potential and ionic charges as a function of position
             [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
-            [u,t,x,par,dev,n,p,Nt,c,V] = dfana.splitsol(sol);
-            Nani = repmat(dev.Nani, length(t), 1);
-            Ncat = repmat(dev.Ncat, length(t), 1);
+            [~,t,x,par,dev,~,~,~,c,V] = dfana.splitsol(sol);
+
+            Nion = zeros(size(c));
+            for i = par.N_ionic_species
+                Nion(:,:,i) = repmat(dev.Nion(i,:), length(t), 1);
+            end
+            
+            ions_to_plot = cell(1,2*par.N_ionic_species);
+            labels_to_plot = cell(1,2*par.N_ionic_species);
+            lines_to_plot = cell(1,2*par.N_ionic_species);
+            for i = 1:par.N_ionic_species
+                ions_to_plot{2*i-1} = c(:,:,i);
+                ions_to_plot{2*i} = Nion(:,:,i);
+                labels_to_plot{2*i-1} = ['ion ' num2str(i)];
+                labels_to_plot{2*i} = ['static ion ' num2str(i)];
+                lines_to_plot{2*i-1} = '-';
+                lines_to_plot{2*i} = '--';
+            end
 
             figure('Name', 'Vxacx')
             subplot(2,1,1);
@@ -717,8 +763,8 @@ classdef dfplot
                 {'-'}, 'Electro. potential [V]', tarr, xrange, 0, 0);
 
             subplot(2,1,2);
-            dfplot.x2d(sol, x, {c,Ncat},{'cation','static cation'}, {'-','--'},...
-                'Ionic carrier density [cm-3]', tarr, xrange, 0, 0);
+            dfplot.x2d(sol, x, ions_to_plot, labels_to_plot, lines_to_plot,...
+                    'Ionic Density [cm-3]', tarr, xrange, 0, 0);
         end
 
         function Vionxacx(varargin)

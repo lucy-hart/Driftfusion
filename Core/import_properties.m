@@ -22,6 +22,7 @@ function par = import_properties(par, filepath)
 %
 %% Start code
 T = readtable(filepath{1,1});   % Reads-in in the external .CSV file to a table T
+n_layers = height(T) - 2;
 
 % Layer type array
 try
@@ -65,22 +66,46 @@ end
 par.Nc = import_single_property(par.Nc, T, {'Nc', 'Ncb', 'NC', 'NCB'}, start_row, end_row);
 % Valence band effective density of states
 par.Nv = import_single_property(par.Nv, T, {'Nv', 'Nvb', 'NV', 'NVB'}, start_row, end_row);
-% Intrinsic electron trap density
-par.Ntrap_n = import_single_property(par.Ntrap_n, T, {'Ntrap_n'}, start_row, end_row);
-% Intrinsic hole trap density
-par.Ntrap_p = import_single_property(par.Ntrap_p, T, {'Ntrap_p'}, start_row, end_row);
-% Intrinsic cation density
-par.Ncat = import_single_property(par.Ncat, T, {'Ncat', 'Nion'}, start_row, end_row);
-% Limiting density of cation states
-par.c_max = import_single_property(par.c_max, T, {'c_max', 'cmax', 'DOScat'}, start_row, end_row);
+% Trap state density
+par.Ntrap = import_single_property(par.Ntrap, T, {'Ntrap', 'Ntrap_n'}, start_row, end_row);
+
+% Number of ionic species
+par.N_ionic_species = import_single_property(par.N_ionic_species, T, {'N_ionic_species'}, 1, 1);
+% Intrinsic ion density
+% Limiting density of ionic states
+% Ionic charge
+% Ionic mobility
+Nion_values = zeros(n_layers, par.N_ionic_species);
+Nion_max_values = zeros(n_layers, par.N_ionic_species);
+mu_ion_values = zeros(n_layers, par.N_ionic_species);
+z_ion_values = zeros(1, par.N_ionic_species);
+for i = 1:par.N_ionic_species
+    if i == 1
+        Nion_values(:,1) = import_single_property(par.Nion, T, {'Ncat', 'Nion', 'Nion_1'}, start_row, end_row);
+        Nion_max_values(:,1) = import_single_property(par.Nion_max, T, {'c_max', 'cmax', 'DOScat', 'Nion_max_1'}, start_row, end_row);
+        mu_ion_values(:,1) = import_single_property(par.mu_ion, T, {'mu_c', 'muc',  'mu_cat', 'mucat', 'muion_1'}, start_row, end_row);
+        z_ion_values(1) = import_single_property(par.z_ion, T, {'z_c', 'z_1'}, 1, 1);
+    elseif i == 2
+        Nion_values(:,2) = import_single_property(par.Nion, T, {'Nani', 'Nion_2'}, start_row, end_row);
+        Nion_max_values(:,2) = import_single_property(par.Nion_max, T, {'a_max', 'amax', 'DOSani', 'Nion_max_2'}, start_row, end_row);
+        mu_ion_values(:,2) = import_single_property(par.mu_ion, T, {'mu_a', 'mua',  'mu_ani', 'muani', 'muion_2'}, start_row, end_row);
+        z_ion_values(2) = import_single_property(par.z_ion, T, {'z_a', 'z_2'}, 1, 1);
+    else
+        Nion_values(:,i) = import_single_property(par.Nion, T, {['Nion_' num2str(i)]}, start_row, end_row);
+        Nion_max_values(:,i) = import_single_property(par.Nion_max, T, {['Nion_max_' num2str(i)]}, start_row, end_row);
+        mu_ion_values(:,i) = import_single_property(par.mu_ion, T, {['muion_' num2str(i)]}, start_row, end_row);
+        z_ion_values(i) = import_single_property(par.z_ion, T, {['z_' num2str(i)]}, 1, 1);
+    end
+end
+par.Nion = Nion_values;
+par.Nion_max = Nion_max_values;
+par.mu_ion = mu_ion_values;
+par.z_ion = z_ion_values;
+
 % Electron mobility
 par.mu_n = import_single_property(par.mu_n, T, {'mu_n', 'mun', 'mue', 'mu_e'}, start_row, end_row);
 % Hole mobility
 par.mu_p = import_single_property(par.mu_p, T, {'mu_p', 'mup', 'muh', 'mu_h'}, start_row, end_row);
-% Trap mobility
-% par.mu_trap = import_single_property(par.mu_trap, T, {'mu_trap'}, start_row, end_row);
-% Cation mobility
-par.mu_c = import_single_property(par.mu_c, T, {'mu_c', 'muc',  'mu_cat', 'mucat'}, start_row, end_row);
 % Relative dielectric constant
 par.epp = import_single_property(par.epp, T, {'epp', 'eppr'}, start_row, end_row);
 % Uniform volumetric generation rate
@@ -97,7 +122,6 @@ if strcmp(layer_type{1}, 'electrode')
     par.sn = sn(start_row:end_row);
     par.sn_l = sn(1);
     par.sn_r = sn(end);
-
     sp = import_single_property(par.sp, T, {'sp'}, 1, length(layer_type));
     par.sp = sp(start_row:end_row);
     par.sp_l = sp(1);
@@ -112,8 +136,6 @@ par.optical_model = import_single_property(par.optical_model, T, {'optical_model
 par.side = import_single_property(par.side, T, {'side'}, 1, 1);
 % Spatial mesh
 par.xmesh_type = import_single_property(par.xmesh_type, T, {'xmesh_type'}, 1, 1);
-% Number of ionic species
-par.N_ionic_species = import_single_property(par.N_ionic_species, T, {'N_ionic_species'}, 1, 1);
 % Layer colours
 Red = import_single_property(par.layer_colour(:,1)', T, {'Red'}, start_row, end_row);
 Green = import_single_property(par.layer_colour(:,2)', T, {'Green'}, start_row, end_row);

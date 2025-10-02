@@ -79,13 +79,13 @@ classdef pc
         %% GENERAL CONTROL PARAMETERS
         mobset = 1;                         % Switch on/off electron hole mobility- MUST BE SET TO ZERO FOR INITIAL SOLUTION
         mobseti = 1;                        % Switch on/off ionic carrier mobility- MUST BE SET TO ZERO FOR INITIAL SOLUTION
-        mobsettrap = 0;                     % Switch on/off trapped charge mobility- MUST BE SET TO ZERO FOR INITIAL SOLUTION
         SRHset = 1;                         % Switch on/off SRH recombination - recommend setting to zero for initial solution
         radset = 1;                         % Switch on/off band-to-band recombination
         kineticset = 1;                     % Switch on/off kinetic traps
-        N_max_variables = 6;                % Total number of allowable variables in this version of Driftfusion
+        eqm = 0;
+        N_max_variables = 10;               % Total number of allowable variables in this version of Driftfusion
         prob_distro_function = 'Blakemore'; % 'Fermi' = Fermi-Dirac, 'Blakemore' = Blakemore aproximation, 'Boltz' = Boltzmann statistics
-        gamma_Blakemore = 0.27;                       % Blakemore coefficient    
+        gamma_Blakemore = 0.27;             % Blakemore coefficient    
         Fermi_limit = 0.2;                  % Max allowable limit for Fermi levels beyond the bands [eV]
         Fermi_Dn_points = 400;              % No. of points in the Fermi-Dirac look-up table
         intgradfun = 'linear'               % Interface gradient function 'linear' = linear, 'erf' = 'error function'
@@ -108,6 +108,8 @@ classdef pc
         g2_fun_arg = 0;
         side = 'left';                           % illumination side 1 = left, 2 = right
         % default: Approximate Uniform generation rate @ 1 Sun for 510 nm active layer thickness
+        PPP = 0;
+        PPP_args = [0 1e-5 1e-3 0.1];
 
         %% Pulse settings
         pulsepow = 10;          % Pulse power [mW cm-2] OM2 (Beer-Lambert and Transfer Matrix only)
@@ -147,18 +149,17 @@ classdef pc
         
         %% Mobile ions        
         N_ionic_species = 1;        
-        Ncat = [1e19];                  % Mobile ion defect density [cm-3] - A. Walsh et al. Angewandte Chemie, 2015, 127, 1811.
-        z_c = 1;                        % Integer charge state for cations
+        Nion = [1e19];                  % Mobile ion defect density [cm-3] - A. Walsh et al. Angewandte Chemie, 2015, 127, 1811.
+        z_ion = [1];                    % Integer charge state for ions
         % Limits the density of ions - Approximate density of iodide sites [cm-3]
-        c_max = [1.21e22];                 % P. Calado thesis
+        Nion_max = [1.21e22];           % P. Calado thesis
         
-        K_c = 1;                    % Coefficients to easily accelerate ions
+        K_ion = [1];                    % Coefficients to easily accelerate ions
         
         %% Mobilities   [cm2V-1s-1]
         mu_n = [1];         % electron mobility
         mu_p = [1];         % hole mobility
-        mu_c = [1e-10];
-        % mu_trap = [1];
+        mu_ion = [1e-10];
         % PTPD h+ mobility: https://pubs.rsc.org/en/content/articlehtml/2014/ra/c4ra05564k
         % PEDOT mu_n = 0.01 cm2V-1s-1 https://aip.scitation.org/doi/10.1063/1.4824104
         % TiO2 mu_n = 0.09 cm2V-1s-1 Bak2008
@@ -174,8 +175,7 @@ classdef pc
         %% SRH time constants for each layer [s] and trap densities
         taun = [1e6];           % [s] SRH time constant for electrons
         taup = [1e6];           % [s] SRH time constant for holes
-        Ntrap_n = [1e15];
-        Ntrap_p = [1e15];
+        Ntrap = [1e15];
         z_t = -1;               % Assume electron traps 
         
         %% Surface recombination and extraction coefficients [cm s-1]
@@ -187,8 +187,8 @@ classdef pc
         sp_r = 1e7;     % hole surface recombination velocity right boundary
         
         %% Volumetric surface recombination
-        vsr_mode = 1;               % Either 1 for volumetric surface recombination approximation or 0 for off
-        vsr_check = 1;              % Perform check for self-consitency at the end of DF
+        vsr_mode = 0;               % Either 1 for volumetric surface recombination approximation or 0 for off
+        vsr_check = 0;              % Perform check for self-consitency at the end of DF
         sn = [0];                   % Electron interfacial surface recombination velocity [cm s-1]
         sp = [0];                   % Hole interfacial surface recombination velocities [cm s-1]
         frac_vsr_zone = 0.1;        % recombination zone thickness [fraction of interface thickness]
@@ -275,7 +275,6 @@ classdef pc
         wscr            % Space charge region width
         x0              % Initial spatial mesh value
         Nt_eqm
-        Pt_eqm
     end
 
     methods
@@ -314,12 +313,14 @@ classdef pc
                 end
             end
 
-            % Warn if c_max is set to zero in any layers - leads to
+            % Warn if Nion_max is set to zero in any layers - leads to
             % infinite diffusion rate
-            for i = 1:length(par.c_max)
-                if par.c_max(i) <= 0
-                    msg = 'Maximum cation density (c_max) cannot have zero or negative entries- choose a low value rather than zero e.g. 1';
-                    error(msg);
+            for j = 1:par.N_ionic_species
+                for i = 1:length(par.Nion_max(:,j))
+                    if par.Nion_max(i) <= 0
+                        msg = 'Maximum ion density (Nion_max) cannot have zero or negative entries- choose a low value rather than zero e.g. 1';
+                        error(msg);
+                    end
                 end
             end
             
@@ -364,9 +365,6 @@ classdef pc
                 error(msg);
             elseif length(par.Nv) ~= length(par.d)
                 msg = 'Effective density of states array (Nv) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
-                error(msg);
-            elseif length(par.Ncat) ~= length(par.d)
-                msg = 'Background ion density (Ncat) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
                 error(msg);
             elseif length(par.epp) ~= length(par.d)
                 msg = 'Relative dielectric constant array (epp) does not have the correct number of elements. Property arrays must have the same number of elements as the thickness array (d), except SRH properties for interfaces which should have length(d)-1 elements.';
@@ -635,19 +633,17 @@ classdef pc
        
         %% SRH trap energy coefficients
         function value = get.nt(par)
-            value = distro_fun.nfun(par.Nc, par.Phi_EA, par.Et, par);
+            %value = distro_fun.nfun(par.Nc, par.Phi_EA, par.Et, par);
+            value = par.Nc./(1+exp((par.Phi_EA-par.EF0)/(par.kB*par.T)));
         end
         
         function value = get.pt(par)
-            value = distro_fun.pfun(par.Nv, par.Phi_IP, par.Et, par);
+            %value = distro_fun.pfun(par.Nv, par.Phi_IP, par.Et, par);
+            value = par.Nv./(1+exp(-(par.Phi_IP-par.EF0)/(par.kB*par.T)));
         end
 
         function value = get.Nt_eqm(par)
-            value = par.Ntrap_n./(1+exp((par.Et-par.EF0)/(par.kB*par.T)));
-        end
-
-        function value = get.Pt_eqm(par)
-            value = par.Ntrap_p./(1+exp(-(par.Et-par.EF0)/(par.kB*par.T)));
+            value = par.Ntrap./(1+exp((par.Et-par.EF0)/(par.kB*par.T)));
         end
 
         %% Thickness and point arrays

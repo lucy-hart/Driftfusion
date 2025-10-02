@@ -59,10 +59,11 @@ if time_fraction >= 1 || time_fraction < 0 || ~isnumeric(time_fraction)
     return
 end
 
+num_variables = length(sol_matrix(:,1,1));
 % name of the variables
-names = ["potential", "electron", "hole", "trapped electron", "cation"];
+names = ["potential", "electron", "hole", "trapped electron", repmat("ion", 1, num_variables-4)];
 % which values have to be considered in a linear or in a log10 scale
-compare_log = [false, true, true, false, false];
+compare_log = [false, true, true, false];
 
 % no need to calculate end_time for each of the 4 solutions: if they
 % break they break at the same time
@@ -74,7 +75,10 @@ end_time = t_array(length(sol_matrix(:, 1, 1)));
 for i = 1:length(sol_matrix(1, 1, :))
     profile_at_time = sol_matrix(time_index, :, i); % take profile of values at a certain time of evolution
     profile_end = sol_matrix(end, :, i); % take profile of values at the end of time
-    if compare_log(i) % for variables ranging on huge scales comparing the log values makes more sense
+    if i > 4 % for variables ranging on huge scales comparing the log values makes more sense
+        profile_at_time = log10(profile_at_time);
+        profile_end = log10(profile_end);
+    elseif compare_log(i)
         profile_at_time = log10(profile_at_time);
         profile_end = log10(profile_end);
     end
