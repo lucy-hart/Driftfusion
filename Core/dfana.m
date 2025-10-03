@@ -92,6 +92,7 @@ classdef dfana
 
             n_sub = getvar_sub(n);
             p_sub = getvar_sub(p);
+            Nt_sub = getvar_sub(Nt);
             c_sub = zeros(len_t, len_x -1 ,N_ionic_species);
             for i = 1:N_ionic_species
                 c_sub(:,:,i) = getvar_sub(c(:,:,i));
@@ -103,7 +104,7 @@ classdef dfana
             if par.PPP == 1
                 PPP_args = par.PPP_args;
                 laser_shape = PPP_args(1) + (PPP_args(2)-PPP_args(1))*gt(mod(t,PPP_args(3))*1/PPP_args(3),PPP_args(4)/100);
-                PPP_gen = laser_shape'.*Nt;
+                PPP_gen = laser_shape'.*Nt_sub;
             end
 
             [~, dndt] = gradient(n_sub, x, t);
