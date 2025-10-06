@@ -308,14 +308,14 @@ end
             Nt_coulomb = Nt;
             PPP_gen = 0;
             if PPP == 1
-                laser_shape = PPP_args(1) + (PPP_args(2)-PPP_args(1))*gt(mod(t,PPP_args(3))*1/PPP_args(3),PPP_args(4)/100);
+                laser_shape = PPP_args(1) + (PPP_args(2)-PPP_args(1))*lt(mod(t,PPP_args(3))*1/PPP_args(3),PPP_args(4)/100);
                 PPP_gen = SRHset*Nt*laser_shape;
             end
         elseif kineticset == 0
             r_srh_n = -SRHset*((n*p - nt(i)*pt(i))/(taun(i)*(p+pt(i))+taup(i)*(n+nt(i))));
             r_srh_p = r_srh_n;
             r_srh_Nt = 0;
-            Nt_coulomb = Ntrap(i)*((krec_n*n+kout_p)/(krec_n*(p+pt(i))+krec_p*(n+nt(i))));
+            Nt_coulomb = Ntrap(i)*((krec_n*n+kout_p)/(krec_p*(p+pt(i))+krec_n*(n+nt(i))));
             PPP_gen = 0;
         end 
 

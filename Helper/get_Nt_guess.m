@@ -15,6 +15,6 @@ function Nt_guess = get_Nt_guess(varargin)
     n = sol.u(i,:,2);
     p = sol.u(i,:,3);
 
-    Nt_guess = dev.Ntrap.*((krec_n.*n+kout_p)./(krec_n.*(p+dev.pt)+krec_p.*(n+dev.nt)));
+    Nt_guess = dev.Ntrap.*((krec_n.*n+kout_p)./(krec_p.*(p+dev.pt)+krec_n.*(n+dev.nt)));
 
 end

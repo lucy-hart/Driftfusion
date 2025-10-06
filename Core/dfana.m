@@ -74,7 +74,10 @@ classdef dfana
             % u is the solution structure
             % Simple structure names
             [u,t,x,par,dev,n,p,Nt,~,V] = dfana.splitsol(sol);
-
+            
+            if par.kineticset == 0
+                Nt = dfana.calc_Nt_eqm(sol);
+            end
             Et = dev.Et-V;                                                          % Trap State Energy                                
             EfNt = real(Et - (par.kB*par.T/par.q)*log(Nt./dev.Ntrap - 1));        % Trap State quasi-Fermi level
             % end
@@ -102,9 +105,11 @@ classdef dfana
             [~,~,g] = dfana.calcg(sol);
 
             if par.PPP == 1
-                PPP_args = par.PPP_args;
-                laser_shape = PPP_args(1) + (PPP_args(2)-PPP_args(1))*gt(mod(t,PPP_args(3))*1/PPP_args(3),PPP_args(4)/100);
-                PPP_gen = laser_shape'.*Nt_sub;
+               PPP_args = par.PPP_args;
+               laser_shape = PPP_args(1) + (PPP_args(2)-PPP_args(1))*lt(mod(t,PPP_args(3))*1/PPP_args(3),PPP_args(4)/100);
+               PPP_gen = laser_shape'.*Nt_sub;
+            else
+                PPP_gen = 0;
             end
 
             [~, dndt] = gradient(n_sub, x, t);

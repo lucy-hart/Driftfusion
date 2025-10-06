@@ -54,12 +54,6 @@ par.eqm = 1;
 % Switch off volumetric surface recombination check
 par.vsr_check = 0;
 
-% arg_active = par.active_layer;
-% xstart = par.pcum0(arg_active);
-% xstop = par.pcum0(arg_active+1);
-xstart = 1;
-xstop = sum(par.parr);
-
 %% General initial parameters
 % Set applied bias to zero
 par.V_fun_type = 'constant';
@@ -130,12 +124,19 @@ disp("Stabilisation verified");
 
 Nt_guess = get_Nt_guess(sol);
 sol.u(end,:,4) = Nt_guess;
-sol.par.taun(:) = 1;
-sol.par.taup(:) = 1;
+if par_origin.taun >= par_origin.taup
+    sol.par.taun(:) = 1;
+    sol.par.taup(:) = 1*par_origin.taup./par_origin.taun;
+else
+    sol.par.taup(:) = 1;
+    sol.par.taun(:) = 1*par_origin.taun./par_origin.taup;
+end
 sol.par.kineticset = 1;
 sol.par.tmax = 100*t_diff;
 sol.par.t0 = sol.par.tmax/1e3;
 sol.par = refresh_device(sol.par);
+sol.par.RelTol = 1e-6;
+sol.par.AbsTol = 1e-9;
 disp('Solution with mobility switched on and kinetic traps')
 sol = df(sol);
 
@@ -181,6 +182,7 @@ sol.par = refresh_device(sol.par);
 soleq.el = sol;
 %Make sure kinetic traps turned on
 soleq.el.par.kineticset = 1;
+soleq.el.par.N_ionic_species = 0;
 soleq.el.par = refresh_device(soleq.el.par);
 
 disp('Electronic carrier equilibration complete')
@@ -191,6 +193,7 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
 
     % Create temporary solution for appending initial conditions to
     sol = soleq.el;
+    sol.par.N_ionic_species = par_origin.N_ionic_species;
 
     % Start without SRH or series resistance
     %par.SRHset = 0;
@@ -251,8 +254,13 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
     Nt_guess = get_Nt_guess(sol);
     sol.u(end,:,4) = Nt_guess;
     sol.par.kineticset = 1;
-    sol.par.taun(:) = 1;
-    sol.par.taup(:) = 1;
+    if par_origin.taun >= par_origin.taup
+        sol.par.taun(:) = 1;
+        sol.par.taup(:) = 1*par_origin.taup./par_origin.taun;
+    else
+        sol.par.taup(:) = 1;
+        sol.par.taun(:) = 1*par_origin.taun./par_origin.taup;
+    end
     sol.par.tmax = 1e4*t_diff;
     sol.par.t0 = sol.par.tmax/1e3;
     sol.par.K_ion = ones(par.N_ionic_species,1);

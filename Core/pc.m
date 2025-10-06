@@ -634,12 +634,12 @@ classdef pc
         %% SRH trap energy coefficients
         function value = get.nt(par)
             %value = distro_fun.nfun(par.Nc, par.Phi_EA, par.Et, par);
-            value = par.Nc./(1+exp((par.Phi_EA-par.EF0)/(par.kB*par.T)));
+            value = par.Nc./(1+exp((par.Phi_EA-par.Et)/(par.kB*par.T)));
         end
         
         function value = get.pt(par)
             %value = distro_fun.pfun(par.Nv, par.Phi_IP, par.Et, par);
-            value = par.Nv./(1+exp(-(par.Phi_IP-par.EF0)/(par.kB*par.T)));
+            value = par.Nv./(1+exp(-(par.Phi_IP-par.Et)/(par.kB*par.T)));
         end
 
         function value = get.Nt_eqm(par)
