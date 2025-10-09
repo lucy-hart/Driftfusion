@@ -3,7 +3,7 @@ par.vsr_mode = 0;
 par.Rs = 0;
 par.z_t = -1;
 par = refresh_device(par);
-eqm = equilibrate(par,0,1);
+eqm = equilibrate(par);
 
 %%
 sol = eqm.ion;
@@ -14,7 +14,7 @@ sol.par.int2 = [0.1];
 sol.par.g1_fun_arg = [0];
 sol.par.tmax = 1;
 sol.par.tmesh_type = 'linear';
-sol.par.side = 'left';
+sol.par.side = 'right';
 sol.par = refresh_device(sol.par);
 sol_light = df(sol);
 
@@ -33,7 +33,7 @@ sol.par.g2_fun_arg = [0];
 sol.par.int2 = [0];
 sol.par.g1_fun_arg = [0];
 sol.par.tmesh_type = 'linear';
-sol.par.side = 'left';
+sol.par.side = 'right';
 
 period = 2e-8;
 %As a percentage
@@ -41,7 +41,7 @@ duty = 50;
 sol.par.tmax = 0.95*(period);
 sol.par.tpoints = 1e3;
 sol.par.PPP = 1;
-sol.par.PPP_args = [0 10 period duty];
+sol.par.PPP_args = [0 1e5 period duty];
 sol.par = refresh_device(sol.par);
 
 sol_darkpulse = df(sol);
@@ -56,12 +56,12 @@ sol.par.int2 = [0.1];
 sol.par.g1_fun_arg = [0];
 sol.par.tmax = 8e-10;
 sol.par.tmesh_type = 'linear';
-sol.par.side = 'left';
+sol.par.side = 'right';
 sol.par = refresh_device(sol.par);
 sol_lightpulse = df(sol);
 
 %%
-delays = [25e-9 50e-9 75e-9 100e-9 200e-9 400e-9 750e-9 1e-6];
+delays = [10e-9 25e-9 50e-9 75e-9 100e-9 200e-9 400e-9 750e-9 1e-6];
 J_pulse = cell(1,length(delays));
 J_nopulse = cell(1,length(delays));
 
@@ -88,7 +88,7 @@ for i = 1:length(delays)
     J_nopulse{i} = dfana.calcJ(sol_nopulse);
 
     sol_delay.par.PPP = 1;
-    sol_delay.par.PPP_args = [0 10 period duty];
+    sol_delay.par.PPP_args = [0 1e5 period duty];
     sol_delay.par = refresh_device(sol_delay.par);
     
     sol_pulse = df(sol_delay);
@@ -102,6 +102,18 @@ figure('Name', 'PPP Current')
 hold on
 for i = 1:length(delays)
     plot(sol_pulse.t, (J_pulse{i}.tot(:,42)-J_nopulse{i}.tot(:,42))/J_lighton)
+end
+plot(sol_darkpulse.t, J_pulse_dark.tot(:,42)/J_lighton, 'Color', 'k')
+hold off
+xlabel('Time (s)')
+ylabel('\DeltaJ/J')
+
+%%
+figure('Name', 'PPP Current')
+
+hold on
+for i = 1:length(delays)
+    plot(sol_pulse.t, (J_pulse{i}.tot(:,42))/J_lighton)
 end
 plot(sol_darkpulse.t, J_pulse_dark.tot(:,42)/J_lighton, 'Color', 'k')
 hold off
