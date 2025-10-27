@@ -222,7 +222,7 @@ classdef dfplot
             J = dfana.calcJ(sol);
             Vapp = dfana.calcVapp(sol);
 
-            figure(91)
+            figure('Name', 'JtotVapp')
             plot(Vapp, J.tot(:, ppos));
             xlabel('Applied Voltage, Vapp [V]');
             ylabel('Current Density, J [A cm^{-2}]');
@@ -311,7 +311,7 @@ classdef dfplot
             [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
             [u,t,x,par,dev,n,p,a,c,V] = dfana.splitsol(sol);
 
-            figure(13);
+            figure('Name', 'npx');
             dfplot.x2d(sol, x, {n, p}, {'n', 'p'}, {'-','-'},...
                 'Carrier density [cm-3]', tarr, xrange, 0, 1)
         end
@@ -574,7 +574,7 @@ classdef dfplot
             [u,t,x,par,dev,n,p,a,c,V] = dfana.splitsol(sol);
             [Ecb, Evb, Efn, Efp] = dfana.QFLs(sol);
 
-            figure(22);
+            figure('Name', 'ELx');
             dfplot.x2d(sol, x, {Efn, Efp, Ecb, Evb}, {'E_{fn}', 'E_{fp}', 'CB', 'VB'},...
                 {'--', '--', '-', '-'}, 'Energy [eV]', tarr, xrange, 0, 0)
         end
