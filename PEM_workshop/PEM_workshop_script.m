@@ -6,7 +6,8 @@
 
 %% Input parameters
 params_filepath = './PEM_workshop_Input_files/intrinsic_ohmic.csv';     % Filepath to the parameters file
-light_intensity = 1;            % Suns equivalent
+output_filename = 'intrinsic_ohmic'; 
+light_intensity = 0;            % Suns equivalent
 Vmax = 1.2;                     % Maximum voltage for cyclic voltammogram
 Vmin = -1.2;                    % Minimum voltage for cyclic voltammogram
 scan_rate = 1e-3;               % Current-voltage scan rate [Vs-1] 
@@ -39,5 +40,15 @@ tplot = (Vplot-Vmin)/scan_rate;
 dfplot.ELx(sol_CV, tplot);
 % PLot the carrier densities at time TPLOT
 dfplot.npx(sol_CV, tplot);
+
+
+%% Rename solution
+eval(['sol_eq_', output_filename, '= sol_eq;'])
+eval(['sol_CV_',output_filename, '= sol_CV;'])
+
+%% Exporting the solutions
+% Export the solution for the first light intensity at voltage VPLOT
+export_solution(['Solution at Vapp =', num2str(Vplot), ' V ', output_filename], sol_CV, tplot)
+export_ELx(['Energy levels at Vapp =', num2str(Vplot), ' V ', output_filename], sol_CV, tplot)
 
 

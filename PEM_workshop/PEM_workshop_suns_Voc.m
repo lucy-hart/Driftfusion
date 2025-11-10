@@ -3,7 +3,7 @@ params_filepath = './PEM_workshop_Input_files/1_layer_device_suns_Voc.csv';
 %% Load in parameters
 par = pc(params_filepath);
 par.taun = 5e-8;
-par.taup = 5e-6;
+par.taup = 5e-8;
 par = refresh_device(par);
 
 %% Obtain equilibrium solution
