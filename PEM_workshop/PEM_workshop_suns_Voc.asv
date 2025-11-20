@@ -14,7 +14,7 @@ Vmax = 1.3;                     % Maximum voltage for cyclic voltammogram
 Vmin = -0.5;                    % Minimum voltage for cyclic voltammogram
 scan_rate = 1e-3;               % Current-voltage scan rate [Vs-1] 
 
-nsamples = 10;                  % Number of light intensities at which to run the simulation
+nsamples = 10;                  % Number of light intensities to run the simulation at
 illuminations = logspace(-1,log10(5),nsamples);
 Vocs = zeros(1,nsamples);
 sols = cell(1,nsamples);
@@ -29,9 +29,6 @@ for i = 1:length(illuminations)
     Vocs(i) = interp1(J, Vapp, 0);
 end 
 plot_suns_Voc(illuminations, Vocs, output_filename, par)
-
-%% Export the current density vs voltage curves at every light intensity
-export_CVs(['Suns Voc JV solutions ', output_filename], illuminations, sols)
 
 %% Plot energy level diagram at applied bias Vapp for illuminations(num)
 % Will save energy level diagram and carrier densitites at Vapp if save = 1
@@ -53,3 +50,5 @@ if save == 1
     export_ELx(['Energy levels at Vapp = ', num2str(Vplot), ' V ', output_filename], sol_CV, tplot)
 end
 
+%% Export the current density vs voltage curves at every light intensity
+export_CVs(['Suns Voc JV solutions ', output_filename], illuminations, sols)

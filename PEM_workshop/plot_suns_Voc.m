@@ -1,8 +1,9 @@
-function plot_suns_Voc(illuminations, Vocs, par)
+function plot_suns_Voc(illuminations, Vocs, output_filename, par)
 
     log_ill = log(illuminations);
     coeffs = polyfit(log_ill, Vocs, 1);
-    display(['m = ' num2str(coeffs(1)/(par.kB*par.T))])
+    m = coeffs(1)/(par.kB*par.T);
+    %display(['m = ' num2str(coeffs(1)/(par.kB*par.T))])
     
     figure('Name', 'SunsVoc')
     
@@ -16,5 +17,15 @@ function plot_suns_Voc(illuminations, Vocs, par)
     xlabel('Illumination (Suns)')
     ylabel('V_{OC}')
     legend('Data', 'Fit', 'Location', 'southeast')
+
+    headers = cell(1, 2);
+    headers{1,1} = "Light Intensity";
+    headers{1,2} = "Voc";
+    values = [illuminations' Vocs'];
+
+    % Create the table and write to file
+    output_cell = [headers; num2cell(values)];
+    T = cell2table(output_cell);
+    writetable(T, ['./Output_files/', output_filename, ' Suns Voc.txt'], 'Delimiter', 'tab', 'WriteVariableNames', 0);
 
 end

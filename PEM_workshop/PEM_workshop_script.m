@@ -31,8 +31,8 @@ xlimits = [0, 0];   % Sets the limits for the CV plot x-axis. Set to [0 ,0] for 
 ylimits = [0, 0];   % Sets the limits for the CV plot y-axis. Set to [0 ,0] for autoscaling
 plot_CVs(sol_CV, light_intensity, xlimits, ylimits);
 
-%% Plot energy level diagram at applied bias Vapp for first light intensity
-Vplot = 0;
+%% Plot energy level diagram at applied bias Vapp 
+Vplot = 0.8;
 % Get corresponding time, TPLOT for VPLOT
 tplot = (Vplot-Vmin)/scan_rate;
 
@@ -48,7 +48,9 @@ eval(['sol_CV_',output_filename, '= sol_CV;'])
 
 %% Exporting the solutions
 % Export the solution for the first light intensity at voltage VPLOT
-export_solution(['Solution at Vapp =', num2str(Vplot), ' V ', output_filename], sol_CV, tplot)
-export_ELx(['Energy levels at Vapp =', num2str(Vplot), ' V ', output_filename], sol_CV, tplot)
+export_solution(['Solution at Vapp = ', num2str(Vplot), ' V ', output_filename], sol_CV, tplot)
+export_ELx(['Energy levels at Vapp = ', num2str(Vplot), ' V ', output_filename], sol_CV, tplot)
+export_CVs(['JV solutions at ', num2str(light_intensity), ' suns ', output_filename], light_intensity, sol_CV)
+
 
 
