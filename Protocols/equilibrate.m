@@ -125,11 +125,18 @@ disp("Stabilisation verified");
 Nt_guess = get_Nt_guess(sol);
 sol.u(end,:,4) = Nt_guess;
 sol.par.kineticset = 1;
+    if par_origin.taun >= par_origin.taup
+        sol.par.taun(:) = 1;
+        sol.par.taup(:) = 1*par_origin.taup./par_origin.taun;
+    else
+        sol.par.taup(:) = 1;
+        sol.par.taun(:) = 1*par_origin.taun./par_origin.taup;
+    end
 sol.par.tmax = 100*t_diff;
 sol.par.t0 = sol.par.tmax/1e3;
 sol.par = refresh_device(sol.par);
-% sol.par.RelTol = 1e-6;
-% sol.par.AbsTol = 1e-9;
+sol.par.RelTol = 1e-4;
+sol.par.AbsTol = 1e-7;
 disp('Solution with mobility switched on and kinetic traps')
 sol = df(sol);
 
@@ -152,7 +159,7 @@ while any(all_stable) == 0
         if max_rec == 0
             max_rec = 1e-20;
         end
-        if max_diff/max_rec > 1e-2 && max_rec > 1e8
+        if max_diff/max_rec > 1e-4 && max_rec > 1e2
             all_stable = 0.*all_stable;
         end
         num = num + 1;
@@ -260,6 +267,8 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
     sol.par.t0 = sol.par.tmax/1e3;
     sol.par.K_ion = ones(par.N_ionic_species,1);
     sol.par = refresh_device(sol.par);
+    sol.par.RelTol = 1e-4;
+    sol.par.AbsTol = 1e-7;
 
     disp('Closed circuit equilibrium with ions and kinetic traps')
 

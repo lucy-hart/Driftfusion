@@ -681,7 +681,7 @@ classdef dfplot
             [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
             [u,t,x,par,dev,n,p,Nt,c,V] = dfana.splitsol(sol);
             Ntrap = repmat(dev.Ntrap, length(t), 1);
-            Nt_eqm = repmat(dev.Nt_eqm, length(t), 1);
+            Nt_eqm = dfana.calc_Nt_eqm(sol);
             N_frac = Nt./Ntrap;
             N_frac_eqm = Nt_eqm./Ntrap;
 

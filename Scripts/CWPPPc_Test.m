@@ -3,8 +3,8 @@ par.vsr_mode = 0;
 par.Rs = 0;
 par.z_t = -1;
 par = refresh_device(par);
-%%
-eqm = equilibrate(par);
+
+eqm = equilibrate(par,0,1);
 eqm.par.RelTol = 1e-5;
 eqm.par.AbsTol = 1e-8;
 

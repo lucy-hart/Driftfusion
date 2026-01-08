@@ -24,11 +24,11 @@ classdef dfana
             V = u(:,:,1);
             n = u(:,:,2);
             p = u(:,:,3);
-            if par.kineticset == 1
-                Nt = u(:,:,4);
-            else
-                Nt = dfana.calc_Nt_eqm(sol);
-            end
+            % if par.kineticset == 1
+            Nt = u(:,:,4);
+            % else
+            %     Nt = dfana.calc_Nt_eqm(sol);
+            % end
 
             switch par.N_ionic_species
                 case 0

@@ -3,7 +3,7 @@ par.vsr_mode = 0;
 par.Rs = 1e6;
 par = refresh_device(par);
 eqm = equilibrate(par,0,1);
-doJV = 0;
+doJV = 1;
 %%
 if doJV == 1
     JVsol = doCV(eqm.ion, 1, -0.2, 1.2, -0.2, 1e-3, 1, 281);
