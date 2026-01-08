@@ -275,7 +275,7 @@ if electronic_only == 0 && par_origin.N_ionic_species > 0
     sol = df(sol);
     all_stable = 0;
     num = 0;
-    while any(all_stable) == 0 
+    while any(all_stable) == 0 && sol.par.tmax < 1e10
         disp(['increasing equilibration time, tmax = ', num2str(sol.par.tmax*10)]);
         sol.par.tmax = 10*sol.par.tmax;
         sol.par.t0 = sol.par.tmax/1e6;

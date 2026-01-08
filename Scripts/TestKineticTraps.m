@@ -1,6 +1,6 @@
 par = pc('Input_files/SAM_MAFACsPbIBr_C60.csv');
 par.vsr_mode = 0;
-par.Rs = 1e6;
+% par.Rs = 1e6;
 par = refresh_device(par);
 eqm = equilibrate(par,0,1);
 doJV = 1;

@@ -137,7 +137,7 @@ switch lightSource
 end
 
 %% stabilize
-sol_int = stabilize(sol_int); % go to steady state
+%sol_int = stabilize(sol_int); % go to steady state
 
 function int = getInt(par, lightSource)
 %at some point in the future par.int1 should be eliminated in favour of g1_fun_arg(1)
